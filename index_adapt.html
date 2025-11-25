@@ -1,0 +1,439 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="Adaptation of Large Language Models">
+  <meta name="keywords" content="LLM, Adaptation, Tutorial">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Adaptation of Large Language Models
+  </title>
+
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="icon" href="./static/images/favicon.svg">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+</head>
+<body>
+
+<style>
+    .publication-authors {
+        width: 100%;
+        text-align: center;
+    }
+    .author-block img {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 50%;
+    }
+    .author-block {
+        display: inline-block;
+        margin: 10px;
+    }
+    .author-name {
+        display: block;
+        margin-top: 5px;
+        text-decoration: none;
+        color: black;
+    }
+    /* Ensure superscript styling */
+    sup {
+        vertical-align: super;
+        font-size: smaller;
+    }
+</style>
+
+<nav class="navbar" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+</nav>
+
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-2 publication-title">
+              <span style="font-size: 80%">NAACL 2025 Tutorial:</span><br />
+              Adaptation of Large Language Models
+            </h1>
+
+            <div class="is-size-5 publication-authors">
+              <table style="width: 100%;">
+                  <tr>
+                      <td class="author-block">
+                          <img src="profile/zixuan.jpg" alt="Zixuan Ke">
+                          <span class="author-info">
+                              <a href="https://vincent950129.github.io/" class="author-name">Zixuan Ke<sup>1</sup></a>
+                          </span>
+                      </td>
+                      <td class="author-block">
+                          <img src="profile/yifei.jpg" alt="Yifei Ming">
+                          <span class="author-info">
+                              <a href="https://alvinmingsf.github.io/" class="author-name">Yifei Ming<sup>1</sup></a>
+                          </span>
+                      </td>
+                      <td class="author-block">
+                        <img src="profile/shafiq.jpg" alt="Shafiq Joty">
+                          <span class="author-info">
+                              <a href="https://raihanjoty.github.io/" class="author-name">Shafiq Joty<sup>1,2</sup></a>
+                          </span>
+                      </td>
+                  </tr>
+              </table>
+          </div>
+          <div class="is-size-6 publication-authors">
+            <span class="author-block"><sup>1</sup>Salesforce AI Research</span>
+            <span class="author-block"><sup>2</sup>Nanyang Technological University</span>
+          </div>
+          <br />
+          <div class="is-size-5 publication-authors">
+            <b>Saturday May 3, 2:00-5:30pm @ Ballroom B, NAACL</b>
+          </div>
+
+
+          <div class="is-size-5 publication-authors">
+            <a href="https://us06web.zoom.us/rec/play/l0bQo739BvbUc5w7KHcNkOv2K4ay5excl4rvp8jxgdrPRNlfS-wN47vdXWIAIOIcQoW_4_A9fnNYEJJk.Hw7BpCvI8l180UXk?accessLevel=meeting&canPlayFromShare=true&from=share_recording_detail&continueMode=true&componentName=rec-play&originRequestUrl=https%3A%2F%2Fus06web.zoom.us%2Frec%2Fshare%2FlOHlVBfgRyc_NNbCF64fKLwDEzU2OiRI4MoyYTdPpUft5lvYmxQLJXZUA-_97Ce3.h69HoHG8FNm7Zebc" style="font-size: 2rem; font-weight: 600;">[Recording]</a>
+            <!-- [<a href="https://underline.io/events/493/sessions?eventSessionId=20089&searchGroup=lecture">Zoom</a>]  -->
+            [<a href="https://arxiv.org/pdf/2504.03931">Proposal</a>] 
+            [<a href="pdf/[All] NAACL25 Tutorial_ Adaptation of LLMs.pdf">Slides</a>] 
+            <!-- [<a href="survey_arxiv.pdf"> Survey Paper</a>]  -->
+            [<a href="https://2025.naacl.org/program/tutorials/" style="border-radius: 50%">NAACL Page</a>]
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">About This Tutorial</h2>
+        <div class="content has-text-justified">
+          <p>
+            <strong>This tutorial on adaptation of Large Language Models (LLMs) is designed to address the growing demand for models that go beyond the static capabilities of generic LLMs by providing an overview of dynamic, domain-specific, and task-adaptive LLM adaptation techniques.</strong> While general LLMs have demonstrated strong generalization across a variety of tasks, they often struggle to perform well in specialized domains such as finance, healthcare, and code generation for underrepresented languages. Additionally, their static nature limits their ability to evolve with the changing world, and they are often extremely large in size, making them impractical and costly to deploy at scale. As a result, the adaptation of LLMs has drawn much attention since the birth of LLMs and is of core importance, both for industry, which focuses on serving its targeted users, and academia, which can greatly benefit from small but powerful LLMs. 
+          </p> <p> 
+            To address this gap, this tutorial aims to provide an overview of the LLM adaptation techniques. We start with an introduction to LLM adaptation, from both the data perspective, which has been widely accepted as one of the most important ingredients in LLM training, and the model perspective, which focuses on the training strategies to adapt the LLMs. We then emphasize how the evaluation metrics and benchmarks are different from other techniques. After establishing the problems in the aforementioned sessions, we explore various adaptation techniques. We categorize adaptation techniques into two main families. The first is parametric knowledge adaptation, which focuses on updating the <strong>parametric knowledge</strong> within LLMs, including methods like <strong>Continual Pre-Training (CPT)</strong>, <strong>Instructional Tuning (IT)</strong>, <strong>Supervised Preference Learning (SPL)</strong> via human or model feedback, and <strong>Reinforcement Learning (RL)</strong>. The second kind of adaptation is <strong>semi-parametric knowledge adaptation</strong>, where the goal is to update LLM parameters to better interact with the external environment (shifting from standalone LLM to agentic system). As an example, we focus on how LLM leverage external knowledge through techniques like retrieval-augmented generation (RAG). 
+            <!-- Additionally, we will discuss real-time adaptation techniques, including model editing, which allows LLMs to be updated dynamically in production environments. -->
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3">Schedule</h2>
+        <p>
+          Our tutorial will be held on Saturday May 3, 2:00-5:30pm (all the times are US Mountain time).
+    
+        </p>
+        <p style="text-align: center">
+          <br/>
+          <b><a href="pdf/[All] NAACL25 Tutorial_ Adaptation of LLMs.pdf">[ALL SLIDES]</a></b>
+          <br/>
+        </p>
+
+        <div class="content has-text-justified">
+
+          <style type="text/css">
+          .tg  {border-collapse:collapse;border-spacing:0;}
+          .tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+            overflow:hidden;padding:10px 5px;word-break:normal;}
+          .tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+            font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
+          .tg .tg-0pky{border-color:inherit;text-align:left;vertical-align:top}
+          .tg .tg-0lax{text-align:left;vertical-align:top}
+          </style>
+          <table class="tg">
+          <thead>
+            <tr>
+              <th class="tg-0pky">Time</th>
+              <th class="tg-0lax">Section</th>
+              <th class="tg-0lax">Presenter</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="tg-0lax">2:00pm - 2:40pm</td>
+              <td class="tg-0lax">Section 1: Introduction and Motivation <a href="pdf/[Introduction] NAACL25 Tutorial_ Adaptation of LLMs.pdf">[Slides]</a></td>
+              <td class="tg-0lax">Zixuan Ke</td>
+            </tr>
+            <tr>
+              <td class="tg-0lax">2:40pm - 3:00pm</td>
+              <td class="tg-0lax">Section 2: Evaluation and benchmark  <a href="pdf/[Evaluation] NAACL25 Tutorial_ Adaptation of LLMs.pdf">[Slides]</a></td>
+              <td class="tg-0lax">Zixuan Ke</td>
+            </tr>
+            <tr>
+              <td class="tg-0lax">3:00pm - 4:30pm</td>
+              <td class="tg-0lax">Section 3: Parametric Knowledge Adaptation  <a href="pdf/[Parameteic adapdation] NAACL25 Tutorial_ Adaptation of LLMs.pdf">[Slides]</a></td>
+              <td class="tg-0lax">Zixuan Ke</td>
+            </tr>
+            <tr>
+              <td class="tg-0lax">4:30pm - 5:00pm</td>
+              <td class="tg-0lax">Section 4: Semi-Parametric Knowledge Adaptation  <a href="pdf/[Semi-parametric adapatation] NAACL25 Tutorial_ Adaptation of LLMs.pdf">[Slides]</a></td>
+              <td class="tg-0lax">Zixuan Ke</td>
+            </tr>
+            <tr>
+              <td class="tg-0lax">5:00pm - 5:30pm</td>
+              <td class="tg-0lax">Section 5: Summary, Discussion, QA <a href="pdf/[Summary] NAACL25 Tutorial_ Adaptation of LLMs.pdf">[Slides]</a></td>
+              <td class="tg-0lax">Zixuan Ke</td>
+            </tr>
+            <!-- <tr>
+              <td class="tg-0lax">3:25pm - 3:55pm</td>
+              <td class="tg-0lax">Panel discussion</td>
+              <td class="tg-0lax">TBD</td>
+            </tr> -->
+          </tbody>
+          </table>
+        </div>
+      </div>  
+    </div>
+    
+    <br/>
+
+  <div class="columns is-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3">Reading List</h2>
+        <!-- <p><b>Bold papers</b> are mentioned in our tutorial.</p> -->
+        <p><b>Bold papers</b> are primary reference in our tutorial.</p>
+        <br />
+
+        <!-- <h3 class="title is-5">Primary Reference</h3>
+        <ul>
+          <li><a href="https://arxiv.org/abs/2406.16838"><b>From Decoding to Meta-Generation: Inference-time Algorithms for Large Language Models</b></a> (Welleck et al., 2024)</li>
+        </ul>-->
+
+        <br />
+
+        <h3 class="title is-5">Section 1: Introduction</h3>
+        <ul>
+          <li><a href="https://arxiv.org/abs/2501.04961"><b>Demystifying Domain-adaptive Post-training for Financial LLMs</b></a> (Ke et al., 2025)</li>
+          <li><a href="https://arxiv.org/abs/2302.03241"><b>Continual Pre-training of Language Models</b></a> (Ke et al., 2023)</li>
+          <li><a href="https://arxiv.org/pdf/2504.09037"><b>A Survey of Frontiers in LLM Reasoning: Inference Scaling, Learning to Reason, and Agentic Systems</b></a> (Ke et al., 2025)</li>
+          <li><a href="https://arxiv.org/abs/2211.12701"><b>Continual Learning of Natural Language Processing Tasks: A Survey</b></a> (Ke et al., 2023)</li>
+          <li><a href="https://arxiv.org/abs/2409.09916"><b>SFR-RAG: Towards Contextually Faithful LLMs</b></a> (Nguyen et al., 2024)</li>
+          <li><a href="https://hai-production.s3.amazonaws.com/files/hai_ai_index_report_2025.pdf">The 2025 AI Index</a> (Standford HAI, 2025)</li>
+          <li><a href="https://hai-production.s3.amazonaws.com/files/hai_ai-index-report-2024-smaller2.pdf">The 2024 AI Index</a> (Standford HAI, 2024)</li>
+          <li><a href="https://arxiv.org/abs/2407.19584">SaulLM-54B & SaulLM-141B: Scaling Up Domain Adaptation for the Legal Domain
+          </a> (Colombo et al., 2022)</li>
+          <li><a href="https://arxiv.org/abs/2403.18421">BioMedLM: A 2.7B Parameter Language Model Trained On Biomedical Text
+          </a> (Bolton et al., 2024)</li>
+          <li><a href="https://arxiv.org/abs/2407.10817">Foundational Autoraters: Taming Large Language Models for Better Automatic Evaluation</a> (Vu et al, 2024)</li>
+          <li><a href="https://arxiv.org/abs/2310.08491">Prometheus: Inducing Fine-grained Evaluation Capability in Language Models</a> (Kim et al., 2024)</li>
+          <li><a href="https://arxiv.org/abs/2308.12950">Code Llama: Open Foundation Models for Code</a> (Rozière et al., 2023)</li>
+          <li><a href="https://arxiv.org/abs/2311.06025">ChiMed-GPT: A Chinese Medical Large Language Model with Full Training Regime and Better Alignment to Human Preferences</a> (Tian et al., 2024)</li>
+          <li><a href="https://arxiv.org/abs/2407.15390">ALLaM: Large Language Models for Arabic and English</a> (Bari et al., 2024)</li>
+          <li><a href="https://arxiv.org/abs/2410.02660">How to Train Long-Context Language Models (Effectively)</a> (Gao et al., 2024)</li>
+          <li><a href="https://arxiv.org/abs/2501.12948">DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning</a> (Deepseek-AI, 2025)</li>
+          <li><a href="https://arxiv.org/abs/2302.04761">Toolformer: Language Models Can Teach Themselves to Use Tools</a> (Schick et al., 2023)</li>
+          <li><a href="https://arxiv.org/abs/2203.02155">Training language models to follow instructions with human feedback</a> (Ouyang et al., 2022)</li>
+          <li><a href="https://arxiv.org/pdf/2411.15124">Tülu 3: Pushing Frontiers in Open Language Model Post-Training</a> (Lambert et al., 2025)</li>
+          <li><a href="https://ai.meta.com/blog/meta-llama-3-1/">Llama3.1</a> (Meta GenAI, 2024)</li>
+          <li><a href="https://arxiv.org/abs/2312.07413">AI capabilities can be significantly improved without expensive retraining
+          </a> (Davidson et al., 2023)</li>
+
+        </ul>
+
+        <br />
+
+        <h3 class="title is-5">Section 2: Evaluation and Benchmark</h3>
+        <ul>
+          <li><a href="https://arxiv.org/pdf/2504.09037"><b>A Survey of Frontiers in LLM Reasoning: Inference Scaling, Learning to Reason, and Agentic Systems</b></a> (Ke et al., 2025)</li>
+          <li><a href="https://arxiv.org/abs/2410.03727"><b>FaithEval: Can Your Language Model Stay Faithful to Context, Even If "The Moon is Made of Marshmallows"
+          </b></a> (Ming et al., 2024)</li>
+          <li><a href="https://arxiv.org/abs/2501.04961"><b>Demystifying Domain-adaptive Post-training for Financial LLMs</b></a> (Ke et al., 2025)</li>
+          <li><a href="https://arxiv.org/abs/1908.10090"><b>Does Context Matter? ContextualJudgeBench for evaluating LLM-based judges in contextual settings</b></a> (Xu et al., 2025)</li>
+          <li><a href="https://arxiv.org/abs/2206.07682">Emergent Abilities of Large Language Models</a> (Wei et al., 2022)</li>
+          <li><a href="https://arxiv.org/abs/2407.01502">AI Agents That Matter</a> (Kapoor et al., 2024)</li>
+          <li><a href="https://arxiv.org/abs/2410.02694">HELMET: How to Evaluate Long-Context Language Models Effectively and Thoroughly</a> (Yen et al., 2024)</li>
+          <li><a href="https://arxiv.org/abs/2308.14508">LongBench: A Bilingual, Multitask Benchmark for Long Context Understanding</a> (Bai et al., 2024)</li>
+          <li><a href="https://github.com/gkamradt/LLMTest_NeedleInAHaystack">Needle in a haystack - pressure testing LLMs</a> (Kamradt et al., 2024)</li>
+        </ul>
+        <br />
+
+        <br /> 
+
+    <h3 class="title is-5">Section 3: Parameteric Knowledge Adaptation</h3>
+    <ul>
+      <li><a href="https://arxiv.org/abs/2501.04961"><b>Demystifying Domain-adaptive Post-training for Financial LLMs</b></a> (Ke et al., 2025)</li>
+      <li><a href="https://arxiv.org/abs/2403.08763">Simple and Scalable Strategies to Continually Pre-train Large Language Models</a> (Ibrahim et al., 2024)</li>
+      <li><a href="https://arxiv.org/abs/2205.12393">Fine-tuned LM are continual learner</a> (Scialom et al., 2022)</li>
+      <li><a href="https://arxiv.org/abs/2410.02660">How to Train Long-Context Language Models (Effectively)</a> (Gao et al., 2024)</li>
+      <li><a href="https://arxiv.org/abs/2407.07263">Reuse, Don't Retrain: A Recipe for Continued Pretraining of Language Models</a> (Parmar et al., 2024)</li>
+      <li><a href="https://arxiv.org/abs/2503.06072">A SURVEY ON POST-TRAINING OF LARGE LANGUAGE MODELS</a> (Tie et al., 2025)</li>
+      <li><a href="https://neurips.cc/virtual/2024/tutorial/99526">NeurIPS2024 Tutorial: Opening the Language Model Pipeline: A Tutorial on Data Preparation, Model Training, and Adaptation</a> (Lo et al., 2025)</li>
+      <li><a href="https://crfm.stanford.edu/2023/03/13/alpaca.html">Alpaca: A Strong, Replicable Instruction-Following Model
+      </a> (Taori et al., 2023)</li>
+      <li><a href="https://arxiv.org/abs/2212.10560">SELF-INSTRUCT: Aligning Language Models with Self-Generated Instructions
+      </a> (Wang et al., 2022)</li>
+      <li><a href="https://arxiv.org/abs/2407.06542">LIONs: An Empirically Optimized Approach to Align Language Models
+      </a> (Yu et al., 2024)</li>
+      <li><a href="https://arxiv.org/pdf/2305.18290">Direct Preference Optimization: Your Language Model is Secretly a Reward Model</a> (Rafailov et al., 2023)</li>
+      <li><a href="https://arxiv.org/pdf/2212.08073">Constitutional AI: Harmlessness from AI Feedback</a> (Bai et al., 2022)</li>
+      <li><a href="https://arxiv.org/abs/2310.01377">UltraFeedback: Boosting Language Models with Scaled AI Feedback</a> (Cui et al., 2024)</li>
+      <li><a href="https://arxiv.org/abs/2310.16944">Zephyr: Direct Distillation of LM Alignment </a> (Tunstall et al., 2023)</li>
+      <li><a href="https://arxiv.org/abs/1707.06347">Proximal Policy Optimization Algorithms</a> (Schulman et al., 2017)</li>
+      <li><a href="https://arxiv.org/abs/2402.03300">DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models</a> (Shao et al., 2024)</li>
+      <li><a href="https://bair.berkeley.edu/blog/2024/02/18/compound-ai-systems/">Back to Basics: Revisiting REINFORCE Style Optimization for Learning from Human Feedback in LLMs</a> (Ahmadian et al., 2024)</li>
+    </ul>
+
+         <br />
+
+        <h3 class="title is-5">Section 4: Semi-parameteric Knowledge Adaptation</h3>
+        <ul>
+          <li><a href="https://arxiv.org/abs/2406.16838"><b>Bridging the Preference Gap between Retrievers and LLMs</b></a> (Ke et al., 2024)</li>
+          <li><a href="https://arxiv.org/pdf/2504.09037"><b>A Survey of Frontiers in LLM Reasoning: Inference Scaling, Learning to Reason, and Agentic Systems</b></a> (Ke et al., 2025)</li>
+          <li><a href="https://arxiv.org/abs/2409.09916"><b>SFR-RAG: Towards Contextually Faithful LLMs</b></a> (Nguyen et al., 2024)</li>
+          <li><a href="https://arxiv.org/abs/2410.19054">INFOGENT: An Agent-Based Framework for Web Information Aggregation
+          </a> (Reddy et al., 2024)</li>
+          <li><a href="https://arxiv.org/pdf/2301.12652">REPLUG: Retrieval-Augmented Black-Box Language Models</a> (Shi et al., 2023)</li>
+          <li><a href="https://arxiv.org/abs/2208.03299">Atlas: Few-shot Learning with Retrieval Augmented Language Models</a> (Izacard et al., 2022)</li>
+          <li><a href="https://arxiv.org/abs/2310.01352">RA-DIT: Retrieval-Augmented Dual Instruction Tuning</a> (Lin et al., 2024)</li>
+          <li><a href="https://arxiv.org/abs/2407.20183">MindSearch: Mimicking Human Minds Elicits Deep AI Searcher</a> (Chen et al., 2024)</li>
+        </ul>
+        <br />
+
+        <!-- <h3 class="title is-5">Section 5: Conclusion</h3>
+        <ul>
+          <li><a href="https://arxiv.org/abs/2406.16838"><b>From Decoding to Meta-Generation: Inference-time Algorithms for Large Language Models, Section 8</b></a> (Welleck et al., 2024)</li>
+          <li><a href="https://arxiv.org/abs/2412.06176">AlphaVerus: Bootstrapping Formally Verified Code Generation through Self-Improving Translation and Treefinement</a> (Aggarwal et al., 2024)</li>
+          <li><a href="https://arxiv.org/abs/2404.03683">Stream of Search (SoS): Learning to Search in Language</a> (Gandhi et al., 2024)</li>
+          <li><a href="https://qwenlm.github.io/blog/qwq-32b-preview/">QwQ: Reflect Deeply on the Boundaries of the Unknown</a> (Qwen, 2024)</li>
+          <li><a href="https://x.com/deepseek_ai/status/1859200141355536422">DeepSeek R1 Lite</a> (Qwen, 2024)</li>
+          <li><a href="https://arxiv.org/abs/2407.01476">Tree Search for Language Model Agents</a> (Koh et al., 2024)</li>
+          <li><a href="https://x.com/gneubig/status/1866172948991615177">Agent Refinement example</a> (@gneubig, 2024)</li>
+          <li><a href="https://nebius.com/blog/posts/training-and-search-for-software-engineering-agents">Leveraging training and search for better software engineering agents</a> (Nebius, 2024)</li>
+          <li><a href="https://arxiv.org/abs/2404.03683">Archon: An Architecture Search Framework for Inference-Time Techniques</a> (Saad-Falcon et al., 2024)</li>
+        </ul>  -->
+
+        <!-- <br /> -->
+ 
+      </div>
+    </div>
+<!--      <div class="column is-full-width">
+        <h2 class="title is-3">Panel discussion</h2>
+        <p>Join us for an insightful panel discussion featuring a selected group of experts in research related to Large Language Models (LLMs) and meta-generation algorithms. Our panelists are listed below!</p>
+      </div>
+      <div class="is-size-5 publication-authors">
+        <table style="width: 100%;">
+            <tr>
+                <td class="author-block">
+                    <img src="static/imgs/profile_beidi.jpg" alt="Beidi Chen">
+                    <span class="author-info">
+                        <a href="https://www.andrew.cmu.edu/user/beidic/" class="author-name">Beidi Chen<sup>1</sup></a>
+                    </span>
+                </td>
+                <td class="author-block">
+                    <img src="static/imgs/profile_nouha.jpg" alt="Nouha Dziri">
+                    <span class="author-info">
+                        <a href="https://nouhadziri.github.io/" class="author-name">Nouha Dziri<sup>2</sup></a>
+                    </span>
+                </td>
+                <td class="author-block">
+                    <img src="static/imgs/profile_rishabh.jpg" alt="Rishabh Agarwal">
+                    <span class="author-info">
+                        <a href="https://agarwl.github.io" class="author-name">Rishabh Agarwal<sup>3</sup></a>
+                    </span>
+                </td>
+                <td class="author-block">
+                    <img src="static/imgs/profile_jakob.jpg" alt="Jakob Foerster">
+                    <span class="author-info">
+                        <a href="https://www.jakobfoerster.com/" class="author-name">Jakob Foerster<sup>4</sup></a>
+                    </span>
+                </td>
+                <td class="author-block">
+                    <img src="static/imgs/profile_noam.jpg" alt="Noam Brown">
+                    <span class="author-info">
+                        <a href="https://noambrown.github.io/" class="author-name">Noam Brown<sup>5</sup></a>
+                    </span>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div class="is-size-6 publication-authors">
+        <span class="author-block"><sup>1</sup>Carnegie Mellon University</span>
+        <span class="author-block"><sup>2</sup>AI2</span>
+        <span class="author-block"><sup>3</sup>DeepMind, McGill</span>
+        <span class="author-block"><sup>4</sup>Meta AI</span>
+        <span class="author-block"><sup>5</sup>OpenAI</span>
+    </div>
+    </div>
+</section> -->
+
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    <pre><code>@misc{ke2025naacl2025tutorialadaptationlarge,
+      title={NAACL2025 Tutorial: Adaptation of Large Language Models}, 
+      author={Zixuan Ke and Yifei Ming and Shafiq Joty},
+      year={2025},
+      eprint={2504.03931},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2504.03931}, 
+}</code></pre>
+  </div>
+</section>
+  <!-- note={Survey Certification} -->
+  <!-- issn={2835-8856}, -->
+  <!-- url={file:///Users/zixuan.ke/Documents/GitHub/llm-reasoning.github.io/survey_arxiv.pdf}, -->
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <a class="icon-link" href="https://llm-reasoning-ai.github.io/" class="external-link" disabled>
+        <i class="fab fa-github"></i>
+      </a>
+    </div>
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <p>
+            This website is licensed under a <a rel="license"
+                                                href="http://creativecommons.org/licenses/by-sa/4.0/">Creative
+            Commons Attribution-ShareAlike 4.0 International License</a>.
+          </p>
+          <p>
+            This means you are free to borrow the <a
+              href="https://github.com/nerfies/nerfies.github.io">source code</a> of this website,
+            we just ask that you link back to this page in the footer.
+            Please remember to remove the analytics code included in the header of the website which
+            you do not want on your website.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

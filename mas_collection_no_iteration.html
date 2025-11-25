@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MAS Collection</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <style>
+    .tab-content, .llm-tab-content { display: none; }
+    .tab-content.is-active, .llm-tab-content.is-active { display: block; }
+    pre {
+      background-color: #f5f5f5;
+      padding: 1em;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+
+<section class="section">
+  <div class="container">
+    <h1 class="title has-text-centered">MAS Collection</h1>
+
+    <!-- Dataset Tabs -->
+    <div class="tabs is-boxed is-scrollable">
+      <ul>
+        <li class="is-active" data-dataset="aime24"><a>AIME24</a></li>
+        <li data-dataset="gpqa"><a>GPQA-Diamond</a></li>
+        <li data-dataset="swe"><a>SWE-Bench</a></li>
+      </ul>
+    </div>
+
+    <!-- LLM Tabs under each Dataset -->
+    <div id="aime24" class="tab-content is-active">
+      <div class="tabs is-toggle is-small">
+        <ul>
+          <li class="is-active" data-llm="aime24-gpt4o"><a>GPT-4o</a></li>
+          <li data-llm="aime24-llama"><a>Llama3.3-70b</a></li>
+          <li data-llm="aime24-qwen"><a>Qwen2.5-32b</a></li>
+        </ul>
+      </div>
+      <div id="aime24-gpt4o" class="llm-tab-content is-active">
+        <div class="columns">
+          <div class="column">
+            <h4 class="title is-5">MAS Problem</h4>
+            <p>Example AIME24 problem for GPT-4o.</p>
+          </div>
+          <div class="column">
+            <h4 class="title is-5">MAS Code</h4>
+            <pre><code>Agent A: ...</code></pre>
+          </div>
+          <div class="column">
+            <h4 class="title is-5">Metadata</h4>
+            <ul>
+              <li><strong>ID:</strong> aime24-gpt4o-001</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div id="aime24-llama" class="llm-tab-content">
+        <div class="columns"><div class="column">Llama3 content...</div></div>
+      </div>
+      <div id="aime24-qwen" class="llm-tab-content">
+        <div class="columns"><div class="column">Qwen content...</div></div>
+      </div>
+    </div>
+
+    <div id="gpqa" class="tab-content">
+      <div class="tabs is-toggle is-small">
+        <ul>
+          <li class="is-active" data-llm="gpqa-gpt4o"><a>GPT-4o</a></li>
+          <li data-llm="gpqa-llama"><a>Llama3.3-70b</a></li>
+          <li data-llm="gpqa-qwen"><a>Qwen2.5-32b</a></li>
+        </ul>
+      </div>
+      <div id="gpqa-gpt4o" class="llm-tab-content is-active">
+        <div class="columns"><div class="column">GPQA GPT-4o content...</div></div>
+      </div>
+      <div id="gpqa-llama" class="llm-tab-content">
+        <div class="columns"><div class="column">GPQA Llama content...</div></div>
+      </div>
+      <div id="gpqa-qwen" class="llm-tab-content">
+        <div class="columns"><div class="column">GPQA Qwen content...</div></div>
+      </div>
+    </div>
+
+    <div id="swe" class="tab-content">
+      <div class="tabs is-toggle is-small">
+        <ul>
+          <li class="is-active" data-llm="swe-gpt4o"><a>GPT-4o</a></li>
+          <li data-llm="swe-llama"><a>Llama3.3-70b</a></li>
+          <li data-llm="swe-qwen"><a>Qwen2.5-32b</a></li>
+        </ul>
+      </div>
+      <div id="swe-gpt4o" class="llm-tab-content is-active">
+        <div class="columns"><div class="column">SWE GPT-4o content...</div></div>
+      </div>
+      <div id="swe-llama" class="llm-tab-content">
+        <div class="columns"><div class="column">SWE Llama content...</div></div>
+      </div>
+      <div id="swe-qwen" class="llm-tab-content">
+        <div class="columns"><div class="column">SWE Qwen content...</div></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Handle dataset tabs
+    const datasetTabs = document.querySelectorAll('.tabs ul li[data-dataset]');
+    const datasetContents = document.querySelectorAll('.tab-content');
+
+    datasetTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        datasetTabs.forEach(t => t.classList.remove('is-active'));
+        tab.classList.add('is-active');
+        const target = tab.dataset.dataset;
+        datasetContents.forEach(content => {
+          content.classList.toggle('is-active', content.id === target);
+        });
+      });
+    });
+
+    // Handle LLM tabs within each dataset
+    const allLLMTabs = document.querySelectorAll('.tabs ul li[data-llm]');
+    allLLMTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const container = tab.closest('.tab-content');
+        const llmTabs = container.querySelectorAll('[data-llm]');
+        const llmContents = container.querySelectorAll('.llm-tab-content');
+        llmTabs.forEach(t => t.classList.remove('is-active'));
+        tab.classList.add('is-active');
+        llmContents.forEach(c => c.classList.remove('is-active'));
+        const llmTarget = tab.dataset.llm;
+        container.querySelector(`#${llmTarget}`).classList.add('is-active');
+      });
+    });
+  });
+</script>
+
+</body>
+</html>

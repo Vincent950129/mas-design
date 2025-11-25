@@ -1,0 +1,279 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="LLM  Reasoning Survey">
+  <meta name="keywords" content="LLM, reasoning, survey">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>A Survey of Frontiers in LLM Reasoning: Inference Scaling, Learning to Reason, and Agentic Systems
+  </title>
+
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="icon" href="./static/images/favicon.svg">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+</head>
+<body>
+
+<style>
+    .publication-authors {
+        width: 100%;
+        text-align: center;
+    }
+    .author-block img {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 50%;
+    }
+    .author-block {
+        display: inline-block;
+        margin: 10px;
+    }
+    .author-name {
+        display: block;
+        margin-top: 5px;
+        text-decoration: none;
+        color: black;
+    }
+    /* Ensure superscript styling */
+    sup {
+        vertical-align: super;
+        font-size: smaller;
+    }
+</style>
+
+<nav class="navbar" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+</nav>
+
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-2 publication-title">
+              <!-- <span style="font-size: 80%">Neurips 2024 Tutorial:</span><br /> -->
+              A Survey of Frontiers in LLM Reasoning: Inference Scaling, Learning to Reason, and Agentic Systems
+            </h1>
+
+            <div class="is-size-5 publication-authors">
+              <table style="width: 100%;">
+                  <tr>
+                      <td class="author-block">
+                          <img src="profile/zixuan.jpg" alt="Zixuan Ke">
+                          <span class="author-info">
+                              <a href="https://vincent950129.github.io/" class="author-name">Zixuan Ke<sup>1</sup></a>
+                          </span>
+                      </td>
+                      <td class="author-block">
+                          <img src="profile/fangkai.jpg" alt="Fangkai Jiao">
+                          <span class="author-info">
+                              <a href="https://jiaofangkai.com/" class="author-name">Fangkai Jiao<sup>3,4</sup></a>
+                          </span>
+                      </td>
+                      <td class="author-block">
+                          <img src="profile/yifei.jpg" alt="Yifei Ming">
+                          <span class="author-info">
+                              <a href="https://alvinmingsf.github.io/" class="author-name">Yifei Ming<sup>1</sup></a>
+                          </span>
+                      </td>
+                      <td class="author-block">
+                          <img src="profile/phi.png" alt="Xuan-Phi Nguyen">
+                          <span class="author-info">
+                              <a href="https://nxphi47.github.io/" class="author-name">Xuan-Phi Nguyen<sup>1</sup></a>
+                          </span>
+                      </td>
+                      <td class="author-block">
+                          <img src="profile/austin.jpg" alt="Austin Xu">
+                          <span class="author-info">
+                              <a href="https://austinxu87.github.io/" class="author-name">Austin Xu<sup>1</sup></a>
+                          </span>
+                      </td>
+                      <td class="author-block">
+                        <img src="profile/long.jpeg" alt="Do Xuan Long">
+                        <span class="author-info">
+                            <a href="https://dxlong2000.github.io//" class="author-name">Do Xuan Long<sup>2,4</sup></a>
+                        </span>
+                      </td>
+                      <td class="author-block">
+                        <img src="profile/minzhi.png" alt="Minzhi Li">
+                          <span class="author-info">
+                              <a href="https://yocodeyo.github.io//" class="author-name">Minzhi Li<sup>2,4</sup></a>
+                          </span>
+                      </td>
+                      <td class="author-block">
+                        <img src="profile/chengwei.jpg" alt="Chengwei Qin">
+                          <span class="author-info">
+                              <a href="https://qcwthu.github.io/" class="author-name">Chengwei Qin<sup>3</sup></a>
+                          </span>
+                      </td>
+                      <td class="author-block">
+                        <img src="profile/peifeng.jpg" alt="Peifeng Wang">
+                          <span class="author-info">
+                              <a href="https://wangpf3.github.io/" class="author-name">Peifeng Wang<sup>1</sup></a>
+                          </span>
+                      </td>
+                      <td class="author-block">
+                        <img src="profile/silvio.jpeg" alt="Silvio Savarese">
+                          <span class="author-info">
+                              <a href="https://www.linkedin.com/in/silvio-savarese-97b76114" class="author-name">Silvio Savarese<sup>1</sup></a>
+                          </span>
+                      </td>
+                      <td class="author-block">
+                        <img src="profile/caiming.jpg" alt="Caiming Xiong">
+                          <span class="author-info">
+                              <a href="http://cmxiong.com/" class="author-name">Caiming Xiong<sup>1</sup></a>
+                          </span>
+                      </td>
+                      <td class="author-block">
+                        <img src="profile/shafiq.jpg" alt="Shafiq Joty">
+                          <span class="author-info">
+                              <a href="https://raihanjoty.github.io/" class="author-name">Shafiq Joty<sup>1,3</sup></a>
+                          </span>
+                      </td>
+                  </tr>
+              </table>
+          </div>
+          <div class="is-size-6 publication-authors">
+            <span class="author-block"><sup>1</sup>Salesforce AI Research</span>
+            <span class="author-block"><sup>2</sup>National University of Singapore</span>
+            <span class="author-block"><sup>3</sup>Nanyang Technological University</span>
+            <span class="author-block"><sup>4</sup>A*STAR, Singapore</span>
+            <!-- <span class="author-block"><sup>5</sup>University of Washington</span> -->
+          </div>
+          <br />
+          <div class="is-size-5 publication-authors">
+            <!-- <b>Tuesday December 10, 1:30-4:00pm @ East Exhibition Hall C, NeurIPS</b> -->
+          </div>
+
+
+          <div class="is-size-5 publication-authors">
+            <a href="https://arxiv.org/abs/2504.09037" style="font-size: 2rem; font-weight: 600;">[Survey Paper]</a>
+          </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            Reasoning is a fundamental cognitive process that enables logical inference, problem-solving, and decision-making. With the rapid advancement of large language models (LLMs), reasoning has emerged as a key capability that distinguishes advanced AI systems from conventional models that empower chatbots. In this survey, we categorize existing methods along two orthogonal dimensions: <strong>(1) Regimes</strong>, which define the stage at which reasoning is achieved (either at inference time or through dedicated training); and <strong>(2) Architectures</strong>, which determine the components involved in the reasoning process, distinguishing between standalone LLMs and agentic compound systems that incorporate external tools, and multiagent collaborations. Within each dimension, we analyze two key perspectives: <strong>(1) Input level</strong>, which focuses on techniques that construct high-quality prompts that the LLM condition on; and <strong>(2) Output level</strong>, which methods that refine multiple sampled candidates to enhance reasoning quality. This categorization provides a systematic understanding of the evolving landscape of LLM reasoning, highlighting emerging trends such as the shift from inference-scaling to learning-to-reason (e.g., DeepSeek-R1), and the transition to agentic workflows (e.g., OpenAI Deep Research, Manus Agent). Additionally, we cover a broad spectrum of learning algorithms, from supervised fine-tuning to reinforcement learning such as PPO and GRPO, and the training of reasoners and verifiers. We also examine key designs of agentic workflows, from established patterns like generator-evaluator and LLM debate to recent innovations. Finally, we identify emerging trends, such as domain-specific reasoning systems, and open challenges, such as evaluation and data quality. This survey aims to provide AI researchers and practitioners with a comprehensive foundation for advancing reasoning in LLMs, paving the way for more sophisticated and reliable AI systems
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="columns is-centered">
+  <div class="column is-three-fifths">
+    <h2 class="title is-3 has-text-centered">Overview</h2>
+        <div class="content has-text-justified">
+          <p>
+            As shown in <strong>Figure 1</strong>, this area has rapidly gained research attention,
+            often referred to as LLM reasoning or reasoning language model. Reasoning requires LLMs to go beyond directly producing an answer from a question; instead, they must
+            generate the thinking process (implicitly or explicitly) in the form of 'question → reasoning steps → answer'. Building on this, the ability of LLMs to reason effectively depends on two factors: <strong>how and at what stage reasoning is achieved</strong>, and <strong>what components are involved in the reasoning process</strong>. Accordingly, in this survey, we categorize existing research into two orthogonal dimensions (<strong>Figure 2</strong>): (1) Regime, refers to whether reasoning is achieved through inference-time strategies (aka. inference-time scaling) or through direct learning and adaptation (learning to reason); and (2) Architecture, refers to whether reasoning happens within a single, standalone LLM or within an interactive, agentic system. <strong>Figure 3</strong> outlines the structure of this survey.
+          </p>
+        </div>
+        <figure class="has-text-centered" style="max-width: 800px; margin: 2.5rem auto;">
+          <img src="./figure/trend_by_year.png" alt="Growth Trend Figure" style="width: 100%; height: auto;">
+          <figcaption style="text-align: left;">
+          <strong>Figure 1:</strong> Growth trend in LLM reasoning. We show the cumulative number (in thousands) of papers published from 2022 to February 2025, based on <a href="https://www.semanticscholar.org/" target="_blank">Semantic Scholar</a> keyword search. Research on regimes and architectures has accelerated notably since the introduction of Chain-of-Thought (CoT) in 2022.</figcaption>
+        </figure>
+
+
+        <!-- <h2 class="title is-3">Proposed Catagorization</h2> -->
+
+        <figure class="has-text-centered" style="max-width: 800px; margin: 4rem auto;">
+          <img src="./figure/mindmap_survey.png" alt="Proposed Catagorization" style="width: 100%; height: auto;">
+          <figcaption style="text-align: left;">
+            <strong>Figure 2:</strong> The proposed categorization over regimes, architectures, and unified perspectives in this survey.</figcaption>
+        </figure>
+
+
+        <!-- <h2 class="title is-3">Taxomony</h2> -->
+
+        <figure class="has-text-centered" style="max-width: 800px; margin: 4rem auto;">
+          <img src="./figure/taxonomy.png" alt="Proposed Taxonomy" style="width: 100%; height: auto;">
+          <figcaption style="text-align: left;">
+            <strong>Figure 3:</strong> Taxonomy of LLM reasoning research organized in this survey by regimes (inference scaling,
+            learning to reason) and architectures (standalone LLM, single-agent, multi-agent). Each leaf node includes
+            examples from the literature that focus on the corresponding category.</figcaption>
+        </figure>
+
+
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    <pre><code>@misc{ke2025surveyfrontiersllmreasoning,
+      title={A Survey of Frontiers in LLM Reasoning: Inference Scaling, Learning to Reason, and Agentic Systems}, 
+      author={Zixuan Ke and Fangkai Jiao and Yifei Ming and Xuan-Phi Nguyen and Austin Xu and Do Xuan Long and Minzhi Li and Chengwei Qin and Peifeng Wang and Silvio Savarese and Caiming Xiong and Shafiq Joty},
+      year={2025},
+      eprint={2504.09037},
+      archivePrefix={arXiv},
+      primaryClass={cs.AI},
+      url={https://arxiv.org/abs/2504.09037}, 
+}</code></pre>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <a class="icon-link" href="https://llm-reasoning-ai.github.io/" class="external-link" disabled>
+        <i class="fab fa-github"></i>
+      </a>
+    </div>
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <p>
+            This website is licensed under a <a rel="license"
+                                                href="http://creativecommons.org/licenses/by-sa/4.0/">Creative
+            Commons Attribution-ShareAlike 4.0 International License</a>.
+          </p>
+          <p>
+            This means you are free to borrow the <a
+              href="https://github.com/nerfies/nerfies.github.io">source code</a> of this website,
+            we just ask that you link back to this page in the footer.
+            Please remember to remove the analytics code included in the header of the website which
+            you do not want on your website.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

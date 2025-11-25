@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DL5GXCZE6Z"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-DL5GXCZE6Z');
+</script>
+  <meta charset="UTF-8">
+  <title>MAS Collection</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
+  <style>
+    .tab-content, .llm-tab-content { display: none; }
+    .tab-content.is-active, .llm-tab-content.is-active { display: block; }
+    pre {
+      background-color: #f5f5f5;
+      padding: 1em;
+      border-radius: 6px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      overflow-x: auto;
+    }
+    .mas-problem {
+      white-space: pre-wrap;
+      font-family: "Noto Sans", sans-serif;
+      font-size: 1rem;
+    }
+    .slider-wrapper {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    .slider-wrapper label {
+      margin-right: 1rem;
+    }
+    .slider-value {
+      margin-left: 1rem;
+      font-weight: bold;
+    }
+    input[type="range"] {
+      accent-color: #d36ba1;
+    }
+  </style>
+</head>
+<body>
+  <a href="index.html" style="
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    font-size: 1rem;
+    color: #3273dc;
+    text-decoration: none;
+  ">
+    ← Back to Home Page
+  </a>
+<section class="section">
+  <div class="container">
+    <h1 class="title has-text-centered">MAS Collection</h1>
+    <p class="has-text-centered has-text-grey-dark is-size-6">Check <a href="mas_template.html" target="_blank"><strong>MAS Template</strong></a> if you want to execute the MAS.</p>
+
+    <!-- Dataset Tabs -->
+    <div class="tabs is-boxed is-scrollable">
+      <ul>
+        <li class="is-active" data-dataset="aime24"><a>AIME24</a></li>
+        <li data-dataset="gpqa"><a>GPQA-Diamond</a></li>
+        <li data-dataset="swe" data-disabled="true"><a>SWE-Bench</a></li>
+      </ul>
+    </div>
+
+    <!-- Dataset Tab Contents -->
+    <div id="aime24" class="tab-content is-active" data-max="29">
+      <div class="tabs is-toggle is-small">
+        <ul>
+          <li class="is-active" data-llm="aime24-gpt4o"><a>GPT-4o</a></li>
+          <li data-llm="aime24-llama"><a>Llama3.3-70b</a></li>
+          <li data-llm="aime24-qwen"><a>Qwen2.5-32b</a></li>
+        </ul>
+      </div>
+      <div class="slider-wrapper">
+        <label for="aime-sample">Sample ID:</label>
+        <input type="range" id="aime-sample" min="0" max="29" value="0">
+        <span id="aime-value" class="slider-value">0</span>
+      </div>
+      <div class="slider-wrapper">
+        <label for="aime-iteration">Iteration:</label>
+        <input type="range" id="aime-iteration" min="0" max="4" value="0">
+        <span id="aime-iteration-value" class="slider-value">0</span>
+      </div>
+      <div id="aime24-gpt4o" class="llm-tab-content is-active">
+        <div class="columns">
+          <div class="column is-one-third">
+            <h4 class="title is-5">MAS Problem</h4>
+            <p class="mas-problem" id="aime24-gpt4o-problem">Every morning Aya goes for a $9$-kilometer-long walk and stops at a coffee shop afterwards. When she walks at a constant speed of $s$ kilometers per hour, the walk takes her 4 hours, including $t$ minutes spent in the coffee shop. When she walks $s+2$ kilometers per hour, the walk takes her 2 hours and 24 minutes, including $t$ minutes spent in the coffee shop. Suppose Aya walks at $s+\frac{1}{2}$ kilometers per hour. Find the number of minutes the walk takes her, including the $t$ minutes spent in the coffee shop.</p>
+          </div>
+          <div class="column is-two-thirds">
+            <h4 class="title is-5">MAS Code</h4>
+            <pre><code class="language-python" id="aime24-gpt4o-code">def forward(self, taskInfo):
+              from collections import Counter
+              sub_tasks = []
+              agents = []
+          
+              cot_instruction_1 = "Sub-task 1: Calculate the time taken to walk 9 km at s km/h without considering the coffee shop time."
+              cot_agent = LLMAgentBase(['thinking', 'answer'], 'Chain-of-Thought Agent', model=global_node_model, temperature=0.0)
+              thinking1, answer1 = cot_agent([taskInfo], cot_instruction_1, is_sub_task=True)
+              agents.append(f"CoT agent {cot_agent.id}, calculating time at s km/h, thinking: {thinking1.content}; answer: {answer1.content}")
+              sub_tasks.append(f"Sub-task 1 output: thinking - {thinking1.content}; answer - {answer1.content}")
+          
+              cot_instruction_2 = "Sub-task 2: Calculate the time taken to walk 9 km at s+2 km/h without considering the coffee shop time."
+              thinking2, answer2 = cot_agent([taskInfo], cot_instruction_2, is_sub_task=True)
+              agents.append(f"CoT agent {cot_agent.id}, calculating time at s+2 km/h, thinking: {thinking2.content}; answer: {answer2.content}")
+              sub_tasks.append(f"Sub-task 2 output: thinking - {thinking2.content}; answer - {answer2.content}")
+          
+              cot_reflect_instruction_3 = "Sub-task 3: Use the results from Sub-task 1 and Sub-task 2 to calculate s and t."
+              thinking3, answer3 = cot_agent([taskInfo, thinking1, answer1, thinking2, answer2], cot_reflect_instruction_3, is_sub_task=True)
+              agents.append(f"Reflexion CoT agent {cot_agent.id}, calculating s and t, thinking: {thinking3.content}; answer: {answer3.content}")
+              sub_tasks.append(f"Sub-task 3 output: thinking - {thinking3.content}; answer - {answer3.content}")
+          
+              cot_reflect_instruction_4 = "Sub-task 4: Based on the outputs from Sub-task 3, calculate the time it takes for Aya to walk 9 km at s+1/2 km/h, including the t minutes spent in the coffee shop."
+              thinking4, answer4 = cot_agent([taskInfo, thinking3, answer3], cot_reflect_instruction_4, is_sub_task=True)
+              agents.append(f"Reflexion CoT agent {cot_agent.id}, calculating final time, thinking: {thinking4.content}; answer: {answer4.content}")
+              sub_tasks.append(f"Sub-task 4 output: thinking - {thinking4.content}; answer - {answer4.content}")
+          
+              final_answer = self.make_final_answer(thinking4, answer4, sub_tasks, agents)
+              return final_answer</code></pre>
+          </div>
+        </div>
+      </div>
+      <div id="aime24-llama" class="llm-tab-content">
+        <div class="columns">
+          <div class="column is-one-third"><h4 class="title is-5">MAS Problem</h4><p class="mas-problem" id="aime24-llama-problem">&lt;place_holder_problem&gt;</p></div>
+          <div class="column is-two-thirds"><h4 class="title is-5">MAS Code</h4><pre><code class="language-python" id="aime24-llama-code">&lt;place_holder_code&gt;</code></pre></div>
+        </div>
+      </div>
+      <div id="aime24-qwen" class="llm-tab-content">
+        <div class="columns">
+          <div class="column is-one-third"><h4 class="title is-5">MAS Problem</h4><p class="mas-problem" id="aime24-qwen-problem">&lt;place_holder_problem&gt;</p></div>
+          <div class="column is-two-thirds"><h4 class="title is-5">MAS Code</h4><pre><code class="language-python" id="aime24-qwen-code">&lt;place_holder_code&gt;</code></pre></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="gpqa" class="tab-content" data-max="197">
+      <div class="tabs is-toggle is-small">
+        <ul>
+          <li class="is-active" data-llm="gpqa-gpt4o"><a>GPT-4o</a></li>
+          <li data-llm="gpqa-llama"><a>Llama3.3-70b</a></li>
+          <li data-llm="gpqa-qwen"><a>Qwen2.5-32b</a></li>
+        </ul>
+      </div>
+      <div class="slider-wrapper">
+        <label for="gpqa-sample">Sample ID:</label>
+        <input type="range" id="gpqa-sample" min="0" max="197" value="0">
+        <span id="gpqa-value" class="slider-value">0</span>
+      </div>
+      <div class="slider-wrapper">
+        <label for="gpqa-iteration">Iteration:</label>
+        <input type="range" id="gpqa-iteration" min="0" max="4" value="0">
+        <span id="gpqa-iteration-value" class="slider-value">0</span>
+      </div>
+      
+      <div id="gpqa-gpt4o" class="llm-tab-content is-active">
+        <div class="columns">
+          <div class="column is-one-third"><h4 class="title is-5">MAS Problem</h4><p class="mas-problem" id="gpqa-gpt4o-problem">&lt;place_holder_problem&gt;</p></div>
+          <div class="column is-two-thirds"><h4 class="title is-5">MAS Code</h4><pre><code class="language-python" id="gpqa-gpt4o-code">&lt;place_holder_code&gt;</code></pre></div>
+        </div>
+      </div>
+      <div id="gpqa-llama" class="llm-tab-content">
+        <div class="columns">
+          <div class="column is-one-third">
+            <h4 class="title is-5">MAS Problem</h4>
+            <p class="mas-problem" id="gpqa-llama-problem">&lt;place_holder_problem&gt;</p>
+          </div>
+          <div class="column is-two-thirds">
+            <h4 class="title is-5">MAS Code</h4>
+            <pre><code class="language-python" id="gpqa-llama-code">&lt;place_holder_code&gt;</code></pre>
+          </div>
+        </div>
+      </div>
+      <div id="gpqa-qwen" class="llm-tab-content">
+        <div class="columns">
+          <div class="column is-one-third">
+            <h4 class="title is-5">MAS Problem</h4>
+            <p class="mas-problem" id="gpqa-qwen-problem">&lt;place_holder_problem&gt;</p>
+          </div>
+          <div class="column is-two-thirds">
+            <h4 class="title is-5">MAS Code</h4>
+            <pre><code class="language-python" id="gpqa-qwen-code">&lt;place_holder_code&gt;</code></pre>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    
+    <div id="swe" class="tab-content" data-max="299">
+      <div class="tabs is-toggle is-small">
+        <ul>
+          <li class="is-active" data-llm="swe-gpt4o"><a>GPT-4o</a></li>
+          <li data-llm="swe-llama"><a>Llama3.3-70b</a></li>
+          <li data-llm="swe-qwen"><a>Qwen2.5-32b</a></li>
+        </ul>
+      </div>
+      <div class="slider-wrapper">
+        <label for="swe-sample">Sample ID:</label>
+        <input type="range" id="swe-sample" min="0" max="299" value="0">
+        <span id="swe-value" class="slider-value">0</span>
+      </div>
+      <div id="swe-gpt4o" class="llm-tab-content is-active">
+        <div class="columns">
+          <div class="column is-one-third"><h4 class="title is-5">MAS Problem</h4><p class="mas-problem" id="swe-gpt4o-problem">&lt;place_holder_problem&gt;</p></div>
+          <div class="column is-two-thirds"><h4 class="title is-5">MAS Code</h4><pre><code class="language-python" id="swe-gpt4o-code">&lt;place_holder_code&gt;</code></pre></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+<script>hljs.highlightAll();</script>
+
+<script src="aime24_gpt4o_data.js"></script>
+<script src="aime24_llama_data.js"></script>
+<script src="aime24_qwen_data.js"></script>
+<script src="gpqa_diamond_gpt4o_data.js"></script>
+<script src="gpqa_diamond_llama_data.js"></script>
+<script src="gpqa_diamond_qwen_data.js"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+      // --------- AIME24 ----------
+
+    const sampleSlider = document.getElementById('aime-sample');
+    const iterationSlider = document.getElementById('aime-iteration');
+    const sampleValue = document.getElementById('aime-value');
+    const iterationValue = document.getElementById('aime-iteration-value');
+  
+    function updateContent(llm) {
+      const sampleId = sampleSlider.value;
+      const iterationId = iterationSlider.value;
+      const data = window[`aime24_${llm}_data`] || {};
+  
+      const problemEl = document.getElementById(`aime24-${llm}-problem`);
+      const codeEl = document.getElementById(`aime24-${llm}-code`);
+      const sampleData = data[sampleId];
+  
+      if (!sampleData) {
+        problemEl.textContent = '<place_holder_problem>';
+        codeEl.textContent = '<place_holder_code>';
+        return;
+      }
+  
+      const iterations = sampleData.iterations || [];
+      const iterationData = iterations[iterationId] || {};
+  
+      problemEl.textContent = sampleData.problem || '<place_holder_problem>';
+      codeEl.textContent = iterationData.code || '<place_holder_code>';
+      if (window.hljs) hljs.highlightElement(codeEl);
+  
+      iterationSlider.max = Math.max(0, iterations.length - 1);
+      iterationSlider.value = iterationId;
+      iterationValue.textContent = iterationId;
+    }
+  
+    function getActiveLLM() {
+      const activeTab = document.querySelector('#aime24 .tabs [data-llm].is-active');
+      return activeTab ? activeTab.dataset.llm.replace('aime24-', '') : 'gpt4o';
+    }
+  
+    sampleSlider.addEventListener('input', () => {
+      sampleValue.textContent = sampleSlider.value;
+      updateContent(getActiveLLM());
+    });
+  
+    iterationSlider.addEventListener('input', () => {
+      iterationValue.textContent = iterationSlider.value;
+      updateContent(getActiveLLM());
+    });
+  
+    const llmTabs = document.querySelectorAll('#aime24 [data-llm]');
+    llmTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        llmTabs.forEach(t => t.classList.remove('is-active'));
+        tab.classList.add('is-active');
+  
+        const llmTarget = tab.dataset.llm;
+        document.querySelectorAll('#aime24 .llm-tab-content').forEach(c => c.classList.remove('is-active'));
+        document.getElementById(llmTarget).classList.add('is-active');
+  
+        updateContent(getActiveLLM());
+      });
+    });
+  
+    updateContent(getActiveLLM());
+
+
+  
+    // --------- GPQA ----------
+    const gpqaSampleSlider = document.getElementById('gpqa-sample');
+    const gpqaIterationSlider = document.getElementById('gpqa-iteration');
+    const gpqaSampleValue = document.getElementById('gpqa-value');
+    const gpqaIterationValue = document.getElementById('gpqa-iteration-value');
+
+    function updateGpqaContent(llm) {
+      const sampleId = gpqaSampleSlider.value;
+      const iterationId = gpqaIterationSlider.value;
+      const data = window[`gpqa_diamond_${llm}_data`] || {};
+
+      const problemEl = document.getElementById(`gpqa-${llm}-problem`);
+      const codeEl = document.getElementById(`gpqa-${llm}-code`);
+      const sampleData = data[sampleId];
+
+      if (!sampleData) {
+        problemEl.textContent = '<place_holder_problem>';
+        codeEl.textContent = '<place_holder_code>';
+        return;
+      }
+
+      const iterations = sampleData.iterations || [];
+      const iterationData = iterations[iterationId] || {};
+
+      problemEl.textContent = sampleData.problem || '<place_holder_problem>';
+      codeEl.textContent = iterationData.code || '<place_holder_code>';
+      if (window.hljs) hljs.highlightElement(codeEl);
+
+      gpqaIterationSlider.max = Math.max(0, iterations.length - 1);
+      gpqaIterationSlider.value = iterationId;
+      gpqaIterationValue.textContent = iterationId;
+    }
+
+    function getActiveGpqaLLM() {
+      const activeTab = document.querySelector('#gpqa .tabs [data-llm].is-active');
+      return activeTab ? activeTab.dataset.llm.replace('gpqa-', '') : 'gpt4o';
+    }
+
+    gpqaSampleSlider.addEventListener('input', () => {
+      gpqaSampleValue.textContent = gpqaSampleSlider.value;
+      updateGpqaContent(getActiveGpqaLLM());
+    });
+
+    gpqaIterationSlider.addEventListener('input', () => {
+      gpqaIterationValue.textContent = gpqaIterationSlider.value;
+      updateGpqaContent(getActiveGpqaLLM());
+    });
+
+    const gpqaLlmTabs = document.querySelectorAll('#gpqa [data-llm]');
+    gpqaLlmTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        gpqaLlmTabs.forEach(t => t.classList.remove('is-active'));
+        tab.classList.add('is-active');
+
+        const llmTarget = tab.dataset.llm;
+        document.querySelectorAll('#gpqa .llm-tab-content').forEach(c => c.classList.remove('is-active'));
+        document.getElementById(llmTarget).classList.add('is-active');
+
+        updateGpqaContent(getActiveGpqaLLM());
+      });
+    });
+
+    updateGpqaContent(getActiveGpqaLLM());
+
+    // --------- Dataset Tab Switching ----------
+const datasetTabs = document.querySelectorAll('.tabs.is-boxed li[data-dataset]');
+const allTabContents = document.querySelectorAll('.tab-content');
+
+datasetTabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    if (tab.dataset.disabled === "true") return;  // 🛑 Do nothing if disabled
+
+    const target = tab.dataset.dataset;
+
+    // Switch tab header
+    datasetTabs.forEach(t => t.classList.remove('is-active'));
+    tab.classList.add('is-active');
+
+    // Switch visible content
+    allTabContents.forEach(c => {
+      if (c.id === target) {
+        c.classList.add('is-active');
+      } else {
+        c.classList.remove('is-active');
+      }
+    });
+  });
+});
+
+  });
+  </script>
+</body>
+</html>

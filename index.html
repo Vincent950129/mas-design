@@ -1,0 +1,342 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DL5GXCZE6Z"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-DL5GXCZE6Z');
+</script>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="Automataic Multi-agent System Design">
+  <meta name="keywords" content="LLM, Multi-agent Systems, Automatic Desin">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MAS-Zero: Designing Multi-Agent Systems with Zero Supervision
+  </title>
+
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="icon" href="./static/images/favicon.svg">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+</head>
+<body>
+
+<style>
+    .publication-authors {
+        width: 100%;
+        text-align: center;
+    }
+    .author-block img {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 50%;
+    }
+    .author-block {
+        display: inline-block;
+        margin: 10px;
+    }
+    .author-name {
+        display: block;
+        margin-top: 5px;
+        text-decoration: none;
+        color: black;
+    }
+    /* Ensure superscript styling */
+    sup {
+        vertical-align: super;
+        font-size: smaller;
+    }
+</style>
+
+<nav class="navbar" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+</nav>
+
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-2 publication-title">
+            <img src="./figure/mas_zero.png" alt="MAS-Zero Icon" style="height: 4.5rem; vertical-align: middle;">
+            <span style="font-variant: small-caps;">MAS-Zero:</span><br />
+              Designing Multi-Agent Systems with Zero Supervision
+            </h1>
+            <div class="is-size-5 publication-authors">
+              <table style="width: 100%;">
+                  <tr>
+                      <td class="author-block">
+                          <img src="profile/zixuan.jpg" alt="Zixuan Ke">
+                          <span class="author-info">
+                              <a href="https://vincent950129.github.io/" class="author-name">Zixuan Ke</a>
+                          </span>
+                      </td>
+                      <td class="author-block">
+                        <img src="profile/austin.jpg" alt="Austin Xu">
+                        <span class="author-info">
+                            <a href="https://austinxu87.github.io/" class="author-name">Austin Xu</a>
+                        </span>
+                    </td>                      
+                      <td class="author-block">
+                          <img src="profile/yifei.jpg" alt="Yifei Ming">
+                          <span class="author-info">
+                              <a href="https://alvinmingsf.github.io/" class="author-name">Yifei Ming</a>
+                          </span>
+                      </td>
+                      <td class="author-block">
+                          <img src="profile/phi.png" alt="Xuan-Phi Nguyen">
+                          <span class="author-info">
+                              <a href="https://nxphi47.github.io/" class="author-name">Xuan-Phi Nguyen</a>
+                          </span>
+                      </td>
+                      <td class="author-block">
+                        <img src="profile/caiming.jpg" alt="Caiming Xiong">
+                          <span class="author-info">
+                              <a href="http://cmxiong.com/" class="author-name">Caiming Xiong</a>
+                          </span>
+                      </td>
+                      <td class="author-block">
+                        <img src="profile/shafiq.jpg" alt="Shafiq Joty">
+                          <span class="author-info">
+                              <a href="https://raihanjoty.github.io/" class="author-name">Shafiq Joty</a>
+                          </span>
+                      </td>
+                  </tr>
+              </table>
+          </div>
+          <div class="is-size-6 publication-authors">
+            Salesforce AI Research</span>
+          </div>
+          <br />
+          <div class="is-size-5 publication-authors">
+            <!-- <b>Tuesday December 10, 1:30-4:00pm @ East Exhibition Hall C, NeurIPS</b> -->
+          </div>
+
+          <div class="is-size-5 publication-authors">
+            <a href="https://arxiv.org/abs/2505.14996" style="font-size: 2rem; font-weight: 600;">[arXiv Paper]</a>
+            <a href="https://github.com/SalesforceAIResearch/MAS-Zero" style="font-size: 2rem; font-weight: 600;">[Github Code]</a>
+            <a href="mas_collection.html" style="font-size: 2rem; font-weight: 600;">[MAS Collection]</a>
+            <!-- <a href="mas_template.html" style="font-size: 2rem; font-weight: 600;">[MAS Template]</a> -->
+            <a href="https://zixuanke.substack.com/p/dont-reason-alone-structured-reasoning" style="font-size: 2rem; font-weight: 600;">[Blog]</a>
+            <!-- <a href="https://github.com/SalesforceAIResearch/MAS-Zero" style="font-size: 1rem; font-weight: 600;"> -->
+              <!-- <div>
+                [Github Code <span style="font-size: 1rem;">(Coming Soon)</span>]</a>
+              </div> -->
+
+          </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            <strong>Multi-agent systems (MAS)</strong> leveraging the impressive capabilities of Large Language Models (LLMs) hold significant potential for tackling complex tasks. However, most current MAS depend on manually designed agent roles and communication protocols. These manual designs often fail to align with the underlying LLMs' strengths and struggle to adapt to novel tasks. Recent automatic MAS approaches attempt to mitigate these limitations but typically necessitate a validation-set for tuning and yield static MAS designs lacking adaptability during inference. We introduce <span style="font-variant: small-caps;">MAS-Zero</span>, the <strong>first self-evolved, inference-time only framework for automatic MAS design</strong>. <span style="font-variant: small-caps;">MAS-Zero</span> employs meta-level design to iteratively generate, evaluate, and refine MAS configurations tailored to each problem instance, without requiring a validation set. Critically, it enables dynamic agent composition and problem decomposition through meta-feedback on <strong>solvability</strong> and <strong>completeness</strong>. Experiments across <strong>math</strong>, <strong>graduate-level QA</strong>, and <strong>software engineering</strong> benchmarks, using both closed-source and open-source LLM back-bones of varying sizes, demonstrate that <span style="font-variant: small-caps;">MAS-Zero</span> outperforms both manual and automatic MAS baselines, achieving a 7.44% average accuracy improvement over the next strongest baseline while maintaining cost-efficiency. These findings underscore the promise of meta-level self-evolved design for creating effective and adaptive MAS.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="columns is-centered">
+  <div class="column is-three-fifths">
+
+    <h2 class="title is-3 has-text-centered">Paradiagm</h2>
+
+    In supervised learning (or reinforcement learning from verified rewards), humans give the expected output to the model, and the model learns to generate the same output. In <strong> manual MAS or workflow design</strong>, humans give not only the expected output, but also the fixed structure of the MAS or workflow. This can be sub-optimal when agent preferences differ from human intuition. Moreover, manually designed MAS are hard to adapt to new tasks. <strong>In this work</strong>, we enable the <strong>machine to propose MAS or workflow design without human intervention</strong>, not even the final outcome supervision.
+    
+    <figure class="has-text-centered" style="max-width: 800px; margin: 2.5rem auto;">
+      <img src="./figure/paradiam.png" alt="Growth Trend Figure" style="width: 100%; height: auto;">
+      <figcaption style="text-align: left;">
+      <strong>Figure 1:</strong> Illustrations of our paradigm (adapted from <a href="https://arxiv.org/pdf/2505.03335">AZR</a>). 
+      </figcaption>
+    </figure>
+
+    <h2 class="title is-3 has-text-centered">Contrast with Existing Work</h2>
+
+    <figure class="has-text-centered" style="max-width: 800px; margin: 2.5rem auto;">
+      <img src="./figure/contrast_high_level.png" alt="Growth Trend Figure" style="width: 100%; height: auto;">
+      <figcaption style="text-align: left;">
+      <strong>Figure 2:</strong> Manual MAS design vs. Existing automatic MAS design vs. <span style="font-variant: small-caps;">MAS-Zero</span>. 
+      </figcaption>
+    </figure>
+
+
+    <h2 class="title is-3 has-text-centered">Approach</h2>
+        <div class="content has-text-justified">
+          <p>
+            We propose <span style="font-variant: small-caps;">MAS-Zero</span>, a <strong>meta-agent</strong> that serves several roles (design, evaluate, and verify) and involves two steps:
+          </p>
+          <ol>
+            <li>
+              <strong>Meta-Iterations:</strong>
+              <ol style="margin-top: 0;" type="a">
+                <li><strong>MAS-Design:</strong> Task Decomposition and propose sub-MAS for each sub-task. We frame the MAS design as code generation.</li>
+                <li><strong>MAS-Feedback:</strong> Evaluate the generated MAS design on solvability and completeness. We evalaute these metrics using intermediate outputs by executing the MAS code.
+                </li>
+              </ol>
+            </li>
+            <li>
+              <strong>Self-Verification:</strong>
+              selects the most suitable outcome from the set of all candidate solutions generated throughout the meta-iteration process.
+            </li>
+          </ol>
+          
+          <p>
+            <strong>In the whole process:</strong> no validation set needed; Meta-level self-supervision on MAS design; Inference-time only.
+          </p>
+        </div>
+        <figure class="has-text-centered" style="max-width: 800px; margin: 2.5rem auto;">
+          <img src="./figure/overview_with_prompt_mas_zero.gif" alt="Growth Trend Figure" style="width: 100%; height: auto;">
+          <figcaption style="text-align: left;">
+          <strong>Figure 3:</strong> Illustrations of <span style="font-variant: small-caps;">MAS-Zero</span>. 
+          </figcaption>
+        </figure>
+
+
+        <h2 class="title is-3 has-text-centered">Key Takeaways</h2>
+
+
+        <div class="notification is-danger">
+          <strong>1. “MAS” moments</strong><br>
+          You might have encountered this: you give a complex task to a strong LLM, and it produces an incorrect answer. You then try to "help" by, for example, manually writing the plan, decomposing the task, listing required knowledge, or even acting as a manual verifier, by explicitly telling the model that an answer is incorrect and needs to be reconsidered—yet none of these work.
+          <br><br>
+          With <span style="font-variant: small-caps;">MAS-Zero</span>, we observe several “MAS” moments, where the system autonomously decides to act in ways we did not anticipate—and succeeds as a result.
+        </div>
+
+          <figure class="has-text-centered" style="max-width: 800px; margin: 2.5rem auto;">
+            <img src="./figure/example.png" alt="Growth Trend Figure" style="width: 100%; height: auto;">
+            <figcaption style="text-align: left;">
+            <strong>Figure 4:</strong> An example of "MAS" moment, comparing CoT, <span style="font-variant: small-caps;">MAS-Zero</span> (iteration 1), and <span style="font-variant: small-caps;">MAS-Zero</span> (iteration 5) (more at <a href="mas_collection.html"">[MAS Collection]</a>).</figcaption>
+          </figure>
+  
+
+
+        
+        <div class="notification is-success">
+          <strong>2. “Self-evolve” without outcome supervision works</strong><br>
+          <span style="font-variant: small-caps;">MAS-Zero</span> purely relies on its own generated dataand sets a new frontier in the performance-cost trade-off across diverse domains and LLMs.
+        </div>
+
+
+        <figure class="has-text-centered" style="max-width: 800px; margin: 2.5rem auto;">
+          <img src="./figure/pareto_frontier.png" alt="Growth Trend Figure" style="width: auto; height: auto;">
+          <figcaption style="text-align: left;">
+          <strong>Figure 5:</strong> Scatter plots comparing the Pareto fronts of various GPT-4o-based systems on three benchmarks. <span style="color: #ba32dc;">Manually designed MAS baselines are marked in purple</span> and <span style="color: #3273dc;">automatic MAS methods in blue</span>. <span style="color: #ff851b; font-variant: small-caps;">MAS-Zero</span><span style="color: #ff851b;"> is highlighted as an orange star</span>. <span style="font-variant: small-caps;">MAS-Zero</span> delivers high performance at lower cost than comparable automatic MAS methods, establishing a new frontier for accuracy vs. cost trade-off.</figcaption>
+        </figure>
+
+      
+
+        <div class="content">
+          <div class="notification is-info">
+            <strong>3. Inference-scaling helps MAS designs</strong><br>
+            Off-the-shelf LLMs—often not trained on MAS design—struggle to design effective MAS when used directly. But with inference-time "scaling" (our meta-level strategy), their performance improves significantly.
+          </div>
+
+          <figure class="has-text-centered" style="max-width: 800px; margin: 2.5rem auto;">
+            <img src="./figure/iter_perf.png" alt="Growth Trend Figure" style="width: auto; height: auto;">
+            <figcaption style="text-align: left;">
+            <strong>Figure 6:</strong> Performance vs. meta-iterations with GPT-4o.</figcaption>
+          </figure>
+
+
+          <div class="notification is-primary">
+            <strong>4. Structure matters. Verification amplifies it.</strong><br>
+           MAS design can boost performance by over 10% compared to a single LLM/agent. With a stronger verifier, the gains become even larger.
+          </div>
+        
+
+
+          <figure class="has-text-centered" style="max-width: 800px; margin: 2.5rem auto;">
+            <img src="./figure/upper_bound.png" alt="Growth Trend Figure" style="width: auto; height: auto;">
+            <figcaption style="text-align: left;">
+            <strong>Figure 7:</strong> <span style="color: #800080;">Performance gains (purple)</span> over <span style="color: #3273dc;">base performance (light blue)</span> given an oracle verifier. Automatic
+            MAS baselines (ADAS, AFlow, and MaAS) cannot integrate external verifieres, yielding zero improvement.</figcaption>
+          </figure>
+
+          <div class="notification is-warning">
+            <strong>5. More analysis and extensions are coming</strong><br>
+            Stay tuned for deeper evaluations, and stronger automatic MAS design systems!
+          </div>
+
+        </div>
+
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    <pre><code>@misc{ke2025maszero,
+      title={MAS-Zero: Designing Multi-Agent Systems with Zero Supervision}, 
+      author={Zixuan Ke and Austin Xu and Yifei Ming and Xuan-Phi Nguyen and Caiming Xiong and Shafiq Joty},
+      year={2025},
+      eprint={2505.14996},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2505.14996}, 
+}</code></pre>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <a class="icon-link" href="https://llm-reasoning-ai.github.io/" class="external-link" disabled>
+        <i class="fab fa-github"></i>
+      </a>
+    </div>
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <p>
+            This website is licensed under a <a rel="license"
+                                                href="http://creativecommons.org/licenses/by-sa/4.0/">Creative
+            Commons Attribution-ShareAlike 4.0 International License</a>.
+          </p>
+          <p>
+            This means you are free to borrow the <a
+              href="https://github.com/nerfies/nerfies.github.io">source code</a> of this website,
+            we just ask that you link back to this page in the footer.
+            Please remember to remove the analytics code included in the header of the website which
+            you do not want on your website.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
