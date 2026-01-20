@@ -1056,18 +1056,6 @@ typically using 3 to 4 parallel searches per question.
     // (Useful when opening via file:// where scanning can be blocked by browser security.)
     const KNOWN_BROKEN_EXAMPLES = new Set([
       "harmony_grpo_7b_120b_aime24.html",
-      "qwen2.5_7b_oss_120b_low_conflict4.html",
-      "qwen2.5_7b_oss_120b_low_conflict6.html",
-      "qwen2.5_20b_oss_20b_low_depth2.html",
-      "qwen2.5_20b_oss_20b_low_depth4.html",
-      "qwen2.5_20b_oss_20b_low_depth6.html",
-      "qwen2.5_20b_oss_20b_low_parallel6.html",
-      "qwen2.5_20b_oss_120b_low_conflict4.html",
-      "qwen2.5_20b_oss_120b_low_depth2.html",
-      "qwen2.5_20b_oss_120b_low_depth4.html",
-      "qwen2.5_20b_oss_120b_low_depth6.html",
-      "qwen2.5_20b_oss_120b_low_parallel2.html",
-      "qwen2.5_20b_oss_120b_low_parallel6.html"
     ]);
 
     const listEl = document.getElementById("examples-list");
@@ -1212,90 +1200,10 @@ typically using 3 to 4 parallel searches per question.
       }
     }
 
-    async function shouldSkipExample(filename) {
+    function shouldSkipExampleFast(filename) {
       if (KNOWN_BROKEN_EXAMPLES.has(filename)) return true;
-      // If you want to always hide all AIME24 examples regardless of scan results:
       if (/aime24/i.test(filename)) return true;
-
-      const markers = [
-        "❌ Failed to draw MAS diagram",
-        "Failed to draw MAS diagram",
-        "Failed to draw MAS diagram:"
-      ];
-
-      const hasMarker = (text) => {
-        if (!text) return false;
-        return markers.some(m => text.includes(m));
-      };
-
-      // When opened via file://, fetch() is often blocked. In that case we fall back to
-      // loading the page into an invisible iframe and scanning its DOM text.
-      async function scanViaIframe() {
-        return new Promise((resolve) => {
-          const probe = document.createElement("iframe");
-          probe.style.position = "absolute";
-          probe.style.left = "-99999px";
-          probe.style.top = "0";
-          probe.style.width = "1px";
-          probe.style.height = "1px";
-          probe.style.border = "0";
-
-          const cleanup = () => {
-            try { probe.remove(); } catch (_) {}
-          };
-
-          probe.onload = () => {
-            try {
-              const doc = probe.contentDocument;
-              const text = doc && doc.documentElement ? (doc.documentElement.innerText || doc.documentElement.textContent || "") : "";
-              cleanup();
-              resolve(hasMarker(text));
-            } catch (_) {
-              cleanup();
-              resolve(false);
-            }
-          };
-
-          probe.onerror = () => {
-            cleanup();
-            resolve(false);
-          };
-
-          probe.src = EXAMPLES_BASE + filename;
-          document.body.appendChild(probe);
-        });
-      }
-
-      try {
-        if (location && location.protocol === "file:") {
-          return await scanViaIframe();
-        }
-
-        const res = await fetch(EXAMPLES_BASE + filename, { cache: "no-store" });
-        if (!res.ok) return false;
-        const text = await res.text();
-        return hasMarker(text);
-      } catch (_) {
-        // Fallback for environments where fetch is blocked.
-        return await scanViaIframe();
-      }
-    }
-
-    async function filterBrokenExamples(items) {
-      // Disable search while we filter to avoid confusing UI states
-      searchEl.disabled = true;
-      clearEl.disabled = true;
-      listEl.innerHTML = '<div style="padding:0.9rem;color:#475569;">Loading examples…</div>';
-
-      const keep = [];
-      for (const it of items) {
-        const skip = await shouldSkipExample(it.filename);
-        if (!skip) keep.push(it);
-      }
-
-      searchEl.disabled = false;
-      clearEl.disabled = false;
-      return keep;
+      return false;
     }
 
     searchEl.addEventListener("input", () => render(searchEl.value));
@@ -1305,11 +1213,9 @@ typically using 3 to 4 parallel searches per question.
       searchEl.focus();
     });
 
-    // Filter out examples that fail to render diagrams, then render UI
-    filterBrokenExamples(all).then((filtered) => {
-      all = filtered;
-      render("");
-    });
+    // Fast, deterministic filtering (no per-file scanning)
+    all = all.filter(x => !shouldSkipExampleFast(x.filename));
+    render("");
   })();
 </script>
 
