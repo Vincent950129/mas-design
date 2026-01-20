@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DL5GXCZE6Z"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-DL5GXCZE6Z');
+</script>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="MAS-Orchestra : Understanding and Improving Multi-Agent Reasoning">
+  <meta name="keywords" content="LLM, Multi-agent Systems, Automatic Design">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MAS-Orchestra: Understanding and Improving Multi-Agent Reasoning</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="icon" href="./static/images/favicon.svg">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+</head>
+<body>
+
+<style>
+  :root {
+    --gradient-start: #4e54c8;
+    --gradient-end: #8f94fb;
+    --card-shadow: 0 12px 25px rgba(15, 23, 42, 0.12);
+    --border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  body {
+    background: #f7f8fc;
+    color: #1f2a44;
+  }
+
+  .hero.hero-gradient {
+    background: linear-gradient(130deg, var(--gradient-start), var(--gradient-end));
+    color: #fff;
+    padding: 4rem 0 3rem;
+  }
+
+  .hero .publication-title {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .hero .subtitle {
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 1.5rem;
+  }
+
+  .meta-badges span {
+    display: inline-block;
+    margin: 0.3rem;
+    padding: 0.4rem 0.9rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid var(--border-color);
+    font-size: 0.9rem;
+  }
+
+  .cta-buttons a.button {
+    margin: 0.4rem;
+    font-weight: 600;
+  }
+
+  .author-grid {
+    margin-top: 2.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.2rem;
+  }
+
+  .author-break {
+    flex-basis: 100%;
+    height: 0;
+  }
+
+  .author-card {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1rem;
+    width: 130px;
+    box-shadow: 0 10px 18px rgba(8, 8, 24, 0.12);
+  }
+
+  .author-card img {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.7);
+  }
+
+  .author-card a {
+    display: block;
+    color: #fff;
+    margin-top: 0.6rem;
+    font-size: 0.95rem;
+  }
+
+  .section-heading {
+    font-weight: 700;
+    color: #1f2a44;
+  }
+
+  .highlight-card {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--card-shadow);
+    border: 1px solid #eef0fb;
+  }
+
+  .feature-card {
+    background: #f9fafc;
+    border-radius: 14px;
+    padding: 1.6rem;
+    border: 1px solid #e0e7ff;
+    height: 100%;
+  }
+
+  .feature-card h4 {
+    font-weight: 600;
+    margin-bottom: 0.8rem;
+    color: #3a3f73;
+  }
+
+  .feature-card p {
+    line-height: 1.75;
+    font-size: 1rem;
+  }
+
+  .contributions-section .feature-card {
+    background: #ffffff;
+  }
+
+  .contributions-section .feature-card p {
+    max-width: 60ch;
+  }
+
+  .insight-card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 1.5rem;
+    border: 1px solid #e0e7ff;
+    box-shadow: 0 8px 18px rgba(30, 64, 175, 0.06);
+    overflow-wrap: anywhere;
+  }
+
+  .insight-card h4 {
+    font-weight: 650;
+    margin-bottom: 0.8rem;
+    color: #3a3f73;
+  }
+
+  .insight-card p {
+    line-height: 1.75;
+    font-size: 1rem;
+    color: #1f2a44;
+  }
+
+  .insight-card.is-observation {
+    background: #f0f4ff;
+    border-left: 4px solid #4e54c8;
+  }
+
+  .insight-card.is-takeaway {
+    background: #fff4e6;
+    border-left: 4px solid #f7971e;
+  }
+
+  .masbench-stats {
+    margin-top: 1.25rem;
+  }
+
+  .masbench-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 1rem;
+  }
+
+  .masbench-stat {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 1rem 1.1rem;
+    border: 1px solid #e0e7ff;
+    box-shadow: 0 8px 18px rgba(30, 64, 175, 0.06);
+    text-align: center;
+  }
+
+  .masbench-stat .stat-label {
+    font-weight: 650;
+    color: #3a3f73;
+    font-size: 0.95rem;
+    letter-spacing: 0.01em;
+  }
+
+  .masbench-stat .stat-number {
+    margin: 0.35rem 0 0.25rem;
+    font-weight: 800;
+    font-size: 2.2rem;
+    line-height: 1.05;
+    color: #1f2a44;
+  }
+
+  .masbench-stat .stat-sub {
+    font-size: 0.85rem;
+    color: #475569;
+  }
+
+  .examples-layout {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 1.25rem;
+    align-items: start;
+    margin-top: 1.25rem;
+  }
+
+  .examples-sidebar {
+    background: #ffffff;
+    border: 1px solid #e0e7ff;
+    border-radius: 14px;
+    padding: 1rem;
+    box-shadow: 0 8px 18px rgba(30, 64, 175, 0.06);
+  }
+
+  .examples-list {
+    margin-top: 0.75rem;
+    max-height: 520px;
+    overflow: auto;
+    border-radius: 10px;
+    border: 1px solid #eef0fb;
+  }
+
+  .examples-item {
+    padding: 0.7rem 0.85rem;
+    cursor: pointer;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .examples-item:last-child {
+    border-bottom: none;
+  }
+
+  .examples-item:hover {
+    background: #f8fafc;
+  }
+
+  .examples-item.is-active {
+    background: #eef2ff;
+  }
+
+  .examples-item .examples-title {
+    font-weight: 700;
+    color: #1f2a44;
+    font-size: 0.95rem;
+    line-height: 1.25;
+  }
+
+  .examples-item .examples-meta {
+    margin-top: 0.2rem;
+    font-size: 0.82rem;
+    color: #475569;
+  }
+
+  .examples-viewer {
+    background: #ffffff;
+    border: 1px solid #e0e7ff;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 8px 18px rgba(30, 64, 175, 0.06);
+  }
+
+  .examples-viewer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    background: #f7f8fc;
+    border-bottom: 1px solid #eef0fb;
+  }
+
+  .examples-viewer-title {
+    font-weight: 700;
+    color: #1f2a44;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .examples-iframe {
+    width: 100%;
+    height: 70vh;
+    border: 0;
+    display: block;
+    background: #ffffff;
+  }
+
+  @media (max-width: 900px) {
+    .examples-layout {
+      grid-template-columns: 1fr;
+    }
+    .examples-list {
+      max-height: 260px;
+    }
+  }
+
+  .figure-card {
+    border-radius: 16px;
+    overflow: hidden;
+    background: white;
+    box-shadow: var(--card-shadow);
+    margin: 2rem 0;
+    border: 1px solid #eef0fb;
+  }
+
+  .figure-card img {
+    width: 100%;
+    display: block;
+  }
+
+  .figure-card figcaption {
+    padding: 1.2rem 1.5rem;
+    font-size: 0.95rem;
+    background: #f7f8fc;
+    line-height: 1.6;
+  }
+
+  .figure-card object,
+  .figure-card embed {
+    border: none;
+    display: block;
+  }
+
+  .process-steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.2rem;
+  }
+
+  .process-step {
+    background: white;
+    border-radius: 14px;
+    padding: 1.5rem;
+    border: 1px solid #e0e7ff;
+    box-shadow: 0 8px 18px rgba(30, 64, 175, 0.08);
+  }
+
+  .process-step h5 {
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+  }
+
+  .takeaway-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .takeaway-card {
+    border-radius: 14px;
+    padding: 1.5rem;
+    color: white;
+    min-height: 220px;
+  }
+
+  .takeaway-card h4 {
+    font-weight: 600;
+    margin-bottom: 0.6rem;
+  }
+
+  .takeaway-card.is-danger { background: linear-gradient(135deg, #ff5f6d, #ffc371); }
+  .takeaway-card.is-success { background: linear-gradient(135deg, #1dd1a1, #10ac84); }
+  .takeaway-card.is-info { background: linear-gradient(135deg, #36d1dc, #5b86e5); }
+  .takeaway-card.is-primary { background: linear-gradient(135deg, #6a11cb, #2575fc); }
+  .takeaway-card.is-warning { background: linear-gradient(135deg, #f7971e, #ffd200); color: #3f2b05; }
+
+  .bibtex-card {
+    background: #0f172a;
+    color: #e2e8f0;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: var(--card-shadow);
+    border: 1px solid rgba(148, 163, 184, 0.3);
+  }
+
+  .bibtex-card pre {
+    background: #0b1220;
+    padding: 1.2rem;
+    border-radius: 12px;
+    border: 1px solid rgba(148, 163, 184, 0.4);
+    overflow-x: auto;
+  }
+
+  pre code {
+    color: #f8fafc;
+  }
+
+  @media (max-width: 768px) {
+    .author-card {
+      width: 46%;
+    }
+  }
+</style>
+
+<nav class="navbar" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+</nav>
+
+<section class="hero hero-gradient">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <img src="./figure/mas_r1.png" alt="MAS-R1 Icon" style="height: 10rem; margin-bottom: 1.5rem; background: transparent; border-radius: 12px; padding: 0.5rem;">
+          <h1 class="title is-1 publication-title" style="color: #ffffff; margin-bottom: 1rem;">MAS-Orchestra</h1>
+          <h2 class="subtitle is-4" style="max-width: 900px; margin: 0 auto 1.5rem; line-height: 1.5;">Understanding and Improving Multi-Agent Reasoning Through Holistic Orchestration and Controlled Benchmarks</h2>
+          <p class="subtitle is-5" style="opacity: 0.9; max-width: 900px; margin: 0 auto 1.6rem; line-height: 1.7; text-align: justify;">
+            A training-time framework that learns to build an entire multi-agent system at once using function-calling reinforcement learning, enabling global system-level reasoning instead of sequential code execution. Together with MASBENCH, a benchmark that measures task structure across five axes, our study shows when multi-agent systems truly outperform single-agent systems and delivers consistent gains on math, multi-hop QA, and search-based tasks. 
+          </p>
+          <div class="meta-badges">
+            <span>Training-Time RL Framework</span>
+            <span>Goal-Oriented Sub-agent</span>
+            <span>Holistic Orchestration</span>
+            <span>Degree of MAS</span>
+            <span>Rigorous analysis on MAS benefits and limitations</span>
+          </div>
+          <div class="cta-buttons" style="margin-top: 1.4rem;">
+            <a class="button is-light is-medium" href="https://arxiv.org/abs/2505.14996">Read the Paper</a>
+            <a class="button is-primary is-medium" href="https://github.com/SalesforceAIResearch/MAS-Orchestra">GitHub</a>
+            <a class="button is-link is-medium" href="https://huggingface.co/datasets/Salesforce/MASBench">MASBench</a>
+            <a class="button is-info is-medium" href="https://huggingface.co/datasets/Salesforce/MAS-Orchestra">Trained Orchestrators</a>
+            <a class="button is-warning is-medium" href="#Examples">Examples</a>
+          </div>
+
+          <div class="author-grid">
+            <div class="author-card has-text-centered">
+              <img src="../profile/zixuan.jpg" alt="Zixuan Ke">
+              <a href="https://vincent950129.github.io/">Zixuan Ke</a>
+            </div>
+            <div class="author-card has-text-centered">
+              <img src="../profile/yifei.jpg" alt="Yifei Ming">
+              <a href="https://alvinmingsf.github.io/">Yifei Ming</a>
+            </div>
+            <div class="author-card has-text-centered">
+              <img src="../profile/austin.jpg" alt="Austin Xu">
+              <a href="https://austinxu87.github.io/">Austin Xu</a>
+            </div>
+            <div class="author-card has-text-centered">
+              <img src="../profile/ryan.png" alt="Ryan Chin">
+              <a href="https://rychin.com/">Ryan Chin</a>
+            </div>
+            <div class="author-card has-text-centered">
+              <img src="../profile/phi.png" alt="Xuan-Phi Nguyen">
+              <a href="https://nxphi47.github.io/">Xuan-Phi Nguyen</a>
+            </div>
+            <div class="author-break" aria-hidden="true"></div>
+            <div class="author-card has-text-centered">
+              <img src="../profile/semih.jpg" alt="Semih Yavuz">
+              <a href="https://www.linkedin.com/in/semih-yavuz-4303518b">Semih Yavuz</a>
+            </div>
+            <div class="author-card has-text-centered">
+              <img src="../profile/caiming.jpg" alt="Caiming Xiong">
+              <a href="http://cmxiong.com/">Caiming Xiong</a>
+            </div>
+            <div class="author-card has-text-centered">
+              <img src="../profile/shafiq.jpg" alt="Shafiq Joty">
+              <a href="https://raihanjoty.github.io/">Shafiq Joty</a>
+            </div>
+          </div>
+          <p class="is-size-6" style="margin-top: 1.5rem;">Salesforce AI Research</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="highlight-card">
+      <h2 class="title is-3 section-heading">Abstract</h2>
+      <p style="line-height: 1.8;">
+
+        While <strong>multi-agent systems (MAS)</strong> promise elevated intelligence through coordination of agents,
+        current approaches to <strong>automatic MAS design</strong> often under-deliver.
+        These shortcomings stem from two key factors:
+        <strong>(1) methodological complexity</strong>—agent orchestration is performed using
+        sequential, code-level execution that limits <strong>global system-level reasoning</strong>
+        and scales poorly with agent complexity—and
+        <strong>(2) efficacy uncertainty</strong>—MAS are deployed without understanding whether they provide
+        tangible benefits compared to <strong>single-agent systems (SAS)</strong>.      
+        We propose <strong>MAS-Orchestra</strong>, a <strong>training-time framework</strong> that formulates MAS
+        orchestration as a <strong>function-calling reinforcement learning problem</strong> with
+        <strong>holistic orchestration</strong>, generating an entire MAS at once.
+        In MAS-Orchestra, complex, goal-oriented sub-agents are abstracted as
+        <strong>callable functions</strong>, enabling global reasoning over system structure while
+        hiding internal execution details.
+        To rigorously study <strong>when and why MAS are beneficial</strong>, we introduce
+        <strong>MASBENCH</strong>, a controlled benchmark that characterizes tasks along
+        <strong>five axes: Depth, Horizon, Breadth, Parallel, and Robustness</strong>.
+        Our analysis shows that MAS gains depend critically on
+        <strong>task structure</strong>, <strong>verification protocols</strong>, and the capabilities of both
+        <strong>the orchestrator and sub-agents</strong>, rather than holding universally.
+        Guided by these insights, MAS-Orchestra achieves
+        <strong>consistent improvements</strong> on public benchmarks including
+        <strong>mathematical reasoning</strong>, <strong>multi-hop QA</strong>, and
+        <strong>search-based QA</strong>.
+        Together, <strong>MAS-Orchestra</strong> and <strong>MASBENCH</strong> support better training and
+        understanding of MAS in the pursuit of <strong>multi-agent intelligence</strong>.
+        
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="section contributions-section">
+  <div class="container is-max-widescreen">
+    <h2 class="title is-3 section-heading has-text-centered">Key Contributions</h2>
+    <div class="columns is-variable is-6 is-multiline" style="margin-top: 1.25rem;">
+      <div class="column is-half-tablet is-half-desktop">
+        <div class="feature-card">
+          <h4>Novel RL Formulation for MAS Orchestration</h4>
+          <p style="line-height: 1.7;">
+            MAS-Orchestra introduces a novel, scalable and effective RL formulation for MAS orchestration, featuring an explicit notion of
+            DoM and a function-calling abstraction that encapsulates
+            complex sub-agents.
+          </p>
+        </div>
+      </div>
+      <div class="column is-half-tablet is-half-desktop">
+        <div class="feature-card">
+          <h4>Benchmark for MAS Evaluation</h4>
+          <p style="line-height: 1.7;">
+            MAS-Orchestra introduces a controlled benchmark MASBENCH, tailored for MAS evaluation, enabling systematic empirical analysis of when MAS outperforms single-agent systems—and when it does not. This is the first benchmark established to evaluate MAS benefits to the best of our knowledge.
+          </p>
+        </div>
+      </div>
+      <div class="column is-half-tablet is-half-desktop">
+        <div class="feature-card">
+          <h4>Analysis on MAS vs. SAS</h4>
+          <p style="line-height: 1.7;">
+            MAS-Orchestra investigates the benefits of MAS
+            across three analysis directions over a broad range of
+            MAS configurations, covering three orchestrator settings
+            and five sub-agent settings across different model sizes
+            and families.
+          </p>
+        </div>
+      </div>
+      <div class="column is-half-tablet is-half-desktop">
+        <div class="feature-card">
+          <h4>Improving Performance over Strong Baselines</h4>
+          <p style="line-height: 1.7;">
+            MAS-Orchestra demonstrates that our approach achieves strong performance on
+            public benchmarks, including math, multi-hop question
+            answering, and multi-step search-based QA.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 section-heading has-text-centered">Contrast with Existing Work</h2>
+    <div class="columns is-variable is-6">
+      <div class="column">
+        <figure class="figure-card">
+          <img src="./figure/approach_comparison.png" alt="Approach comparison">
+          <figcaption>
+            Comparison of different approaches to multi-agent system design.
+          </figcaption>
+        </figure>
+      </div>
+      <div class="column">
+        <figure class="figure-card">
+          <img src="./figure/paradigm_comparison.png" alt="Paradigm comparison">
+          <figcaption>
+            Inference-time orchestration systems typically adopt holistic orchestration,
+            but without training. MAS-Orchestra lies in automatic MAS and formulate the problem as a function-calling RL problem with holistic
+            orchestration
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="highlight-card">
+      <h2 class="title is-3 section-heading">MAS-Orchestra Approach</h2>
+      <!-- <p style="margin-bottom: 1.5rem;">
+        MAS-Zero runs a three-stage meta-loop every time it confronts a new question, continually refining
+        structure and answers without any offline supervision.
+      </p>
+      <div class="process-steps">
+        <div class="process-step">
+          <h5>1. MAS-Init</h5>
+          <p>Execute a library of established building blocks (CoT, CoT-SC, Debate, Self-Refine) as executable code to seed diverse candidates.</p>
+        </div>
+        <div class="process-step">
+          <h5>2. MAS-Evolve</h5>
+          <p>Iteratively generate MAS code that reconfigures agent roles, task decompositions, and communication, scoring each design on solvability and completeness.</p>
+        </div>
+        <div class="process-step">
+          <h5>3. MAS-Verify</h5>
+          <p>Use a verifier to consolidate all intermediate solutions and surface the most reliable final answer.</p>
+        </div>
+      </div> -->
+      <figure class="figure-card" style="margin-top: 1.8rem;">
+        <img src="./figure/mas_r1_overview.png" alt="MAS-Zero Overview">
+        <figcaption>
+          When DoM is configured to be low (dashed lines), the system instantiates at most one agent. When DoM is high,
+the number of agents is unconstrained
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 section-heading has-text-centered">Factors Affecting MAS Performance</h2>
+    
+    <div class="highlight-card" style="margin-bottom: 2rem;">
+      <h3 class="title is-4 section-heading">(a) A Five-Axis Evaluation Framework</h3>
+      <figure class="figure-card">
+        <img src="./figure/five_axis_evaluation.png" alt="Five-axis evaluation framework">
+        <figcaption>
+          Summary of 5 axes. Blue circles denote sub-tasks; blue–red circles denote sub-tasks augmented with adversarial information
+        </figcaption>
+      </figure>
+    </div>
+
+    <div class="highlight-card" style="margin-bottom: 2rem;">
+      <h3 class="title is-4 section-heading">(b) MASBench Benchmark</h3>
+      <p style="line-height: 1.8; margin-bottom: 0.75rem;">
+        The resulting benchmark covers all five axes, with axis values ranging from <strong>2</strong> to <strong>12</strong>, and provides axis-specific training and test splits:
+      </p>
+      <div class="masbench-stats">
+        <div class="masbench-stats-grid">
+          <div class="masbench-stat">
+            <div class="stat-label">Depth &mdash; Train</div>
+            <div class="stat-number">3,993</div>
+            <div class="stat-sub">examples</div>
+          </div>
+          <div class="masbench-stat">
+            <div class="stat-label">Depth &mdash; Test</div>
+            <div class="stat-number">1,195</div>
+            <div class="stat-sub">examples</div>
+          </div>
+
+          <div class="masbench-stat">
+            <div class="stat-label">Horizon &mdash; Train</div>
+            <div class="stat-number">2,174</div>
+            <div class="stat-sub">examples</div>
+          </div>
+          <div class="masbench-stat">
+            <div class="stat-label">Horizon &mdash; Test</div>
+            <div class="stat-number">567</div>
+            <div class="stat-sub">examples</div>
+          </div>
+
+          <div class="masbench-stat">
+            <div class="stat-label">Breadth &mdash; Train</div>
+            <div class="stat-number">2,000</div>
+            <div class="stat-sub">examples</div>
+          </div>
+          <div class="masbench-stat">
+            <div class="stat-label">Breadth &mdash; Test</div>
+            <div class="stat-number">676</div>
+            <div class="stat-sub">examples</div>
+          </div>
+
+          <div class="masbench-stat">
+            <div class="stat-label">Parallel &mdash; Train</div>
+            <div class="stat-number">1,807</div>
+            <div class="stat-sub">examples</div>
+          </div>
+          <div class="masbench-stat">
+            <div class="stat-label">Parallel &mdash; Test</div>
+            <div class="stat-number">567</div>
+            <div class="stat-sub">examples</div>
+          </div>
+
+          <div class="masbench-stat">
+            <div class="stat-label">Robustness &mdash; Train</div>
+            <div class="stat-number">3,000</div>
+            <div class="stat-sub">examples</div>
+          </div>
+          <div class="masbench-stat">
+            <div class="stat-label">Robustness &mdash; Test</div>
+            <div class="stat-number">600</div>
+            <div class="stat-sub">examples</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="highlight-card" style="margin-bottom: 2rem;">
+      <h3 class="title is-4 section-heading">(c) How Different Evaluation Axes Affect MAS</h3>
+      <div class="columns is-variable is-6">
+        <div class="column">
+          <figure class="figure-card">
+            <img src="./figure/sub_task_sub_agent.png" alt="Sub-task sub-agent analysis">
+            <figcaption>
+              Avg@8 (accuracy) for SAS (CoT) and MAS-Orchestra
+across different axes with Qwen-7b as orchestrator and Qwen-7b
+and GPT-120b (low) as sub-agent
+            </figcaption>
+          </figure>
+        </div>
+        <div class="column">
+          <figure class="figure-card">
+            <img src="./figure/oss120b_robustness.png" alt="Robustness analysis">
+            <figcaption>
+              Avg@8 in the Robustness setting with GPT-120b (low) as
+the sub-agent. (SAS performance is too low to be visible.)
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+      <div style="margin-top: 1.5rem;">
+        <h4 class="title is-5 section-heading" style="margin-bottom: 1rem;">Observations</h4>
+        <div class="columns is-variable is-6">
+          <div class="column">
+            <div class="insight-card is-observation">
+              <p>
+                When the sub-agent is “weaker” (Qwen-7b), the MAS (MAS-Orchestra) outperforms the SAS across most task structures, except along the Depth axis.
+              </p>
+            </div>
+          </div>
+          <div class="column">
+            <div class="insight-card is-observation">
+              <p>
+                Surprisingly, when the sub-agent is “stronger” (GPT-120b (low)), a different pattern emerges—performance gains for MAS diminish across Depth, Horizon, Breadth, or Parallel structures.
+              </p>
+            </div>
+          </div>
+      </div>
+      <div class="columns is-variable is-6" style="margin-top: 1rem;">
+        <div class="column">
+          <div class="insight-card is-observation">
+            <p>
+              As tasks become more complex, performance decreases. Importantly, out-of-distribution complexity follows the same trend as in-distribution complexity.
+            </p>
+          </div>
+        </div>
+        <div class="column">
+          <div class="insight-card is-observation">
+            <p>
+              MAS consistently exhibit superior robustness under data poisoning. While SAS performance collapses to near-zero accuracy in this adversarial setting, MAS retain substantially higher accuracy.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="columns is-variable is-6" style="margin-top: 1.5rem;">
+        <div class="column">
+          <div class="insight-card is-takeaway">
+            <h4>Takeaway</h4>
+            <p>
+              <strong>MAS are most effective at the edge of sub-agent competence.</strong> MAS provide clear gains over SAS when the
+              underlying sub-agent is capable but not yet strong enough
+              to reliably internalize complex task structure on its own.
+              In this regime (e.g., task structure is not purely sequential
+              or the task contains potential adversarial sub-tasks), explicit decomposition, orchestration and moderation help
+              expose and utilize latent reasoning capacity.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="highlight-card" style="margin-bottom: 2rem;">
+      <h3 class="title is-4 section-heading">(d) Are Reasoning Models Better Orchestrators?</h3>
+      <div class="columns is-variable is-6">
+        <div class="column">
+          <figure class="figure-card">
+            <img src="./figure/meta_ilm_vs_rlm.png" alt="Meta ILM vs RLM comparison">
+            <figcaption>
+              Avg@8 comparing LLM and RLM as orchestrator
+            </figcaption>
+          </figure>
+        </div>
+        <div class="column">
+          <figure class="figure-card">
+            <img src="./figure/7b_120b_vs_20b_120b_depth4.png" alt="Model size and depth analysis">
+            <figcaption>
+              Statistics of agents in the generated MAS over the
+training steps (use Depth equals 4 as an example). The number
+of agents measures the total number of sub-agents, the sequential
+agent length measures the length of dependency chain and parallel
+agent width measures the in degree of sub-agent.
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+      <div class="columns is-variable is-6" style="margin-top: 1.5rem;">
+        <div class="column">
+          <div class="insight-card is-observation">
+            <h4>Observations</h4>
+            <p>
+              Surprisingly, the instruction-tuned LLM as orchestrator
+outperforms the strong RLM counterparts.
+            </p>
+          </div>
+        </div>
+        <div class="column">
+          <div class="insight-card is-takeaway">
+            <h4>Takeaway</h4>
+            <p>
+              <strong>Instruction-tuned LLMs can be better orchestrators than RLMs.</strong> Effective orchestration prioritizes task decomposition, delegation, and coordination over directly solving sub-tasks. Current RLM training objectives emphasize end-to-end problem solving rather than structural control, making them misaligned with the requirements of orchestration (especially when paired with a strong sub-agent). However, the gains diminish as the sub-agent becomes stronger.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="highlight-card">
+      <h3 class="title is-4 section-heading">(e) How Does Sub-agent Reasoning Effort Affect MAS?</h3>
+      <div class="columns is-variable is-6">
+        <div class="column">
+          <figure class="figure-card">
+            <img src="./figure/reasoning_effort.png" alt="Reasoning effort analysis">
+            <figcaption>
+              Avg@8 comparing different reasoning effort with Qwen-
+7b as orchestrator and GPT-120b as sub-agent.
+            </figcaption>
+          </figure>
+        </div>
+        <div class="column">
+          <figure class="figure-card">
+            <img src="./figure/max_length.png" alt="Maximum length analysis">
+            <figcaption>
+              Avg@8 comparing different maximum context length
+with Qwen-7b as orchestrator and GPT-120b as sub-agent
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+      <div class="columns is-variable is-6" style="margin-top: 1.5rem;">
+        <div class="column">
+          <div class="insight-card is-observation">
+            <h4>Observations</h4>
+            <p>
+              Higher reasoning effort is not necessarily better. We consistently observe that increasing reasoning effort makes it easier to hit the length limit (a default response length of 512 tokens was used), especially as task complexity grows. When the limit is reached, both MAS and SAS experience performance degradation—MAS are not immune to this effect.
+            </p>
+          </div>
+        </div>
+        <div class="column">
+          <div class="insight-card is-takeaway">
+            <h4>Takeaway (from the two plots above)</h4>
+            <p>
+              <strong>More reasoning effort is not always better.</strong> From the Reasoning Effort and Max Context Length plots above, pushing for longer reasoning increases the chance of hitting length limits (e.g., 512 tokens), which hurts both MAS and SAS. Effective context management likely requires dedicated training and better budgeting—not simply increasing reasoning length.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 section-heading has-text-centered">Evaluation on Public Benchmarks</h2>
+    <figure class="figure-card">
+      <img src="./figure/mas_r1_results.png" alt="MAS-R1 main results table">
+      <figcaption>
+        Avg@8 of the considered benchmarks. “—” indicates
+non-applicable.
+      </figcaption>
+    </figure>
+    <div class="columns is-variable is-6" style="margin-top: 1.25rem;">
+      <div class="column">
+        <div class="insight-card is-observation">
+          <h4>Observation</h4>
+          <p>
+            MAS-Orchestra consistently outperforms the underlying sub-agents as well as SoTA inference-time and training-time orchestration systems across all evaluated benchmarks, and it demonstrates strong OOD generalization on GPQA.
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="columns is-variable is-6" style="margin-top: 1.5rem;">
+      <div class="column">
+        <figure class="figure-card">
+          <img src="./figure/7b_120b_browse_comp_plus_high.png" alt="BrowseComp++ (high) results">
+          <figcaption>
+            Statistics of agents for high DoM (BrowseComp+).
+          </figcaption>
+        </figure>
+        <div class="insight-card is-observation" style="margin-top: 1rem;">
+          <h4>Observation</h4>
+          <p>
+            Under high DoM, MAS-Orchestra generates substan-
+tially more sub-agents. It learns to invoke SEARCHA-
+GENT and employs multiple parallel search processes,
+typically using 3 to 4 parallel searches per question.
+          </p>
+        </div>
+      </div>
+      <div class="column">
+        <figure class="figure-card">
+          <img src="./figure/7b_120b_aime24_low.png" alt="AIME24 (low) results">
+          <figcaption>
+            Statistics of agents for low DoM (AIME24).
+          </figcaption>
+        </figure>
+        <div class="insight-card is-observation" style="margin-top: 1rem;">
+          <h4>Observation</h4>
+          <p>
+            Under low DoM, MAS-Orchestra learns to delegate the
+            task entirely to a single sub-agent (100% delegation after
+            20 steps) and dynamically selects strong sub-agents, pri-
+            marily REFLEXIONAGENT and DEBATEAGENT, which
+            are the best-performing SAS baselines
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="columns is-variable is-6" style="margin-top: 2.25rem;">
+      <div class="column">
+        <div class="insight-card is-takeaway">
+          <h4>Takeaway</h4>
+          <p>
+            Taken together, the observations under low and high DoM in-
+            dicate that MAS-Orchestra dynamically adapts to the given
+            task by proposing MAS designs that align with the under-
+            lying sub-task structure and by delegating execution to the
+            most effective agent configurations
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="Examples">
+  <div class="container is-max-widescreen">
+    <h2 class="title is-3 section-heading has-text-centered">Generated MAS Examples</h2>
+    <p style="line-height: 1.8; max-width: 900px; margin: 0 auto; text-align: center;">
+      Browse real, generated multi-agent designs. Select an example to preview it inline, or open it in a new tab for the full interactive view.
+    </p>
+
+    <div class="examples-layout">
+      <div class="examples-sidebar">
+        <div class="field">
+          <div class="control">
+            <input id="examples-search" class="input" type="text" placeholder="Search (e.g., depth4, horizon, 120b, high, low)">
+          </div>
+        </div>
+
+        <div id="examples-list" class="examples-list" aria-label="Examples list"></div>
+
+        <div style="margin-top: 0.85rem; display: flex; gap: 0.6rem; flex-wrap: wrap;">
+          <a class="button is-light is-small" href="./exmaples/" target="_blank" rel="noopener">Browse folder</a>
+          <button id="examples-clear" class="button is-light is-small" type="button">Clear</button>
+        </div>
+        <!-- <p style="margin-top: 0.6rem; font-size: 0.85rem; color: #475569;">
+          Note: for local viewing, serve the folder (e.g., GitHub Pages or a local web server) so the inline preview loads reliably.
+        </p> -->
+      </div>
+
+      <div class="examples-viewer">
+        <div class="examples-viewer-header">
+          <div id="examples-viewer-title" class="examples-viewer-title">Select an example to preview</div>
+          <a id="examples-open" class="button is-link is-small" target="_blank" rel="noopener" style="display:none;">Open full page</a>
+        </div>
+        <iframe id="examples-iframe" class="examples-iframe" title="MAS example preview"></iframe>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop">
+    <div class="bibtex-card">
+      <h2 class="title is-4" style="color: #f8fafc;">BibTeX</h2>
+      <pre><code>@misc{ke2025masr1,
+  title={MAS-Orchestra: Understanding and Improving Multi-Agent Reasoning Through Holistic Orchestration and Controlled Benchmarks},
+  author={Zixuan Ke and Yifei Ming and Austin Xu and Ryan Chin and Xuan-Phi Nguyen and Semih Yavuz and Caiming Xiong and Shafiq Joty},
+  year={2026},
+  archivePrefix={arXiv},
+  primaryClass={cs.CL},
+}
+</code></pre>
+  <!-- eprint={2505.14996}, -->
+  <!-- url={https://arxiv.org/abs/2505.14996}, -->
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <a class="icon-link" href="https://llm-reasoning-ai.github.io/" class="external-link" disabled>
+        <i class="fab fa-github"></i>
+      </a>
+    </div>
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <p>
+            This website is licensed under a <a rel="license"
+                                                href="http://creativecommons.org/licenses/by-sa/4.0/">Creative
+            Commons Attribution-ShareAlike 4.0 International License</a>.
+          </p>
+          <p>
+            This means you are free to borrow the <a
+              href="https://github.com/nerfies/nerfies.github.io">source code</a> of this website,
+            we just ask that you link back to this page in the footer.
+            Please remember to remove the analytics code included in the header of the website which
+            you do not want on your website.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  (function() {
+    const EXAMPLES_BASE = "./exmaples/";
+
+    const listEl = document.getElementById("examples-list");
+    const searchEl = document.getElementById("examples-search");
+    const clearEl = document.getElementById("examples-clear");
+    const iframeEl = document.getElementById("examples-iframe");
+    const titleEl = document.getElementById("examples-viewer-title");
+    const openEl = document.getElementById("examples-open");
+
+    if (!listEl || !searchEl || !clearEl || !iframeEl || !titleEl || !openEl) return;
+
+    function generateFilenames() {
+      const files = [];
+
+      // Harmony GRPO examples
+      files.push("harmony_grpo_7b_120b_aime24.html");
+      files.push("harmony_grpo_7b_120b_browse_comp_plus.html");
+      files.push("harmony_grpo_7b_120b_hotpotqa.html");
+
+      // qwen2.5_20b_oss_120b_low_{depth,parallel,conflict}
+      [2, 4].forEach(v => files.push(`qwen2.5_20b_oss_120b_low_conflict${v}.html`));
+      [2, 4, 6].forEach(v => files.push(`qwen2.5_20b_oss_120b_low_depth${v}.html`));
+      [2, 4, 6].forEach(v => files.push(`qwen2.5_20b_oss_120b_low_parallel${v}.html`));
+
+      // qwen2.5_20b_oss_20b_low_{depth,parallel}
+      [2, 4, 6].forEach(v => files.push(`qwen2.5_20b_oss_20b_low_depth${v}.html`));
+      [2, 4, 6].forEach(v => files.push(`qwen2.5_20b_oss_20b_low_parallel${v}.html`));
+
+      // qwen2.5_7b_oss_120b_high_{breadth,horizon}
+      [2, 4, 6, 8].forEach(v => files.push(`qwen2.5_7b_oss_120b_high_breadth${v}.html`));
+      [2, 4, 6].forEach(v => files.push(`qwen2.5_7b_oss_120b_high_horizon${v}.html`));
+
+      // qwen2.5_7b_oss_120b_low_{breadth,conflict,depth,horizon,parallel}
+      [2, 4, 6, 8].forEach(v => files.push(`qwen2.5_7b_oss_120b_low_breadth${v}.html`));
+      [2, 4, 6].forEach(v => files.push(`qwen2.5_7b_oss_120b_low_conflict${v}.html`));
+      [2, 4, 6, 12].forEach(v => files.push(`qwen2.5_7b_oss_120b_low_depth${v}.html`));
+      [2, 4, 6].forEach(v => files.push(`qwen2.5_7b_oss_120b_low_horizon${v}.html`));
+      [2, 4, 6].forEach(v => files.push(`qwen2.5_7b_oss_120b_low_parallel${v}.html`));
+
+      // qwen2.5_7b_oss_7b_low_{breadth,depth,horizon,parallel}
+      [2, 4, 6].forEach(v => files.push(`qwen2.5_7b_oss_7b_low_breadth${v}.html`));
+      [2, 4, 6].forEach(v => files.push(`qwen2.5_7b_oss_7b_low_depth${v}.html`));
+      files.push("qwen2.5_7b_oss_7b_low_depth4_100steps.html");
+      [2, 4, 6].forEach(v => files.push(`qwen2.5_7b_oss_7b_low_horizon${v}.html`));
+      [2, 4, 6].forEach(v => files.push(`qwen2.5_7b_oss_7b_low_parallel${v}.html`));
+
+      return files;
+    }
+
+    function prettyLabel(filename) {
+      const base = filename.replace(/\.html$/i, "");
+
+      if (base.startsWith("harmony_grpo_7b_120b_")) {
+        const task = base.replace("harmony_grpo_7b_120b_", "");
+        const taskName = task === "browse_comp_plus" ? "BrowseComp+" : task.toUpperCase();
+        return {
+          title: `Harmony-GRPO (7B→120B) — ${taskName}`,
+          meta: "Generated MAS example"
+        };
+      }
+
+      const parts = base.split("_");
+      // e.g., qwen2.5_7b_oss_120b_low_depth4
+      const model = parts[0] === "qwen2.5" ? "Qwen2.5" : parts[0];
+      const orch = parts[1]?.toUpperCase() || "";
+      const sub = (parts[2] && parts[3]) ? `${parts[2].toUpperCase()}-${parts[3].toUpperCase()}` : "";
+      const dom = parts[4]?.toUpperCase() || "";
+      const tail = parts.slice(5).join("_"); // depth4 / depth4_100steps / etc.
+
+      const m = tail.match(/(depth|horizon|breadth|parallel|conflict)(\d+)/i);
+      const axis = m ? m[1].toUpperCase() : tail.toUpperCase();
+      const val = m ? m[2] : "";
+      const extra = tail.includes("100steps") ? " (100 steps)" : "";
+
+      return {
+        title: `${model} ${orch} / ${sub} / ${dom} — ${axis}${val ? "=" + val : ""}${extra}`,
+        meta: filename
+      };
+    }
+
+    const all = generateFilenames()
+      .map((filename) => ({ filename, ...prettyLabel(filename) }))
+      .sort((a, b) => a.title.localeCompare(b.title));
+
+    function setActive(filename) {
+      const item = all.find(x => x.filename === filename);
+      if (!item) return;
+
+      // Update UI
+      titleEl.textContent = item.title;
+      openEl.href = EXAMPLES_BASE + item.filename;
+      openEl.style.display = "inline-flex";
+
+      // Load preview
+      iframeEl.src = EXAMPLES_BASE + item.filename;
+
+      // Mark active
+      [...listEl.querySelectorAll(".examples-item")].forEach(el => {
+        el.classList.toggle("is-active", el.dataset.filename === filename);
+      });
+    }
+
+    function render(filterText) {
+      const q = (filterText || "").trim().toLowerCase();
+      const filtered = q
+        ? all.filter(x => (x.title + " " + x.meta).toLowerCase().includes(q))
+        : all;
+
+      listEl.innerHTML = "";
+
+      filtered.forEach((x) => {
+        const el = document.createElement("div");
+        el.className = "examples-item";
+        el.dataset.filename = x.filename;
+
+        const t = document.createElement("div");
+        t.className = "examples-title";
+        t.textContent = x.title;
+
+        const m = document.createElement("div");
+        m.className = "examples-meta";
+        m.textContent = x.meta;
+
+        el.appendChild(t);
+        el.appendChild(m);
+        el.addEventListener("click", () => setActive(x.filename));
+        listEl.appendChild(el);
+      });
+
+      // Auto-select first match if nothing selected yet
+      const hasActive = !!listEl.querySelector(".examples-item.is-active");
+      if (!hasActive && filtered.length > 0 && !iframeEl.src) {
+        setActive(filtered[0].filename);
+      }
+
+      if (filtered.length === 0) {
+        const empty = document.createElement("div");
+        empty.style.padding = "0.9rem";
+        empty.style.color = "#475569";
+        empty.textContent = "No matches. Try “depth4”, “120b”, “high”, or “parallel”.";
+        listEl.appendChild(empty);
+      }
+    }
+
+    searchEl.addEventListener("input", () => render(searchEl.value));
+    clearEl.addEventListener("click", () => {
+      searchEl.value = "";
+      render("");
+      searchEl.focus();
+    });
+
+    render("");
+  })();
+</script>
+
+</body>
+</html>
