@@ -454,7 +454,7 @@
             <span>Rigorous analysis on MAS benefits and limitations</span>
           </div>
           <div class="cta-buttons" style="margin-top: 1.4rem;">
-            <a class="button is-light is-medium" href="https://arxiv.org/abs/2505.14996">Read the Paper</a>
+            <a class="button is-light is-medium" href="https://arxiv.org/abs/2601.14652">Read the Paper</a>
             <a class="button is-primary is-medium" href="https://github.com/SalesforceAIResearch/MAS-Orchestra">GitHub</a>
             <a class="button is-link is-medium" href="https://huggingface.co/datasets/Salesforce/MASBench">MASBench</a>
             <a class="button is-info is-medium" href="https://huggingface.co/datasets/Salesforce/MAS-Orchestra">Trained Orchestrators</a>
@@ -843,7 +843,11 @@ outperforms the strong RLM counterparts.
           <div class="insight-card is-takeaway">
             <h4>Takeaway</h4>
             <p>
-              <strong>Instruction-tuned LLMs can be better orchestrators than RLMs.</strong> Effective orchestration prioritizes task decomposition, delegation, and coordination over directly solving sub-tasks. Current RLM training objectives emphasize end-to-end problem solving rather than structural control, making them misaligned with the requirements of orchestration (especially when paired with a strong sub-agent). However, the gains diminish as the sub-agent becomes stronger.
+              <strong>Instruction-tuned LLMs are better orchestrators
+                than RLMs.</strong> Effective orchestration prioritizes task decomposition, delegation, and coordination over directly
+                solving sub-tasks. Current RLM training objectives emphasize end-to-end problem solving rather than structural
+                control, making them misaligned with the requirements
+                of orchestration.
             </p>
           </div>
         </div>
@@ -885,7 +889,11 @@ with Qwen-7b as orchestrator and GPT-120b as sub-agent
           <div class="insight-card is-takeaway">
             <h4>Takeaway (from the two plots above)</h4>
             <p>
-              <strong>More reasoning effort is not always better.</strong> From the Reasoning Effort and Max Context Length plots above, pushing for longer reasoning increases the chance of hitting length limits (e.g., 512 tokens), which hurts both MAS and SAS. Effective context management likely requires dedicated training and better budgeting—not simply increasing reasoning length.
+              <strong>MAS improve robustness even at high reasoning effort.</strong> Adversarial robustness remains the primary regime
+              where MAS provide consistent gains, including when
+              sub-agents operate with high reasoning effort. In contrast,
+              effective context management likely requires dedicated
+              training rather than increased reasoning effort alone.
             </p>
           </div>
         </div>
