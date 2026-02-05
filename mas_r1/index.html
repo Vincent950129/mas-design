@@ -464,11 +464,16 @@
             <span>Rigorous analysis on MAS benefits and limitations</span>
           </div>
           <div class="cta-buttons" style="margin-top: 1.4rem;">
-            <a class="button is-light is-medium" href="https://arxiv.org/abs/2601.14652">Read the Paper</a>
-            <a class="button is-primary is-medium" href="https://github.com/SalesforceAIResearch/MAS-Orchestra">GitHub</a>
-            <a class="button is-link is-medium" href="https://huggingface.co/datasets/Salesforce/MASBench">MASBench</a>
-            <a class="button is-info is-medium" href="https://huggingface.co/datasets/Salesforce/MAS-Orchestra">Trained Orchestrators</a>
-            <a class="button is-warning is-medium" href="#Examples">Examples</a>
+            <div class="buttons is-centered">
+              <a class="button is-light is-medium" href="https://arxiv.org/abs/2601.14652">Read the Paper</a>
+              <a class="button is-primary is-medium" href="https://github.com/SalesforceAIResearch/MAS-Orchestra">GitHub</a>
+              <a class="button is-link is-medium" href="https://huggingface.co/datasets/Salesforce/MASBench">MASBench</a>
+            </div>
+            <div class="buttons is-centered">
+              <a class="button is-info is-medium" href="https://huggingface.co/datasets/Salesforce/MAS-Orchestra">Trained Orchestrators</a>
+              <a class="button is-success is-medium" href="#Demo">Demo</a>
+              <a class="button is-warning is-medium" href="#Examples">Examples</a>
+            </div>
           </div>
 
           <div class="author-grid">
@@ -751,7 +756,7 @@ the number of agents is unconstrained
           <figure class="figure-card">
             <img src="./figure/sub_task_sub_agent.png" alt="Sub-task sub-agent analysis">
             <figcaption>
-              Avg@8 (accuracy) for SAS (CoT) and MAS-Orchestra
+              Avg@8 accuracy for SAS (CoT) and MAS-Orchestra
 across different axes with Qwen-7b as orchestrator and Qwen-7b
 and GPT-120b (low) as sub-agent
             </figcaption>
@@ -761,7 +766,7 @@ and GPT-120b (low) as sub-agent
           <figure class="figure-card">
             <img src="./figure/oss120b_robustness.png" alt="Robustness analysis">
             <figcaption>
-              Avg@8 in the Robustness setting with GPT-120b (low) as
+              Avg@8 accuracy in the Robustness setting with GPT-120b (low) as
 the sub-agent. (SAS performance is too low to be visible.)
             </figcaption>
           </figure>
@@ -773,19 +778,19 @@ the sub-agent. (SAS performance is too low to be visible.)
           <div class="column">
             <div class="insight-card is-observation">
               <p>
-                When the sub-agent is “weaker” (Qwen-7b), the MAS (MAS-Orchestra) outperforms the SAS across most task structures, except along the Depth axis.
+                When the sub-agent is “weaker” (Qwen-7b), the MAS (MAS-Orchestra) outperforms the SAS across most sub-task structures, except along the Depth axis.
               </p>
             </div>
           </div>
           <div class="column">
             <div class="insight-card is-observation">
               <p>
-                Surprisingly, when the sub-agent is “stronger” (GPT-120b (low)), a different pattern emerges—performance gains for MAS diminish across Depth, Horizon, Breadth, or Parallel structures.
+                When the sub-agent is “stronger” (GPT-120b (low)), performance gains for MAS diminish across Depth, Horizon, Breadth, or Parallel.
               </p>
             </div>
           </div>
       </div>
-      <div class="columns is-variable is-6" style="margin-top: 1rem;">
+      <!-- <div class="columns is-variable is-6" style="margin-top: 1rem;">
         <div class="column">
           <div class="insight-card is-observation">
             <p>
@@ -800,7 +805,7 @@ the sub-agent. (SAS performance is too low to be visible.)
             </p>
           </div>
         </div>
-      </div>
+      </div> -->
       <div class="columns is-variable is-6" style="margin-top: 1.5rem;">
         <div class="column">
           <div class="insight-card is-takeaway">
@@ -825,7 +830,7 @@ the sub-agent. (SAS performance is too low to be visible.)
           <figure class="figure-card">
             <img src="./figure/meta_ilm_vs_rlm.png" alt="Meta ILM vs RLM comparison">
             <figcaption>
-              Avg@8 comparing LLM and RLM as orchestrator
+              Avg@8 accuracy comparing LLM and RLM as orchestrator
             </figcaption>
           </figure>
         </div>
@@ -847,8 +852,7 @@ agent width measures the in degree of sub-agent.
           <div class="insight-card is-observation">
             <h4>Observations</h4>
             <p>
-              Surprisingly, the instruction-tuned LLM as orchestrator
-outperforms the strong RLM counterparts.
+              <strong>Instruction-tuned LLM orchestrator initialization outperforms RLM initialization.</strong>  This is surprising, as RLMs have been shown to outperform LLMs on many reasoning tasks. However, prior work has not systematically examined their effectiveness as orchestrators.
             </p>
           </div>
         </div>
@@ -856,7 +860,9 @@ outperforms the strong RLM counterparts.
           <div class="insight-card is-takeaway">
             <h4>Takeaway</h4>
             <p>
-              <strong>Instruction-tuned LLM orchestrator initialization outperforms RLM initialization.</strong> Effective orchestration prioritizes task decomposition, delegation, and coordination over directly
+              <strong>A closer inspection reveals that RLM tends to solve the task itself
+                first and then delegate it to only one simple sub-agent, even
+                when the sub-agent is stronger at solving the task.</strong> Effective orchestration prioritizes task decomposition, delegation, and coordination over directly
                 solving sub-tasks. Current RLM training objectives emphasize end-to-end problem solving rather than structural
                 control, making them misaligned with the requirements
                 of orchestration.
@@ -873,7 +879,7 @@ outperforms the strong RLM counterparts.
           <figure class="figure-card">
             <img src="./figure/reasoning_effort.png" alt="Reasoning effort analysis">
             <figcaption>
-              Avg@8 comparing different reasoning effort with Qwen-
+              Avg@8 accuracy comparing different reasoning effort with Qwen-
 7b as orchestrator and GPT-120b as sub-agent.
             </figcaption>
           </figure>
@@ -882,7 +888,7 @@ outperforms the strong RLM counterparts.
           <figure class="figure-card">
             <img src="./figure/max_length.png" alt="Maximum length analysis">
             <figcaption>
-              Avg@8 comparing different maximum context length
+              Avg@8 accuracy comparing different maximum context length
 with Qwen-7b as orchestrator and GPT-120b as sub-agent
             </figcaption>
           </figure>
@@ -893,7 +899,7 @@ with Qwen-7b as orchestrator and GPT-120b as sub-agent
           <div class="insight-card is-observation">
             <h4>Observations</h4>
             <p>
-              Higher reasoning effort is not necessarily better. We consistently observe that increasing reasoning effort makes it easier to hit the length limit (a default response length of 512 tokens was used), especially as task complexity grows. When the limit is reached, both MAS and SAS experience performance degradation—MAS are not immune to this effect.
+              <strong>MAS are not immune to exceeding maximum context length limits under higher reasoning effort.</strong> We consistently observe that increasing reasoning effort makes it easier to hit the length limit (a default response length of 512 tokens was used), especially as task complexity grows. When the limit is reached, both MAS and SAS experience performance degradation—MAS are not immune to this effect.
             </p>
           </div>
         </div>
@@ -921,7 +927,7 @@ with Qwen-7b as orchestrator and GPT-120b as sub-agent
     <figure class="figure-card">
       <img src="./figure/mas_r1_results.png" alt="MAS-R1 main results table">
       <figcaption>
-        Avg@8 of the considered benchmarks. “—” indicates
+        Avg@8 accuracy of the considered benchmarks. “—” indicates
 non-applicable.
       </figcaption>
     </figure>
