@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DL5GXCZE6Z"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-DL5GXCZE6Z');
+</script>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="Reasoning and Agents">
+  <meta name="keywords" content="LLM, Multi-agent Systems, Automatic Design, Research">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reasoning and Agents
+  </title>
+
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="icon" href="./static/images/favicon.svg">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+</head>
+<body>
+
+<style>
+    .publication-authors {
+        width: 100%;
+        text-align: center;
+    }
+    .author-block img {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 50%;
+    }
+    .author-block {
+        display: inline-block;
+        margin: 10px;
+    }
+    .author-name {
+        display: block;
+        margin-top: 5px;
+        text-decoration: none;
+        color: black;
+    }
+    sup {
+        vertical-align: super;
+        font-size: smaller;
+    }
+    
+    .project-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        transition: transform 0.2s ease-in-out;
+    }
+    .project-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+    .project-title {
+        color: #3273dc;
+        text-decoration: none;
+        font-weight: 600;
+    }
+    .project-title:hover {
+        color: #2366d1;
+    }
+    .project-links {
+        margin-top: 1rem;
+    }
+    .project-links a {
+        margin-right: 1rem;
+        color: #3273dc;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    .project-links a:hover {
+        text-decoration: underline;
+    }
+    
+    .project-authors {
+        margin: 1rem 0;
+        text-align: left;
+    }
+    .project-authors .author-block {
+        display: inline-block;
+        margin: 5px 8px;
+        text-align: center;
+        vertical-align: top;
+    }
+    .project-authors .author-block img {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 50%;
+    }
+    .project-authors .author-name {
+        display: block;
+        margin-top: 3px;
+        font-size: 0.9rem;
+        text-decoration: none;
+        color: #3273dc;
+        font-weight: 500;
+    }
+    .project-authors .author-name:hover {
+        color: #2366d1;
+        text-decoration: underline;
+    }
+    
+    .hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    .hero .title {
+        color: white;
+        margin-bottom: 1rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+    }
+    .hero .subtitle {
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 400;
+        margin-bottom: 2rem;
+    }
+    
+    .intro-section {
+        background: #f8f9fa;
+        border-left: 4px solid #3273dc;
+        padding: 2rem;
+        border-radius: 8px;
+        margin: 2rem 0;
+    }
+    .intro-section .title {
+        color: #2c3e50;
+        margin-bottom: 1.5rem;
+    }
+    .intro-section p {
+        font-size: 1.1rem;
+        line-height: 1.7;
+        color: #555;
+    }
+    .highlight-text {
+        color: #3273dc;
+        font-weight: 600;
+    }
+</style>
+
+<nav class="navbar" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">
+            🚀 Reasoning and Agents
+          </h1>
+          <h2 class="subtitle is-3">
+            Research Papers
+          </h2>
+          <!-- <p class="subtitle is-5" style="margin-top: 1rem; opacity: 0.9;">
+            Designing, evaluating, and scaling LLM-native agent teams without manual scaffolds.
+          </p> -->
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- <section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered">
+      <div class="column is-four-fifths">
+        <div class="intro-section">
+          <h2 class="title is-3">🎯 About Our Research</h2>
+          <div class="content has-text-justified">
+            <p>
+              <span class="highlight-text">Automatic multi-agent system (MAS) design</span> enables language models
+              to propose, test, and refine their own workflows at inference time. Instead of prescribing
+              static agent roles or relying on validation sets, we pursue <strong>self-evolving scaffolds</strong>
+              that adapt structure to each task instance.
+            </p>
+            <p>
+              MAS-Zero demonstrates that meta-design, structural feedback, and self-verification can be
+              orchestrated entirely at inference time. This hub centralizes the core paper, hands-on
+              demos, templates, and ongoing analyses for researchers and practitioners.
+            </p>
+            <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(50, 115, 220, 0.1); border-radius: 6px;">
+              <strong>🔬 Key Research Pillars:</strong>
+              <ul style="margin-top: 0.5rem; margin-left: 1rem;">
+                <li>Meta-iterations that jointly design, execute, and critique MAS code</li>
+                <li>Solvability & completeness signals gathered from intermediate rollouts</li>
+                <li>Self-verification to select the best candidate solutions</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section> -->
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3">Research Papers</h2>
+
+    
+        <div class="project-card">
+          <h3 class="title is-4">
+            <a href="mas_r1/index.html" class="project-title">
+              MAS-Orchestra: Understanding and Improving Multi-Agent Reasoning Through Holistic Orchestration and Controlled Benchmarks
+            </a>
+          </h3>
+          <div class="project-authors">
+            <div class="author-block">
+              <img src="profile/zixuan.jpg" alt="Zixuan Ke">
+              <a href="https://vincent950129.github.io/" class="author-name">Zixuan Ke</a>
+            </div>
+            <div class="author-block">
+              <img src="profile/yifei.jpg" alt="Yifei Ming">
+              <a href="https://alvinmingsf.github.io/" class="author-name">Yifei Ming</a>
+            </div>
+            <div class="author-block">
+              <img src="profile/austin.jpg" alt="Austin Xu">
+              <a href="https://austinxu87.github.io/" class="author-name">Austin Xu</a>
+            </div>
+            <div class="author-block">
+              <img src="profile/ryan.png" alt="Xuan-Phi Nguyen">
+              <a href="https://rychin.com/" class="author-name">Ryan Chin</a>
+            </div>
+            <div class="author-block">
+              <img src="profile/phi.png" alt="Xuan-Phi Nguyen">
+              <a href="https://nxphi47.github.io/" class="author-name">Xuan-Phi Nguyen</a>
+            </div>
+            <div class="author-block">
+              <img src="profile/jwala.jpg" alt="Prathyusha Jwalapuram">
+              <a href="https://pjwalapuram.com/" class="author-name">Prathyusha <br>Jwalapuram</a>
+            </div>
+            <div class="author-block">
+              <img src="profile/jiayu.jpg" alt="Jiayu Wang">
+              <a href="https://jiayuww.github.io/" class="author-name">Jiayu Wang</a>
+            </div>
+            <div class="author-block">
+              <img src="profile/semih.jpg" alt="Semih Yavuz">
+              <a href="https://www.linkedin.com/in/semih-yavuz-4303518b" class="author-name">Semih Yavuz</a>
+            </div>
+            <div class="author-block">
+              <img src="profile/caiming.jpg" alt="Caiming Xiong">
+              <a href="http://cmxiong.com/" class="author-name">Caiming Xiong</a>
+            </div>
+            <div class="author-block">
+              <img src="profile/shafiq.jpg" alt="Shafiq Joty">
+              <a href="https://raihanjoty.github.io/" class="author-name">Shafiq Joty</a>
+            </div>
+          </div>
+          <div class="content">
+            <p>
+              MAS-Orchestra is a reinforcement learning framework that learns to build an entire multi-agent system at once using function-calling reinforcement learning, enabling global system-level reasoning instead of sequential code execution. Together with MASBENCH, a benchmark that measures task structure across five axes, our study shows when multi-agent systems truly outperform single-agent systems and delivers consistent gains on math, multi-hop QA, and search-based tasks.
+            </p>
+            <!-- <p><strong>Published:</strong> <em>SEA@NeurIPS</em>, 2025 🏅 <strong style="color:red;">Oral</strong></p> -->
+            <div class="project-links">
+              <a href="mas_r1/index.html">[Project Page]</a>
+              <a href="https://arxiv.org/abs/2601.14652">[Paper]</a>
+              <a href="https://github.com/SalesforceAIResearch/MAS-Orchestra">[Code]</a>
+              <a href="https://huggingface.co/datasets/Salesforce/MASBench">[MASBench]</a>
+              <a href="https://huggingface.co/datasets/Salesforce/MAS-Orchestra">[Trained Orchestrators]</a>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="project-card">
+          <h3 class="title is-4">
+            <a href="mas_zero/index.html" class="project-title">
+              MAS-Zero: Designing Multi-Agent Systems with Zero Supervision
+            </a>
+          </h3>
+          <div class="project-authors">
+            <div class="author-block">
+              <img src="profile/zixuan.jpg" alt="Zixuan Ke">
+              <a href="https://vincent950129.github.io/" class="author-name">Zixuan Ke</a>
+            </div>
+            <div class="author-block">
+              <img src="profile/austin.jpg" alt="Austin Xu">
+              <a href="https://austinxu87.github.io/" class="author-name">Austin Xu</a>
+            </div>
+            <div class="author-block">
+              <img src="profile/yifei.jpg" alt="Yifei Ming">
+              <a href="https://alvinmingsf.github.io/" class="author-name">Yifei Ming</a>
+            </div>
+            <div class="author-block">
+              <img src="profile/phi.png" alt="Xuan-Phi Nguyen">
+              <a href="https://nxphi47.github.io/" class="author-name">Xuan-Phi Nguyen</a>
+            </div>
+            <div class="author-block">
+              <img src="profile/ryan.png" alt="Xuan-Phi Nguyen">
+              <a href="https://rychin.com/" class="author-name">Ryan Chin</a>
+            </div>
+            <div class="author-block">
+              <img src="profile/caiming.jpg" alt="Caiming Xiong">
+              <a href="http://cmxiong.com/" class="author-name">Caiming Xiong</a>
+            </div>
+            
+            <div class="author-block">
+              <img src="profile/shafiq.jpg" alt="Shafiq Joty">
+              <a href="https://raihanjoty.github.io/" class="author-name">Shafiq Joty</a>
+            </div>
+          </div>
+          <div class="content">
+            <p>
+              MAS-Zero is the first inference-time-only framework that meta-designs MAS through iterative
+              generation, execution, feedback, and self-verification—no outcome supervision or validation
+              set required. It advances the accuracy–cost Pareto frontier on math, graduate-level QA, and
+              software engineering benchmarks.
+            </p>
+            <p><strong>Published:</strong> <em>SEA@NeurIPS</em>, 2025 🏅 <strong style="color:red;">Oral</strong></p>
+            <div class="project-links">
+              <a href="mas_zero/index.html">[Project Page]</a>
+              <a href="https://arxiv.org/abs/2505.14996">[Paper]</a>
+              <a href="https://github.com/SalesforceAIResearch/MAS-Zero">[Code]</a>
+              <a href="mas_zero/mas_collection.html">[MAS Collection]</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="project-card">
+          <h3 class="title is-4">
+            <a href="https://llm-reasoning-ai.github.io/" class="project-title">
+              A Survey of Frontiers in LLM Reasoning: Inference Scaling, Learning to Reason, and Agentic Systems
+            </a>
+          </h3>
+          <div class="project-authors">
+            <div class="author-block">
+              <img src="profile/zixuan.jpg" alt="Zixuan Ke">
+              <a href="https://vincent950129.github.io/" class="author-name">Zixuan Ke</a>
+            </div>
+            <div class="author-block">
+              <img src="profile/fangkai.jpg" alt="Fangkai Jiao">
+              <a href="https://jiaofangkai.com/" class="author-name">Fangkai Jiao</a>
+            </div>
+            <div class="author-block">
+              <img src="profile/yifei.jpg" alt="Yifei Ming">
+              <a href="https://alvinmingsf.github.io/" class="author-name">Yifei Ming</a>
+            </div>
+            <div class="author-block">
+              <img src="profile/phi.png" alt="Xuan-Phi Nguyen">
+              <a href="https://nxphi47.github.io/" class="author-name">Xuan-Phi Nguyen</a>
+            </div>
+            <div class="author-block">
+              <img src="profile/austin.jpg" alt="Austin Xu">
+              <a href="https://austinxu87.github.io/" class="author-name">Austin Xu</a>
+            </div>
+            <div class="author-block">
+              <img src="profile/long.jpeg" alt="Do Xuan Long">
+              <a href="https://dxlong2000.github.io/" class="author-name">Do Xuan Long</a>
+            </div>
+            <div class="author-block">
+              <img src="profile/minzhi.png" alt="Minzhi Li">
+              <a href="https://yocodeyo.github.io/" class="author-name">Minzhi Li</a>
+            </div>
+            <div class="author-block">
+              <img src="profile/chengwei.jpg" alt="Chengwei Qin">
+              <a href="https://qcwthu.github.io/" class="author-name">Chengwei Qin</a>
+            </div>
+            <div class="author-block">
+              <img src="profile/peifeng.jpg" alt="Peifeng Wang">
+              <a href="https://wangpf3.github.io/" class="author-name">Peifeng Wang</a>
+            </div>
+            <div class="author-block">
+              <img src="profile/silvio.jpeg" alt="Silvio Savarese">
+              <a href="https://www.linkedin.com/in/silvio-savarese-97b76114" class="author-name">Silvio Savarese</a>
+            </div>
+            <div class="author-block">
+              <img src="profile/caiming.jpg" alt="Caiming Xiong">
+              <a href="http://cmxiong.com/" class="author-name">Caiming Xiong</a>
+            </div>
+            <div class="author-block">
+              <img src="profile/shafiq.jpg" alt="Shafiq Joty">
+              <a href="https://raihanjoty.github.io/" class="author-name">Shafiq Joty</a>
+            </div>
+          </div>
+          <div class="content">
+            <p>
+              Comprehensive survey that maps the rapidly evolving landscape of LLM reasoning across inference-time
+              scaling, learning-to-reason methods, and agentic systems. Highlights unified taxonomies, benchmark
+              trends, and emerging research challenges.
+            </p>
+            <p><strong>Published:</strong> <em>TMLR</em>, 2025 🏅 <strong style="color:red;">Survey Certificate </strong></p>
+            <div class="project-links"></p>
+            <div class="project-links">
+              <a href="https://llm-reasoning-ai.github.io/">[Project Page]</a>
+              <a href="https://arxiv.org/abs/2504.09037">[Survey Paper]</a>
+            </div>
+          </div>
+        </div>
+      </div>  
+    </div>
+  </div>
+</section>
+
+
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <a class="icon-link" href="https://llm-reasoning-ai.github.io/" class="external-link" disabled>
+        <i class="fab fa-github"></i>
+      </a>
+    </div>
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <p>
+            This website is licensed under a <a rel="license"
+                                                href="http://creativecommons.org/licenses/by-sa/4.0/">Creative
+            Commons Attribution-ShareAlike 4.0 International License</a>.
+          </p>
+          <p>
+            This means you are free to borrow the <a
+              href="https://github.com/nerfies/nerfies.github.io">source code</a> of this website,
+            we just ask that you link back to this page in the footer.
+            Please remember to remove the analytics code included in the header of the website which
+            you do not want on your website.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
