@@ -924,13 +924,25 @@ with Qwen-7b as orchestrator and GPT-120b as sub-agent
 <section class="section">
   <div class="container is-max-desktop">
     <h2 class="title is-3 section-heading has-text-centered">Evaluation on Public Benchmarks</h2>
-    <figure class="figure-card">
-      <img src="./figure/mas_r1_results.png" alt="MAS-R1 main results table">
-      <figcaption>
-        Avg@8 accuracy of the considered benchmarks. “—” indicates
-non-applicable.
-      </figcaption>
-    </figure>
+    <div class="columns is-variable is-6 is-multiline">
+      <div class="column is-half-desktop">
+        <figure class="figure-card">
+          <img src="./figure/mas_r1_results.png" alt="MAS-R1 main results table">
+          <figcaption>
+            Avg@8 accuracy of the considered benchmarks. “—” indicates non-applicable.
+          </figcaption>
+        </figure>
+      </div>
+      <div class="column is-half-desktop">
+        <figure class="figure-card">
+          <img src="./figure/pareto_front.png" alt="Pareto front">
+          <figcaption>
+            Cost-performance trade-off computed using average accuracy and total inference cost on AIME24 and GPQA. MAS-Orchestra lie on the Pareto frontier, delivering higher accuracy at lower or comparable cost than strong baselines.
+            All training-time orchestration models use the released orchestrator, which may have been trained in a different environment than ours.
+          </figcaption>
+        </figure>
+      </div>
+    </div>
     <div class="columns is-variable is-6" style="margin-top: 1.25rem;">
       <div class="column">
         <div class="insight-card is-observation">
@@ -999,7 +1011,7 @@ typically using 3 to 4 parallel searches per question.
     <div class="highlight-card">
       <h2 class="title is-3 section-heading has-text-centered">Demo</h2>
       <p style="line-height: 1.8; max-width: 900px; margin: 0 auto; text-align: center;">
-        A short illustration of MAS-Orchestra (AIME24 as an example).
+        A short illustration of MAS-Orchestra.
       </p>
 
       <div style="margin-top: 1.5rem;">
