@@ -53,7 +53,7 @@
   .hero.hero-gradient {
     background: linear-gradient(130deg, var(--gradient-start), var(--gradient-end));
     color: #fff;
-    padding: 4rem 0 3rem;
+    padding: 2rem 0 3rem;
   }
 
   .hero .publication-title {
@@ -425,6 +425,147 @@
     color: #f8fafc;
   }
 
+  /* --- Hub nav dropdown --- */
+  .hub-nav {
+    position: relative;
+  }
+
+  .hub-nav-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 1.05rem;
+    color: #4e54c8;
+    text-decoration: none;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    user-select: none;
+    border: none;
+    background: none;
+    font-family: inherit;
+    line-height: 1.4;
+  }
+
+  .hub-nav-trigger:hover {
+    background: rgba(78, 84, 200, 0.08);
+    color: #3a3fc0;
+  }
+
+  .hub-nav-trigger .chevron-down {
+    transition: transform 0.25s ease;
+  }
+
+  .hub-nav.is-open .hub-nav-trigger .chevron-down {
+    transform: rotate(180deg);
+  }
+
+  .hub-nav-dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    min-width: 280px;
+    background: #fff;
+    border: 1px solid #e0e7ff;
+    border-radius: 12px;
+    box-shadow: 0 12px 32px rgba(30, 64, 175, 0.14), 0 2px 6px rgba(0,0,0,0.06);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+    z-index: 1000;
+    padding: 6px 0;
+  }
+
+  .hub-nav.is-open .hub-nav-dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .hub-nav-dropdown a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    color: #1f2a44;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: background 0.15s;
+    line-height: 1.35;
+  }
+
+  .hub-nav-dropdown a:hover {
+    background: #f0f2ff;
+    color: #4e54c8;
+  }
+
+  .hub-nav-dropdown .dropdown-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+
+  .hub-nav-dropdown .dropdown-icon.hub   { background: linear-gradient(135deg, #4e54c8, #8f94fb); color: #fff; }
+  .hub-nav-dropdown .dropdown-icon.paper { background: linear-gradient(135deg, #36d1dc, #5b86e5); color: #fff; }
+  .hub-nav-dropdown .dropdown-icon.ext   { background: linear-gradient(135deg, #f7971e, #ffd200); color: #fff; }
+
+  .hub-nav-dropdown .dropdown-label {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .hub-nav-dropdown .dropdown-label small {
+    color: #94a3b8;
+    font-size: 0.78rem;
+    font-weight: 400;
+  }
+
+  .hub-nav-dropdown .dropdown-divider {
+    height: 1px;
+    background: #eef0fb;
+    margin: 4px 12px;
+  }
+
+  /* --- Floating button --- */
+  .fab-back-hub {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 999;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 20px 10px 16px;
+    background: linear-gradient(135deg, #4e54c8 0%, #8f94fb 100%);
+    color: #fff;
+    font-size: 0.88rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    border-radius: 50px;
+    text-decoration: none;
+    box-shadow: 0 4px 16px rgba(78, 84, 200, 0.45);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .fab-back-hub:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 6px 24px rgba(78, 84, 200, 0.55);
+    color: #fff;
+  }
+
+  .fab-back-hub svg {
+    flex-shrink: 0;
+  }
+
   @media (max-width: 768px) {
     .author-grid {
       grid-template-columns: repeat(auto-fit, minmax(150px, 150px));
@@ -432,11 +573,46 @@
     .author-card {
       width: 150px;
     }
+    .fab-back-hub {
+      bottom: 1.2rem;
+      right: 1.2rem;
+      padding: 8px 16px 8px 12px;
+      font-size: 0.82rem;
+    }
+    .hub-nav-dropdown {
+      min-width: 240px;
+    }
   }
 </style>
 
-<nav class="navbar" role="navigation" aria-label="main navigation">
-  <div class="navbar-brand">
+<nav class="navbar" role="navigation" aria-label="main navigation" style="border-bottom: 1px solid #eef0fb;">
+  <div class="navbar-brand" style="padding-left: 1rem;">
+    <div class="hub-nav" id="hubNav">
+      <button class="navbar-item hub-nav-trigger" onclick="document.getElementById('hubNav').classList.toggle('is-open')" aria-haspopup="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+        Reasoning &amp; Agents Hub
+        <svg class="chevron-down" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+      <div class="hub-nav-dropdown">
+        <a href="../index_hub.html">
+          <span class="dropdown-icon hub">🏠</span>
+          <span class="dropdown-label">Research Hub <small>All papers &amp; projects</small></span>
+        </a>
+        <div class="dropdown-divider"></div>
+        <a href="../mas_zero/">
+          <span class="dropdown-icon paper">🔬</span>
+          <span class="dropdown-label">MAS-Zero <small>Designing MAS with Zero Supervision</small></span>
+        </a>
+        <a href="https://llm-reasoning-ai.github.io/" target="_blank">
+          <span class="dropdown-icon ext">📊</span>
+          <span class="dropdown-label">Reasoning Survey <small>Inference Scaling, Learning to Reason &amp; Agents</small></span>
+        </a>
+      </div>
+    </div>
     <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
       <span aria-hidden="true"></span>
       <span aria-hidden="true"></span>
@@ -445,16 +621,24 @@
   </div>
 </nav>
 
+<!-- Floating back-to-hub button -->
+<a href="../index_hub.html" class="fab-back-hub" title="Back to Research Hub">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="15 18 9 12 15 6"></polyline>
+  </svg>
+  <span>Hub</span>
+</a>
+
 <section class="hero hero-gradient">
   <div class="hero-body">
     <div class="container is-max-desktop">
       <div class="columns is-centered">
         <div class="column has-text-centered">
-          <img src="./figure/mas_r1.png" alt="MAS-R1 Icon" style="height: 10rem; margin-bottom: 1.5rem; background: transparent; border-radius: 12px; padding: 0.5rem;">
+          <!-- <img src="./figure/mas_r1.png" alt="MAS-R1 Icon" style="height: 10rem; margin-bottom: 1.5rem; background: transparent; border-radius: 12px; padding: 0.5rem;"> -->
           <h1 class="title is-1 publication-title" style="color: #ffffff; margin-bottom: 1rem;">MAS-Orchestra</h1>
           <h2 class="subtitle is-4" style="max-width: 900px; margin: 0 auto 1.5rem; line-height: 1.5;">Understanding and Improving Multi-Agent Reasoning Through Holistic Orchestration and Controlled Benchmarks</h2>
           <p class="subtitle is-5" style="opacity: 0.9; max-width: 900px; margin: 0 auto 1.6rem; line-height: 1.7; text-align: justify;">
-            A training-time framework that learns to build an entire multi-agent system at once using function-calling reinforcement learning, enabling global system-level reasoning instead of sequential code execution. Together with MASBENCH, a benchmark that measures task structure across five axes, our study shows when multi-agent systems truly outperform single-agent systems and delivers consistent gains on math, multi-hop QA, and search-based tasks. 
+            A RL-based training framework that learns to build an entire multi-agent system at once using function-calling reinforcement learning, enabling global system-level reasoning instead of sequential code execution. Together with MASBENCH, a benchmark that measures task structure across five axes, our study shows when multi-agent systems truly outperform single-agent systems and delivers consistent gains on math, multi-hop QA, and search-based tasks. 
           </p>
           <div class="meta-badges">
             <span>Training-Time RL Framework</span>
@@ -1290,6 +1474,15 @@ typically using 3 to 4 parallel searches per question.
     all = all.filter(x => !shouldSkipExampleFast(x.filename));
     render("");
   })();
+</script>
+
+<script>
+  document.addEventListener('click', function(e) {
+    var nav = document.getElementById('hubNav');
+    if (nav && !nav.contains(e.target)) {
+      nav.classList.remove('is-open');
+    }
+  });
 </script>
 
 </body>
