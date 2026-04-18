@@ -818,6 +818,22 @@
   </div>
 </section>
 
+<section style="padding: 1.5rem 1.5rem 0;">
+  <div class="container is-max-desktop">
+    <a href="https://vincent950129.github.io/mas-design/mas_r1/demo" target="_blank" rel="noopener"
+       style="display: flex; align-items: center; justify-content: center; gap: 1rem; padding: 1rem 2rem;
+              background: linear-gradient(135deg, #ff6b6b, #ee5a24, #f7971e); border-radius: 12px;
+              text-decoration: none; color: #fff; font-weight: 700; font-size: 1.1rem;
+              box-shadow: 0 4px 16px rgba(238, 90, 36, 0.35); transition: transform 0.2s, box-shadow 0.2s;"
+       onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 24px rgba(238,90,36,0.45)'"
+       onmouseout="this.style.transform='';this.style.boxShadow='0 4px 16px rgba(238,90,36,0.35)'">
+      <span style="font-size: 1.4rem;">&#127881;</span>
+      <span>NEW: Try our Live Demo — run MAS-Orchestra in your browser!</span>
+      <span style="font-size: 1.2rem;">&rarr;</span>
+    </a>
+  </div>
+</section>
+
 <section class="section">
   <div class="container is-max-desktop">
     <div class="highlight-card">
@@ -1301,36 +1317,35 @@ typically using 3 to 4 parallel searches per question.
 
 <section class="section" id="Demo">
   <div class="container is-max-desktop">
-    <div class="highlight-card">
-      <h2 class="title is-3 section-heading has-text-centered">Demo</h2>
-      <p style="line-height: 1.8; max-width: 900px; margin: 0 auto; text-align: center;">
-        A short illustration of MAS-Orchestra.
+    <!-- Live Demo -->
+    <div style="background: linear-gradient(135deg, #4e54c8, #8f94fb); border-radius: 16px; padding: 2.5rem 2rem; margin-bottom: 2rem; box-shadow: 0 12px 32px rgba(78, 84, 200, 0.3); text-align: center;">
+      <h2 class="title is-3" style="color: #fff; margin-bottom: 0.5rem;">Live Demo</h2>
+      <p style="color: rgba(255,255,255,0.9); line-height: 1.7; max-width: 700px; margin: 0 auto 1.5rem;">
+        Try MAS-Orchestra directly in your browser — enter a question and watch the orchestrator decompose it, select sub-agents, and aggregate their outputs in real time.
       </p>
-
+      <a href="https://vincent950129.github.io/mas-design/mas_r1/demo" target="_blank" rel="noopener"
+         style="display: inline-block; text-decoration: none;">
+        <img src="./figure/demo_teaser.png" alt="MAS-Orchestra Live Demo"
+             style="max-width: 100%; border-radius: 12px; border: 2px solid rgba(255,255,255,0.3); box-shadow: 0 8px 24px rgba(0,0,0,0.2); transition: transform 0.2s, box-shadow 0.2s;"
+             onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 32px rgba(0,0,0,0.3)'"
+             onmouseout="this.style.transform='';this.style.boxShadow='0 8px 24px rgba(0,0,0,0.2)'">
+      </a>
       <div style="margin-top: 1.5rem;">
-        <div style="position: relative; padding-top: 56.25%; border-radius: 14px; overflow: hidden; border: 1px solid #eef0fb; box-shadow: 0 8px 18px rgba(30, 64, 175, 0.06); background: #000;">
-          <iframe
-            src="https://drive.google.com/file/d/1FO2H-N1EemQ6_ju1b58_G5jWhs92ZRgu/preview"
-            title="MAS-Orchestra demo video"
-            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;"
-            allow="autoplay"
-            allowfullscreen></iframe>
-        </div>
-      </div>
-
-      <p class="has-text-centered" style="margin-top: 0.9rem;">
-        <a href="https://drive.google.com/file/d/1FO2H-N1EemQ6_ju1b58_G5jWhs92ZRgu/view?usp=drive_link"
-           target="_blank" rel="noopener">
-          Open the video in a new tab
+        <a class="button is-large" href="https://vincent950129.github.io/mas-design/mas_r1/demo" target="_blank" rel="noopener"
+           style="font-weight: 700; background: #fff; color: #4e54c8; border: none; border-radius: 10px; padding: 0.8rem 2.5rem; font-size: 1.15rem; box-shadow: 0 4px 14px rgba(0,0,0,0.15); transition: transform 0.2s, box-shadow 0.2s;"
+           onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 20px rgba(0,0,0,0.2)'"
+           onmouseout="this.style.transform='';this.style.boxShadow='0 4px 14px rgba(0,0,0,0.15)'">
+          Launch Live Demo &rarr;
         </a>
-      </p>
+      </div>
     </div>
+
   </div>
 </section>
 
 <section class="section" id="Examples">
   <div class="container is-max-widescreen">
-    <h2 class="title is-3 section-heading has-text-centered">Generated MAS Examples</h2>
+    <h2 class="title is-3 section-heading has-text-centered">Case Inspection</h2>
     <p style="line-height: 1.8; max-width: 900px; margin: 0 auto; text-align: center;">
       Browse real, generated multi-agent designs. Select an example to preview it inline, or open it in a new tab for the full interactive view.
     </p>
