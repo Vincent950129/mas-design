@@ -1,463 +1,782 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-DL5GXCZE6Z"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Reasoning and Agents</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --pink: #e6007e;
+    --pink-soft: #ff4fa3;
+    --purple: #b5179e;
+    --indigo: #6366f1;
+    --green: #16a34a;
+    --ink: #14101a;
+    --slate: #4b5563;
+    --muted: #8b8794;
+    --line: #ece8ef;
+    --paper: #fbfaf8;
+    --paper-2: #f4f1ee;
+  }
 
-  gtag('config', 'G-DL5GXCZE6Z');
-</script>
-  <meta charset="utf-8">
-  <meta name="description"
-        content="Reasoning and Agents">
-  <meta name="keywords" content="LLM, Multi-agent Systems, Automatic Design, Research">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Reasoning and Agents
-  </title>
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    color: var(--ink);
+    background: var(--paper);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
 
+  .eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: var(--pink);
+  }
+  .serif { font-family: 'Newsreader', Georgia, serif; font-weight: 500; }
 
-  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
-        rel="stylesheet">
+  /* animated chevron for the scroll cue */
+  .chev { width: 12px; height: 12px; border-right: 2px solid var(--pink); border-bottom: 2px solid var(--pink); transform: rotate(45deg); animation: bob 1.6s ease-in-out infinite; }
+  @keyframes bob { 0%,100% { transform: translateY(0) rotate(45deg);} 50% { transform: translateY(6px) rotate(45deg);} }
 
-  <link rel="stylesheet" href="./static/css/bulma.min.css">
-  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
-  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
-  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
-  <link rel="stylesheet"
-        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
-  <link rel="stylesheet" href="./static/css/index.css">
-  <link rel="icon" href="./static/images/favicon.svg">
+  /* ---------- Pinned split pages ---------- */
+  .page { position: relative; }
+  .page__pin {
+    position: sticky; top: 0;
+    height: 100vh;
+    display: flex; align-items: center;
+    gap: 3vw;
+    max-width: 1280px; margin: 0 auto;
+    padding: 0 5vw;
+  }
+  .col { flex: 1 1 50%; min-width: 0; }
+  .col--viz { display: flex; align-items: center; justify-content: center; }
+  .col--viz svg { width: 100%; height: auto; max-height: 84vh; }
 
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <script defer src="./static/js/fontawesome.all.min.js"></script>
-  <script src="./static/js/bulma-carousel.min.js"></script>
-  <script src="./static/js/bulma-slider.min.js"></script>
-  <script src="./static/js/index.js"></script>
+  .page--alt .page__pin { background: var(--paper); }
+  .page--alt { background: var(--paper-2); }
+
+  /* "scroll down to the roadmap" cue, pinned to the bottom of page 1 */
+  .scroll-cue {
+    position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%);
+    display: inline-flex; flex-direction: column; align-items: center; gap: 9px;
+    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--muted); text-decoration: none; transition: color .2s ease;
+  }
+  .scroll-cue:hover { color: var(--pink); }
+
+  .triggers { position: relative; pointer-events: none; }
+  .trig { height: 68vh; }
+
+  .ptitle {
+    font-family: 'Newsreader', Georgia, serif;
+    font-weight: 500;
+    font-size: clamp(2rem, 3.6vw, 3rem);
+    line-height: 1.08;
+    letter-spacing: -0.015em;
+    margin: 14px 0 16px;
+  }
+  .pintro { color: var(--slate); font-size: 1.08rem; max-width: 46ch; margin: 0 0 26px; }
+
+  /* stage list (page 1) */
+  .stage-item {
+    padding: 12px 0 12px 20px;
+    border-left: 2px solid var(--line);
+    opacity: 0.4;
+    cursor: pointer;
+    transition: opacity .45s ease, border-color .45s ease;
+  }
+  .stage-item:not(.is-active):hover { opacity: 0.7; border-color: #f3a8ce; }
+  .stage-item.is-active { opacity: 1; border-color: var(--pink); }
+  .stage-item__t { font-weight: 700; font-size: 1.06rem; display: flex; align-items: center; gap: 10px; }
+  .stage-item__n { font-size: 0.72rem; color: var(--pink); font-weight: 800; letter-spacing: 0.1em; }
+  .stage-desc {
+    max-height: 0; overflow: hidden; opacity: 0;
+    color: var(--slate); font-size: 0.98rem;
+    transition: max-height .45s ease, opacity .45s ease, margin .45s ease;
+  }
+  .stage-item.is-active .stage-desc { max-height: 140px; opacity: 1; margin-top: 6px; }
+
+  /* milestone card (page 2) */
+  .mcard { display: none; }
+  .mcard.is-active { display: block; animation: fadeUp .5s ease; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(10px);} to { opacity: 1; transform: none;} }
+  .mcard__date { font-size: 0.78rem; font-weight: 800; letter-spacing: 0.1em; color: var(--pink); text-transform: uppercase; }
+  .mcard__t { font-family: 'Newsreader', Georgia, serif; font-weight: 500; font-size: clamp(1.6rem, 3vw, 2.3rem); margin: 8px 0 12px; line-height: 1.1; }
+  .mcard__b { color: var(--slate); font-size: 1.06rem; margin: 0 0 16px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { font-size: 0.74rem; font-weight: 700; padding: 5px 11px; border-radius: 999px; border: 1px solid var(--line); background: #fff; color: var(--slate); }
+  .chip.training { color: #1d4ed8; border-color: #bfdbfe; background: #eff6ff; }
+  .chip.inference { color: #7c3aed; border-color: #ddd6fe; background: #f5f3ff; }
+  .chip.evaluation { color: #047857; border-color: #a7f3d0; background: #ecfdf5; }
+  .chip.venue { color: var(--pink); border-color: #fbcfe8; background: #fdf2f8; }
+  .chip.award { color: #b45309; border-color: #fcd34d; background: #fffbeb; }
+
+  .mlinks { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 6px 18px; }
+  .mlinks a { color: var(--pink); text-decoration: none; font-weight: 600; font-size: 0.9rem; white-space: nowrap; }
+  .mlinks a:hover { text-decoration: underline; }
+  .mlinks a::before { content: "↗"; margin-right: 4px; opacity: .6; font-weight: 400; }
+
+  /* page 2 — the live demo card (the application the series converges into) */
+  .mcard--app { border: 1px solid #f3cfe3; background: linear-gradient(180deg, #ffffff, #fdf3f8); border-radius: 16px; padding: 22px 22px 20px; }
+  .app-kicker { display: flex; align-items: center; gap: 8px; font: 800 0.7rem 'Inter', sans-serif; letter-spacing: 0.16em; text-transform: uppercase; color: var(--pink); margin-bottom: 8px; }
+  .appshot { margin: 4px 0 16px; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: #fff; box-shadow: 0 14px 34px rgba(20, 16, 26, .10); }
+  .appshot__bar { display: flex; align-items: center; gap: 6px; padding: 9px 12px; background: #faf6fb; border-bottom: 1px solid var(--line); }
+  .appshot__bar span { width: 9px; height: 9px; border-radius: 50%; background: #e7dcec; }
+  .appshot__bar span:first-child { background: #ff8aab; }
+  .appshot__url { margin-left: 8px; font-size: 0.72rem; font-weight: 600; color: var(--muted); }
+  .appshot__body { padding: 14px 16px 15px; }
+  .appshot__q { font-size: 0.92rem; font-weight: 600; color: var(--ink); margin-bottom: 8px; }
+  .appshot__graph { width: 100%; height: auto; display: block; }
+  .appshot__cap { margin-top: 8px; font-size: 0.74rem; color: var(--muted); }
+  .demo-cta { display: inline-flex; align-items: center; gap: 8px; margin-top: 8px; padding: 12px 20px; border-radius: 999px; background: var(--pink); color: #fff; font-weight: 800; font-size: 0.95rem; text-decoration: none; box-shadow: 0 10px 22px rgba(230, 0, 126, .28); transition: transform .2s ease, box-shadow .2s ease; }
+  .demo-cta:hover { transform: translateY(-1px); box-shadow: 0 14px 28px rgba(230, 0, 126, .34); }
+
+  /* ---------- SVG animation primitives ---------- */
+  #world { transform-box: view-box; transform-origin: 50% 50%; transition: transform 1s cubic-bezier(.4,0,.2,1); }
+  .layer { opacity: 0; transform: translateY(8px); transform-box: fill-box; transform-origin: 50% 50%; transition: opacity .6s ease, transform .45s ease; }
+  .layer.is-on { opacity: 1; transform: none; }
+  .layer.is-current { transform: scale(1.07); }
+  .edge { opacity: 0; stroke-dasharray: 7 7; transition: opacity .55s ease; }
+  .edge.is-on { opacity: 1; animation: flow 1.1s linear infinite; }
+  @keyframes flow { to { stroke-dashoffset: -28; } }
+
+  /* growth: capability chips, sub-agents, memory layers */
+  .spark { opacity: 0; transform: scale(.2); transform-box: fill-box; transform-origin: 50% 50%; transition: opacity .5s ease, transform .5s ease; }
+  .spark.is-on { opacity: 1; transform: none; }
+  .lead-glow { opacity: 0; transform-box: fill-box; transform-origin: 50% 50%; transition: opacity .9s ease, transform .9s ease; }
+
+  /* recursive self-improvement, branching in DIVERSE directions: each generation sprouts from a parent
+     (a thin twig), the live frontier leads pulse + glow, and prior ones grey into boxes. #world scales
+     down (zoom out) as the branching system outgrows the frame, so it can keep growing. */
+  .lead-active { transform-box: fill-box; transform-origin: 50% 78%; transition: opacity .45s ease; }
+  .gen { transform-box: fill-box; transform-origin: 50% 50%; animation: genIn .55s cubic-bezier(.34, 1.4, .5, 1) both; }
+  .gen .genbox { opacity: 0; transition: opacity .7s ease; }
+  .gen--arch { transition: transform .55s cubic-bezier(.4, 0, .2, 1); }
+  .gen--arch .genbox { opacity: 1; }
+  .gen .genfig { transform-box: fill-box; transform-origin: 50% 78%; transition: color .7s ease, filter .7s ease; }
+  .gen--live .genfig { animation: leadPulse 2.2s ease-in-out infinite; filter: drop-shadow(0 0 5px rgba(230, 0, 126, .5)); }
+  .twig { stroke: #cdbfe0; stroke-width: 1.6; stroke-linecap: round; opacity: 0; animation: twigIn .6s ease forwards; }
+  @keyframes genIn { from { opacity: 0; transform: scale(.45); } to { opacity: 1; transform: none; } }
+  @keyframes leadPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.07); } }
+  @keyframes twigIn { to { opacity: 1; } }
+
+  /* sub-agents proliferate as the system grows */
+  .subgrow { opacity: 0; transition: opacity .6s ease; }
+  .subgrow.is-on { opacity: 1; }
+  /* the orchestration box grows to fit its proliferating sub-agents */
+  #orchBox { transition: width .6s cubic-bezier(.4, 0, .2, 1), height .6s cubic-bezier(.4, 0, .2, 1); }
+
+  .node-label { font: 700 16px 'Inter', sans-serif; fill: var(--ink); text-anchor: middle; }
+  .node-sub { font: 600 12px 'Inter', sans-serif; fill: var(--slate); text-anchor: middle; }
+  .node-tag { font: 700 11px 'Inter', sans-serif; letter-spacing: 0.08em; text-anchor: middle; }
+
+  .spine { fill: none; stroke: #d6d1da; stroke-width: 4; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 1s ease; }
+  .dot { opacity: 0; transform: scale(.5); transform-box: fill-box; transform-origin: center; transition: opacity .5s ease, transform .5s ease; }
+  .dot.is-on { opacity: 1; transform: scale(1); }
+  .dotlbl { opacity: 0; transition: opacity .5s ease; }
+  .dotlbl.is-on { opacity: 1; }
+  /* branches grow out of the trunk; tobe = faint, future-bound paths to the frontier */
+  .branch { fill: none; stroke: #e6007e; stroke-width: 2.4; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; opacity: .92; transition: stroke-dashoffset .75s ease; }
+  .branch.is-on { stroke-dashoffset: 0; }
+  .tobe { fill: none; stroke: #b9b1c4; stroke-width: 1.8; stroke-dasharray: 4 6; opacity: 0; transition: opacity .7s ease; }
+  .tobe.is-on { opacity: .6; }
+  .lineage { fill: none; stroke: #e6007e; stroke-width: 1.8; stroke-dasharray: 2 7; stroke-linecap: round; opacity: 0; transition: opacity .7s ease; }
+  .lineage.is-on { opacity: .5; }
+  #p2halo { transition: transform .6s cubic-bezier(.4,0,.2,1); }
+
+  /* ---------- Responsive / reduced-motion ---------- */
+  @media (max-width: 920px) {
+    .page__pin { position: static; height: auto; flex-direction: column; padding: 70px 24px; gap: 30px; }
+    .col--viz svg { max-height: none; }
+    .triggers { display: none; }
+    .layer, .edge { opacity: 1 !important; transform: none !important; }
+    .spine { stroke-dashoffset: 0 !important; }
+    .branch { stroke-dashoffset: 0 !important; }
+    .tobe { opacity: .6 !important; }
+    .lineage { opacity: .5 !important; }
+    .dot, .dotlbl { opacity: 1 !important; transform: none !important; }
+    .stage-item { opacity: 1; border-color: var(--pink); }
+    .stage-item .stage-desc { max-height: 200px; opacity: 1; margin-top: 6px; }
+    .mcard { display: block; border-top: 1px solid var(--line); padding-top: 18px; margin-top: 18px; }
+    #p2halo { display: none; }
+    .page--alt .page__pin { flex-direction: column-reverse; }
+    .scroll-cue { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .layer, .edge, .spine, .branch, .tobe, .lineage, .dot, .dotlbl, #p2halo, .stage-item, .stage-desc,
+    #world, .spark, .lead-glow, .lead-active, .gen, .subgrow { transition: none; }
+    .edge.is-on, .gen, .gen--live .genfig, .twig { animation: none; }
+    .chev { animation: none; }
+  }
+</style>
 </head>
 <body>
 
-<style>
-    .publication-authors {
-        width: 100%;
-        text-align: center;
-    }
-    .author-block img {
-        width: 100px;
-        height: 100px;
-        object-fit: cover;
-        border-radius: 50%;
-    }
-    .author-block {
-        display: inline-block;
-        margin: 10px;
-    }
-    .author-name {
-        display: block;
-        margin-top: 5px;
-        text-decoration: none;
-        color: black;
-    }
-    sup {
-        vertical-align: super;
-        font-size: smaller;
-    }
-    
-    .project-card {
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        padding: 2rem;
-        margin-bottom: 2rem;
-        transition: transform 0.2s ease-in-out;
-    }
-    .project-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-    }
-    .project-title {
-        color: #3273dc;
-        text-decoration: none;
-        font-weight: 600;
-    }
-    .project-title:hover {
-        color: #2366d1;
-    }
-    .project-links {
-        margin-top: 1rem;
-    }
-    .project-links a {
-        margin-right: 1rem;
-        color: #3273dc;
-        text-decoration: none;
-        font-weight: 500;
-    }
-    .project-links a:hover {
-        text-decoration: underline;
-    }
-    
-    .project-authors {
-        margin: 1rem 0;
-        text-align: left;
-    }
-    .project-authors .author-block {
-        display: inline-block;
-        margin: 5px 8px;
-        text-align: center;
-        vertical-align: top;
-    }
-    .project-authors .author-block img {
-        width: 60px;
-        height: 60px;
-        object-fit: cover;
-        border-radius: 50%;
-    }
-    .project-authors .author-name {
-        display: block;
-        margin-top: 3px;
-        font-size: 0.9rem;
-        text-decoration: none;
-        color: #3273dc;
-        font-weight: 500;
-    }
-    .project-authors .author-name:hover {
-        color: #2366d1;
-        text-decoration: underline;
-    }
-    
-    .hero {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-    }
-    .hero .title {
-        color: white;
-        margin-bottom: 1rem;
-        font-weight: 700;
-        letter-spacing: -0.02em;
-    }
-    .hero .subtitle {
-        color: rgba(255, 255, 255, 0.9);
-        font-weight: 400;
-        margin-bottom: 2rem;
-    }
-    
-    .intro-section {
-        background: #f8f9fa;
-        border-left: 4px solid #3273dc;
-        padding: 2rem;
-        border-radius: 8px;
-        margin: 2rem 0;
-    }
-    .intro-section .title {
-        color: #2c3e50;
-        margin-bottom: 1.5rem;
-    }
-    .intro-section p {
-        font-size: 1.1rem;
-        line-height: 1.7;
-        color: #555;
-    }
-    .highlight-text {
-        color: #3273dc;
-        font-weight: 600;
-    }
-</style>
+<!-- ===================== PAGE 1: OUR FRAMEWORK ===================== -->
+<section class="page" id="page1">
+  <div class="page__pin">
+    <!-- LEFT: text -->
+    <div class="col col--text">
+      <div class="eyebrow">Our Framework</div>
+      <h2 class="ptitle">A modern AI<br>learning loop</h2>
+      <p class="pintro">Today's agentic systems share one shape: a loop that turns a task into a response, and feedback into improvement. Every piece of our work sharpens one part of it.</p>
 
-<nav class="navbar" role="navigation" aria-label="main navigation">
-  <div class="navbar-brand">
-    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
-      <span aria-hidden="true"></span>
-      <span aria-hidden="true"></span>
-      <span aria-hidden="true"></span>
+      <div class="stage-item" data-page="1" data-stage="1">
+        <div class="stage-item__t"><span class="stage-item__n">01</span> Task + Capability</div>
+        <div class="stage-desc">Each run begins with a task and the external capabilities available to solve it — tools, skills, data, and environments.</div>
+      </div>
+      <div class="stage-item" data-page="1" data-stage="2">
+        <div class="stage-item__t"><span class="stage-item__n">02</span> Lead Agent</div>
+        <div class="stage-desc">A lead (meta) agent receives the task. Its job is not to answer directly, but to decide how the work should be done.</div>
+      </div>
+      <div class="stage-item" data-page="1" data-stage="3">
+        <div class="stage-item__t"><span class="stage-item__n">03</span> Orchestration</div>
+        <div class="stage-desc">The lead composes and coordinates specialized sub-agents — assigning roles, context, tools, and a flow between them.</div>
+      </div>
+      <div class="stage-item" data-page="1" data-stage="4">
+        <div class="stage-item__t"><span class="stage-item__n">04</span> Environment</div>
+        <div class="stage-desc">Sub-agents act in an environment, calling tools and producing intermediate results that become a response.</div>
+      </div>
+      <div class="stage-item" data-page="1" data-stage="5">
+        <div class="stage-item__t"><span class="stage-item__n">05</span> Feedback</div>
+        <div class="stage-desc">The environment returns feedback. This signal is how the system learns whether the orchestration actually worked.</div>
+      </div>
+      <div class="stage-item" data-page="1" data-stage="6">
+        <div class="stage-item__t"><span class="stage-item__n">06</span> Memory <span style="color:var(--muted);font-weight:600;font-size:.85rem">(optional)</span></div>
+        <div class="stage-desc">Memory carries state across turns, so the lead agent can adapt and improve over time.</div>
+      </div>
+    </div>
+
+    <!-- RIGHT: animated loop -->
+    <div class="col col--viz">
+      <svg id="loop" viewBox="40 8 644 530" role="img" aria-label="A modern AI learning loop where the lead agent and its sub-agents keep growing">
+        <defs>
+          <linearGradient id="leadGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#ff4fa3" /><stop offset="1" stop-color="#b5179e" />
+          </linearGradient>
+          <radialGradient id="glowGrad"><stop offset="0" stop-color="#ff4fa3" stop-opacity="0.55" /><stop offset="1" stop-color="#ff4fa3" stop-opacity="0" /></radialGradient>
+          <filter id="sh" x="-30%" y="-30%" width="160%" height="160%">
+            <feDropShadow dx="0" dy="5" stdDeviation="8" flood-color="#14101a" flood-opacity="0.12" />
+          </filter>
+          <marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#9aa1ad" /></marker>
+          <marker id="ap" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7.5" markerHeight="7.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#e6007e" /></marker>
+
+          <!-- one consistent "agent" shape: a human-like bust. Lead = large/pink, sub-agents = small/indigo -->
+          <symbol id="person" viewBox="0 0 48 52">
+            <circle cx="24" cy="14" r="11" fill="currentColor" />
+            <path d="M24 27 C11 27 4 37 4 50 L44 50 C44 37 37 27 24 27 Z" fill="currentColor" />
+          </symbol>
+        </defs>
+
+        <g id="world">
+          <!-- CORE EDGES (the loop) -->
+          <path class="edge" data-page="1" data-reveal="2" d="M226,232 C280,168 300,138 330,116" fill="none" stroke="#9aa1ad" stroke-width="2.6" marker-end="url(#a)" />
+          <path class="edge" data-page="1" data-reveal="3" d="M414,114 C470,144 482,166 502,202" fill="none" stroke="#9aa1ad" stroke-width="2.6" marker-end="url(#a)" />
+          <path class="edge" data-page="1" data-reveal="4" d="M566,312 L566,428" fill="none" stroke="#9aa1ad" stroke-width="2.6" marker-end="url(#a)" />
+          <path class="edge" data-page="1" data-reveal="5" d="M460,470 L284,470" fill="none" stroke="#9aa1ad" stroke-width="2.6" marker-end="url(#a)" />
+          <path class="edge" data-page="1" data-reveal="5" d="M198,432 C150,360 168,182 300,118" fill="none" stroke="#e6007e" stroke-width="2.6" marker-end="url(#ap)" />
+          <path class="edge" data-page="1" data-reveal="6" d="M360,158 L360,268" fill="none" stroke="#9aa1ad" stroke-width="2" marker-end="url(#a)" />
+
+          <!-- NODE: Task + Capability -->
+          <g class="layer" data-page="1" data-reveal="1">
+            <rect x="74" y="210" width="152" height="76" rx="16" fill="#fff" stroke="#d6d1da" stroke-width="1.6" filter="url(#sh)" />
+            <text x="150" y="242" class="node-label">Task</text>
+            <text x="150" y="264" class="node-sub">+ Capability</text>
+          </g>
+          <!-- capabilities accumulate as the loop keeps running (more added by JS) -->
+          <g id="capTokens" data-page="1">
+            <rect class="spark" data-reveal="1" x="88" y="298" width="26" height="15" rx="4" fill="#c4b5fd" />
+            <rect class="spark" data-reveal="1" x="120" y="298" width="26" height="15" rx="4" fill="#d8b4fe" />
+          </g>
+
+          <!-- NODE: Lead Agent (it keeps improving — newest lead in front, prior generations archived as boxes) -->
+          <g class="layer" data-page="1" data-reveal="2" id="leadNode">
+            <circle id="leadGlow" class="lead-glow" cx="360" cy="68" r="40" fill="url(#glowGrad)" />
+            <!-- lineage: each prior lead generation, archived into a box (generated by JS) -->
+            <g id="leadLine" data-page="1" data-reveal="7"></g>
+            <!-- the current lead agent (build phase); during grow it hands over to the living tower -->
+            <g id="leadActive" class="lead-active" style="color:#e6007e"><use href="#person" x="340" y="46" width="40" height="44" /></g>
+            <text x="360" y="148" class="node-label" fill="#b5179e">Lead Agent</text>
+          </g>
+
+          <!-- NODE: Orchestration (sub-agents = small human glyphs that grow) -->
+          <g class="layer" data-page="1" data-reveal="3">
+            <rect id="orchBox" x="491" y="190" width="150" height="122" rx="16" fill="#fff" stroke="#6366f1" stroke-width="1.8" filter="url(#sh)" />
+            <text x="506" y="214" class="node-label" fill="#4338ca" style="font-size:15px;text-anchor:start">Orchestration</text>
+          </g>
+          <g id="subAgents" data-page="1">
+            <g class="spark" data-reveal="3" style="color:#6366f1"><use href="#person" x="512" y="228" width="24" height="26" /></g>
+            <g class="spark" data-reveal="3" style="color:#818cf8"><use href="#person" x="554" y="228" width="24" height="26" /></g>
+            <g class="spark" data-reveal="3" style="color:#6366f1"><use href="#person" x="596" y="228" width="24" height="26" /></g>
+          </g>
+          <!-- sub-agents proliferate and move between one another as they grow (generated by JS) -->
+          <g id="subGrow" class="subgrow" data-page="1" data-reveal="7"></g>
+
+          <!-- NODE: Environment (icon left, label right — no overlap) -->
+          <g class="layer" data-page="1" data-reveal="4">
+            <rect x="466" y="434" width="176" height="72" rx="16" fill="#fff" stroke="#16a34a" stroke-width="1.8" filter="url(#sh)" />
+            <circle cx="498" cy="470" r="13" fill="none" stroke="#16a34a" stroke-width="1.5" />
+            <path d="M485,470 a13,13 0 0 1 26,0 M498,457 v26 M486,464 h24 M486,476 h24" stroke="#16a34a" stroke-width="1" fill="none" />
+            <text x="522" y="475" class="node-label" fill="#15803d" style="font-size:14px;text-anchor:start">Environment</text>
+          </g>
+
+          <!-- NODE: Feedback -->
+          <g class="layer" data-page="1" data-reveal="5">
+            <rect x="144" y="434" width="140" height="72" rx="16" fill="#fff" stroke="#e6007e" stroke-width="1.8" filter="url(#sh)" />
+            <text x="214" y="475" class="node-label" fill="#c2185b" style="font-size:15px">Feedback</text>
+          </g>
+
+          <!-- NODE: Memory (stack grows taller over time) -->
+          <g class="layer" data-page="1" data-reveal="6">
+            <text x="322" y="290" class="node-sub" style="font-size:12px;text-anchor:end" fill="#6b7280">Memory</text>
+            <ellipse cx="360" cy="284" rx="34" ry="9" fill="#fff" stroke="#9aa1ad" stroke-width="1.6" />
+            <path d="M326,284 v22 a34,9 0 0 0 68,0 v-22" fill="#fff" stroke="#9aa1ad" stroke-width="1.6" />
+            <ellipse cx="360" cy="284" rx="34" ry="9" fill="#fff" stroke="#9aa1ad" stroke-width="1.6" />
+          </g>
+          <g id="memStack" data-page="1"></g>
+        </g>
+      </svg>
+    </div>
+
+    <a class="scroll-cue" href="#page2" aria-label="Scroll to our roadmap">
+      <span>Scroll to our roadmap</span>
+      <span class="chev"></span>
     </a>
   </div>
-</nav>
+</section>
 
-<section class="hero">
-  <div class="hero-body">
-    <div class="container is-max-desktop">
-      <div class="columns is-centered">
-        <div class="column has-text-centered">
-          <h1 class="title is-1 publication-title">
-            🚀 Reasoning and Agents
-          </h1>
-          <h2 class="subtitle is-3">
-            Research Papers
-          </h2>
-          <!-- <p class="subtitle is-5" style="margin-top: 1rem; opacity: 0.9;">
-            Designing, evaluating, and scaling LLM-native agent teams without manual scaffolds.
-          </p> -->
+<!-- ===================== PAGE 2: ROADMAP ===================== -->
+<section class="page page--alt" id="page2">
+  <div class="page__pin">
+    <!-- LEFT: animated timeline -->
+    <div class="col col--viz">
+      <svg id="road" viewBox="0 0 360 900" role="img" aria-label="Roadmap: a foundational trunk that branches into directions and converges into a live demo">
+        <defs>
+          <linearGradient id="haloGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff4fa3" /><stop offset="1" stop-color="#b5179e" /></linearGradient>
+        </defs>
+
+        <!-- foundational trunk: Survey → MAS-Zero → MAS-Orchestra -->
+        <path class="spine" id="spine" d="M58,40 L58,300" pathLength="1" />
+
+        <!-- three parallel directions grow out of MAS-Orchestra -->
+        <path class="branch" data-page="2" data-stage="4" d="M58,300 C64,356 112,372 112,420" pathLength="1" />
+        <path class="branch" data-page="2" data-stage="5" d="M58,300 C66,470 112,478 112,540" pathLength="1" />
+        <path class="branch" data-page="2" data-stage="6" d="M58,300 C70,600 112,602 112,660" pathLength="1" />
+
+        <!-- direct lineage: the live demo is MAS-Orchestra's application -->
+        <path class="lineage" data-page="2" data-stage="7" d="M58,316 L58,743" />
+
+        <!-- and the demo points forward to the open frontier -->
+        <path class="tobe" data-page="2" data-stage="8" d="M58,781 L58,842" />
+
+        <!-- moving halo -->
+        <g id="p2halo"><circle cx="58" cy="60" r="17" fill="none" stroke="url(#haloGrad)" stroke-width="3" /></g>
+
+        <!-- TRUNK milestones — the works the rest branches from -->
+        <g class="dot" data-page="2" data-stage="1"><circle cx="58" cy="60" r="10" fill="#e6007e" /></g>
+        <g class="dotlbl" data-page="2" data-stage="1"><text x="84" y="55" class="node-tag" fill="#8b8794" style="text-anchor:start">2025 · SURVEY</text><text x="84" y="73" class="node-label" style="text-anchor:start;font-size:15px">LLM Reasoning Survey</text></g>
+
+        <g class="dot" data-page="2" data-stage="2"><circle cx="58" cy="180" r="10" fill="#e6007e" /></g>
+        <g class="dotlbl" data-page="2" data-stage="2"><text x="84" y="175" class="node-tag" fill="#8b8794" style="text-anchor:start">2025 · MAS POLICY</text><text x="84" y="193" class="node-label" style="text-anchor:start;font-size:15px">MAS-Zero</text></g>
+
+        <g class="dot" data-page="2" data-stage="3"><circle cx="58" cy="300" r="12" fill="#e6007e" /></g>
+        <g class="dotlbl" data-page="2" data-stage="3"><text x="86" y="295" class="node-tag" fill="#8b8794" style="text-anchor:start">2026 · MAS POLICY · ANALYSIS</text><text x="86" y="313" class="node-label" style="text-anchor:start;font-size:15px">MAS-Orchestra</text></g>
+
+        <!-- BRANCH milestones — parallel directions that grow out of the trunk -->
+        <g class="dot" data-page="2" data-stage="4"><circle cx="112" cy="420" r="6.5" fill="#fff" stroke="#e6007e" stroke-width="2.4" /></g>
+        <g class="dotlbl" data-page="2" data-stage="4"><text x="138" y="415" class="node-tag" fill="#8b8794" style="text-anchor:start">2026 · MAS POLICY</text><text x="138" y="433" class="node-label" style="text-anchor:start;font-size:15px">SkillOrchestra</text></g>
+
+        <g class="dot" data-page="2" data-stage="5"><circle cx="112" cy="540" r="6.5" fill="#fff" stroke="#e6007e" stroke-width="2.4" /></g>
+        <g class="dotlbl" data-page="2" data-stage="5"><text x="138" y="535" class="node-tag" fill="#8b8794" style="text-anchor:start">2026 · VERIFY ORCHESTRATION</text><text x="138" y="553" class="node-label" style="text-anchor:start;font-size:15px">OrchRM · MAS-ProVe</text></g>
+
+        <g class="dot" data-page="2" data-stage="6"><circle cx="112" cy="660" r="6.5" fill="#fff" stroke="#e6007e" stroke-width="2.4" /></g>
+        <g class="dotlbl" data-page="2" data-stage="6"><text x="138" y="655" class="node-tag" fill="#8b8794" style="text-anchor:start">2026 · ANALYSIS</text><text x="138" y="673" class="node-label" style="text-anchor:start;font-size:15px">IlluMAS · LiveResearchBench</text></g>
+
+        <!-- the application: where the whole series converges into something you can run -->
+        <g class="dot dot--demo" data-page="2" data-stage="7">
+          <circle cx="58" cy="762" r="19" fill="none" stroke="#ff9ecb" stroke-width="2" opacity="0.7" />
+          <circle cx="58" cy="762" r="13" fill="#e6007e" />
+          <path d="M53.5,755 L53.5,769 L66,762 Z" fill="#fff" />
+        </g>
+        <g class="dotlbl" data-page="2" data-stage="7"><text x="86" y="757" class="node-tag" fill="#e6007e" style="text-anchor:start">TRY IT LIVE</text><text x="86" y="775" class="node-label" style="text-anchor:start;font-size:15px">MAS-Orchestra Demo</text></g>
+
+        <!-- frontier: where the demo and research head next -->
+        <g class="dot" data-page="2" data-stage="8"><circle cx="58" cy="852" r="7" fill="#fff" stroke="#9aa1ad" stroke-width="2.2" stroke-dasharray="3 3" /></g>
+        <g class="dotlbl" data-page="2" data-stage="8"><text x="84" y="847" class="node-tag" fill="#8b8794" style="text-anchor:start">NEXT · FRONTIER</text><text x="84" y="865" class="node-label" style="text-anchor:start;font-size:15px">Policy · Verification · Env</text></g>
+      </svg>
+    </div>
+
+    <!-- RIGHT: summary -->
+    <div class="col col--text">
+      <div class="eyebrow">Our Roadmap</div>
+      <h2 class="ptitle">Roadmap of<br>our work</h2>
+      <p class="pintro">Three works lay the groundwork — the <strong>Survey</strong>, <strong>MAS-Zero</strong>, and <strong>MAS-Orchestra</strong> — then the agenda branches fast into parallel directions. Everything below — our papers and thought leadership — converges into the <strong>live demo</strong>, the real application you can play with.</p>
+
+      <div class="mcard" data-page="2" data-stage="1">
+        <div class="mcard__date">2025 · Survey</div>
+        <div class="mcard__t">A Survey of Frontiers in LLM Reasoning</div>
+        <p class="mcard__b">The map that framed our whole agenda — from standalone LLMs, to single-agent systems, to multi-agent systems. The must-read starting point that everything below builds on.</p>
+        <div class="chips"><span class="chip venue">TMLR'25</span><span class="chip award">🏅 Survey Certification</span><span class="chip venue">NeurIPS'25 Tutorial</span></div>
+        <div class="mlinks"><a href="https://llm-reasoning-ai.github.io/" target="_blank" rel="noopener">Project Page</a><a href="https://arxiv.org/abs/2504.09037" target="_blank" rel="noopener">Paper</a></div>
+      </div>
+
+      <div class="mcard" data-page="2" data-stage="2">
+        <div class="mcard__date">2025 · MAS Policy</div>
+        <div class="mcard__t">MAS-Zero</div>
+        <p class="mcard__b">The first to make MAS design automatic — an inference-time, self-refinement framework that builds multi-agent systems with zero supervision. The seed idea the rest of the line scales up.</p>
+        <div class="chips"><span class="chip inference">inference</span><span class="chip venue">SEA@NeurIPS'25</span><span class="chip award">🏅 Oral</span></div>
+        <div class="mlinks"><a href="mas_zero/index.html" target="_blank" rel="noopener">Project Page</a><a href="https://arxiv.org/abs/2505.14996" target="_blank" rel="noopener">Paper</a><a href="https://github.com/SalesforceAIResearch/MAS-Zero" target="_blank" rel="noopener">Code</a><a href="mas_zero/mas_collection.html" target="_blank" rel="noopener">MAS Collection</a></div>
+      </div>
+
+      <div class="mcard" data-page="2" data-stage="3">
+        <div class="mcard__date">2026 · MAS Policy · Analysis</div>
+        <div class="mcard__t">MAS-Orchestra</div>
+        <p class="mcard__b">Holistic, training-time orchestration via function-calling RL — composing an entire MAS at each step, not piece by piece — paired with <strong>MASBench</strong>, a controlled study of when multi-agent beats single-agent. Beats GPT-5 and Claude-Sonnet-4.5 by up to 23% across 5 benchmarks, at a 10× efficiency gain. It's the trunk the three directions below branch from.</p>
+        <div class="chips"><span class="chip training">training</span><span class="chip venue">ICML'26</span></div>
+        <div class="mlinks"><a href="mas_r1/index.html" target="_blank" rel="noopener">Project Page</a><a href="mas_r1/demo/index.html" target="_blank" rel="noopener">Live Demo</a><a href="https://arxiv.org/abs/2601.14652" target="_blank" rel="noopener">Paper</a><a href="https://github.com/SalesforceAIResearch/MAS-Orchestra" target="_blank" rel="noopener">Code</a></div>
+      </div>
+
+      <div class="mcard" data-page="2" data-stage="4">
+        <div class="mcard__date">2026 · MAS Policy</div>
+        <div class="mcard__t">SkillOrchestra</div>
+        <p class="mcard__b">Building on the orchestration line — skill-based agent routing, an offline approach that outperforms SOTA RL orchestrators by 22.5% at 700× lower cost.</p>
+        <div class="chips"><span class="chip inference">inference</span><span class="chip award">🏅 #2 Hugging Face Daily</span></div>
+        <div class="mlinks"><a href="https://arxiv.org/abs/2602.19672" target="_blank" rel="noopener">Paper</a></div>
+      </div>
+
+      <div class="mcard" data-page="2" data-stage="5">
+        <div class="mcard__date">2026 · Verify Orchestration</div>
+        <div class="mcard__t">OrchRM &amp; MAS-ProVe</div>
+        <p class="mcard__b">Can we judge an orchestration without running the whole system? Reward modeling and process verification at the orchestration level.</p>
+        <div class="chips"><span class="chip training">training</span><span class="chip evaluation">evaluation</span><span class="chip venue">MAS-ProVe · ICML'26</span><span class="chip venue">OrchRM · under submission</span></div>
+        <div class="mlinks"><a href="https://arxiv.org/abs/2606.13598" target="_blank" rel="noopener">OrchRM Paper</a><a href="https://arxiv.org/abs/2602.03053" target="_blank" rel="noopener">MAS-ProVe Paper</a></div>
+      </div>
+
+      <div class="mcard" data-page="2" data-stage="6">
+        <div class="mcard__date">2026 · Analysis</div>
+        <div class="mcard__t">IlluMAS &amp; LiveResearchBench</div>
+        <p class="mcard__b">When does multi-agent actually beat single-agent? A cost-controlled study plus benchmarks that stress-test the multi-agent advantage.</p>
+        <div class="chips"><span class="chip evaluation">evaluation</span><span class="chip venue">ICLR'26 · under submission</span></div>
+        <div class="mlinks"><a href="https://multi-agent-eval.github.io/" target="_blank" rel="noopener">IlluMAS Page</a><a href="https://arxiv.org/abs/2606.13003" target="_blank" rel="noopener">IlluMAS Paper</a></div>
+      </div>
+
+      <div class="mcard mcard--app" data-page="2" data-stage="7">
+        <div class="app-kicker">try it live</div>
+        <div class="mcard__t">Vibe-code your MAS</div>
+        <p class="mcard__b">Where the whole series becomes something you can run. Describe a problem and Orchestra <strong>designs a multi-agent plan, executes it, and lets you refine it in chat</strong> — across math, search, deep research, and enterprise ops.</p>
+        <div class="appshot">
+          <div class="appshot__bar"><span></span><span></span><span></span><div class="appshot__url">mas-orchestra.salesforceresearch.ai</div></div>
+          <div class="appshot__body">
+            <div class="appshot__q">“Find all positive integer triples (a,b,c) …”</div>
+            <svg class="appshot__graph" viewBox="0 0 320 130" role="img" aria-label="A designed multi-agent plan">
+              <path d="M74,65 C102,65 104,28 128,28" fill="none" stroke="#cbb8d6" stroke-width="2" />
+              <path d="M74,65 C102,65 104,102 128,102" fill="none" stroke="#cbb8d6" stroke-width="2" />
+              <path d="M208,28 C234,28 232,65 248,65" fill="none" stroke="#cbb8d6" stroke-width="2" />
+              <path d="M208,102 C234,102 232,65 248,65" fill="none" stroke="#cbb8d6" stroke-width="2" />
+              <g><rect x="12" y="50" width="62" height="30" rx="9" fill="#e6007e" /><text x="43" y="69" text-anchor="middle" fill="#fff" font-family="Inter, sans-serif" font-size="12" font-weight="700">LEAD</text></g>
+              <g><rect x="128" y="14" width="80" height="28" rx="9" fill="#fff" stroke="#e6a9cf" stroke-width="1.6" /><text x="168" y="32" text-anchor="middle" fill="#14101a" font-family="Inter, sans-serif" font-size="11.5" font-weight="700">SEARCH</text></g>
+              <g><rect x="128" y="88" width="80" height="28" rx="9" fill="#fff" stroke="#e6a9cf" stroke-width="1.6" /><text x="168" y="106" text-anchor="middle" fill="#14101a" font-family="Inter, sans-serif" font-size="11.5" font-weight="700">SOLVE</text></g>
+              <g><rect x="248" y="50" width="62" height="30" rx="9" fill="#fff" stroke="#e6a9cf" stroke-width="1.6" /><text x="279" y="69" text-anchor="middle" fill="#14101a" font-family="Inter, sans-serif" font-size="11.5" font-weight="700">FINAL</text></g>
+            </svg>
+            <div class="appshot__cap">Orchestra · designed a multi-agent plan, ready to run</div>
+          </div>
         </div>
+        <div class="chips"><span class="chip">AIME</span><span class="chip">HotpotQA</span><span class="chip">BrowseComp+</span><span class="chip">MASBench</span><span class="chip">SMFR</span><span class="chip">EnterpriseOps</span><span class="chip">LiveResearchBench</span></div>
+        <a class="demo-cta" href="https://mas-orchestra.salesforceresearch.ai/mas_r1/demo" target="_blank" rel="noopener">Open the live demo →</a>
+      </div>
+
+      <div class="mcard" data-page="2" data-stage="8">
+        <div class="mcard__date">What's next</div>
+        <div class="mcard__t">The open challenges</div>
+        <p class="mcard__b">A lead agent configures the environment, orchestrates sub-agents, receives feedback, and updates memory. The hard parts that remain: <strong>Policy</strong> (a huge action space), <strong>Verification</strong> (judging a plan without a full rollout), and <strong>Environment</strong> (an evolving harness).</p>
+        <div class="chips"><span class="chip">Policy</span><span class="chip">Verification</span><span class="chip">Environment</span></div>
+        <div class="mlinks"><a href="https://zixuanke.substack.com/p/a-one-year-milestone-in-multi-agent" target="_blank" rel="noopener">Read the blog</a></div>
       </div>
     </div>
+  </div>
+
+  <div class="triggers">
+    <div class="trig" data-page="2" data-stage="1"></div>
+    <div class="trig" data-page="2" data-stage="2"></div>
+    <div class="trig" data-page="2" data-stage="3"></div>
+    <div class="trig" data-page="2" data-stage="4"></div>
+    <div class="trig" data-page="2" data-stage="5"></div>
+    <div class="trig" data-page="2" data-stage="6"></div>
+    <div class="trig" data-page="2" data-stage="7"></div>
+    <div class="trig" data-page="2" data-stage="8"></div>
   </div>
 </section>
 
-<!-- <section class="section">
-  <div class="container is-max-desktop">
-    <div class="columns is-centered">
-      <div class="column is-four-fifths">
-        <div class="intro-section">
-          <h2 class="title is-3">🎯 About Our Research</h2>
-          <div class="content has-text-justified">
-            <p>
-              <span class="highlight-text">Automatic multi-agent system (MAS) design</span> enables language models
-              to propose, test, and refine their own workflows at inference time. Instead of prescribing
-              static agent roles or relying on validation sets, we pursue <strong>self-evolving scaffolds</strong>
-              that adapt structure to each task instance.
-            </p>
-            <p>
-              MAS-Zero demonstrates that meta-design, structural feedback, and self-verification can be
-              orchestrated entirely at inference time. This hub centralizes the core paper, hands-on
-              demos, templates, and ongoing analyses for researchers and practitioners.
-            </p>
-            <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(50, 115, 220, 0.1); border-radius: 6px;">
-              <strong>🔬 Key Research Pillars:</strong>
-              <ul style="margin-top: 0.5rem; margin-left: 1rem;">
-                <li>Meta-iterations that jointly design, execute, and critique MAS code</li>
-                <li>Solvability & completeness signals gathered from intermediate rollouts</li>
-                <li>Self-verification to select the best candidate solutions</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section> -->
+<script>
+  (function () {
+    var P2_POS = [null, { x: 58, y: 60 }, { x: 58, y: 180 }, { x: 58, y: 300 }, { x: 112, y: 420 }, { x: 112, y: 540 }, { x: 112, y: 660 }, { x: 58, y: 762 }, { x: 58, y: 852 }]; // node centres by stage (1..8)
+    var P2_TOTAL = 8, P1_BUILD = 6, P1_TOTAL = 7;
 
-<section class="section">
-  <div class="container is-max-desktop">
-    <div class="columns is-centered">
-      <div class="column is-full-width">
-        <h2 class="title is-3">Research Papers</h2>
+    var loop = document.getElementById('loop');
+    var road = document.getElementById('road');
+    var spine = document.getElementById('spine');
+    var halo = document.getElementById('p2halo');
 
-    
-        <div class="project-card">
-          <h3 class="title is-4">
-            <a href="mas_r1/index.html" class="project-title">
-              MAS-Orchestra: Understanding and Improving Multi-Agent Reasoning Through Holistic Orchestration and Controlled Benchmarks
-            </a>
-          </h3>
-          <div class="project-authors">
-            <div class="author-block">
-              <img src="profile/zixuan.jpg" alt="Zixuan Ke">
-              <a href="https://vincent950129.github.io/" class="author-name">Zixuan Ke</a>
-            </div>
-            <div class="author-block">
-              <img src="profile/yifei.jpg" alt="Yifei Ming">
-              <a href="https://alvinmingsf.github.io/" class="author-name">Yifei Ming</a>
-            </div>
-            <div class="author-block">
-              <img src="profile/austin.jpg" alt="Austin Xu">
-              <a href="https://austinxu87.github.io/" class="author-name">Austin Xu</a>
-            </div>
-            <div class="author-block">
-              <img src="profile/ryan.png" alt="Xuan-Phi Nguyen">
-              <a href="https://rychin.com/" class="author-name">Ryan Chin</a>
-            </div>
-            <div class="author-block">
-              <img src="profile/phi.png" alt="Xuan-Phi Nguyen">
-              <a href="https://nxphi47.github.io/" class="author-name">Xuan-Phi Nguyen</a>
-            </div>
-            <div class="author-block">
-              <img src="profile/jwala.jpg" alt="Prathyusha Jwalapuram">
-              <a href="https://pjwalapuram.com/" class="author-name">Prathyusha <br>Jwalapuram</a>
-            </div>
-            <div class="author-block">
-              <img src="profile/jiayu.jpg" alt="Jiayu Wang">
-              <a href="https://jiayuww.github.io/" class="author-name">Jiayu Wang</a>
-            </div>
-            <div class="author-block">
-              <img src="profile/semih.jpg" alt="Semih Yavuz">
-              <a href="https://www.linkedin.com/in/semih-yavuz-4303518b" class="author-name">Semih Yavuz</a>
-            </div>
-            <div class="author-block">
-              <img src="profile/caiming.jpg" alt="Caiming Xiong">
-              <a href="http://cmxiong.com/" class="author-name">Caiming Xiong</a>
-            </div>
-            <div class="author-block">
-              <img src="profile/shafiq.jpg" alt="Shafiq Joty">
-              <a href="https://raihanjoty.github.io/" class="author-name">Shafiq Joty</a>
-            </div>
-          </div>
-          <div class="content">
-            <p>
-              MAS-Orchestra is a reinforcement learning framework that learns to build an entire multi-agent system at once using function-calling reinforcement learning, enabling global system-level reasoning instead of sequential code execution. Together with MASBENCH, a benchmark that measures task structure across five axes, our study shows when multi-agent systems truly outperform single-agent systems and delivers consistent gains on math, multi-hop QA, and search-based tasks.
-            </p>
-            <p><strong>Published:</strong> <em>ICML</em>, 2026</p>
-            <div class="project-links">
-              <a href="mas_r1/index.html">[Project Page]</a>
-              <a href="mas_r1/demo/index.html">[Live Demo]</a>
-              <a href="https://arxiv.org/abs/2601.14652">[Paper]</a>
-              <a href="https://github.com/SalesforceAIResearch/MAS-Orchestra">[Code]</a>
-              <a href="https://huggingface.co/datasets/Salesforce/MASBench">[MASBench]</a>
-              <a href="https://huggingface.co/datasets/Salesforce/MAS-Orchestra">[Trained Orchestrators]</a>
-            </div>
-          </div>
-        </div>
+    var p1Layers = loop.querySelectorAll('[data-reveal]');
+    var p1Stages = document.querySelectorAll('.stage-item');
+    var p2Dots = road.querySelectorAll('.dot, .dotlbl');
+    var p2Flows = road.querySelectorAll('.branch, .tobe, .lineage');
+    var p2Cards = document.querySelectorAll('.mcard');
 
+    var state = { 1: 0, 2: 0 };
 
-        <div class="project-card">
-          <h3 class="title is-4">
-            <a href="mas_zero/index.html" class="project-title">
-              MAS-Zero: Designing Multi-Agent Systems with Zero Supervision
-            </a>
-          </h3>
-          <div class="project-authors">
-            <div class="author-block">
-              <img src="profile/zixuan.jpg" alt="Zixuan Ke">
-              <a href="https://vincent950129.github.io/" class="author-name">Zixuan Ke</a>
-            </div>
-            <div class="author-block">
-              <img src="profile/austin.jpg" alt="Austin Xu">
-              <a href="https://austinxu87.github.io/" class="author-name">Austin Xu</a>
-            </div>
-            <div class="author-block">
-              <img src="profile/yifei.jpg" alt="Yifei Ming">
-              <a href="https://alvinmingsf.github.io/" class="author-name">Yifei Ming</a>
-            </div>
-            <div class="author-block">
-              <img src="profile/phi.png" alt="Xuan-Phi Nguyen">
-              <a href="https://nxphi47.github.io/" class="author-name">Xuan-Phi Nguyen</a>
-            </div>
-            <div class="author-block">
-              <img src="profile/ryan.png" alt="Xuan-Phi Nguyen">
-              <a href="https://rychin.com/" class="author-name">Ryan Chin</a>
-            </div>
-            <div class="author-block">
-              <img src="profile/caiming.jpg" alt="Caiming Xiong">
-              <a href="http://cmxiong.com/" class="author-name">Caiming Xiong</a>
-            </div>
-            
-            <div class="author-block">
-              <img src="profile/shafiq.jpg" alt="Shafiq Joty">
-              <a href="https://raihanjoty.github.io/" class="author-name">Shafiq Joty</a>
-            </div>
-          </div>
-          <div class="content">
-            <p>
-              MAS-Zero is the first inference-time-only framework that meta-designs MAS through iterative
-              generation, execution, feedback, and self-verification—no outcome supervision or validation
-              set required. It advances the accuracy–cost Pareto frontier on math, graduate-level QA, and
-              software engineering benchmarks.
-            </p>
-            <p><strong>Published:</strong> <em>SEA@NeurIPS</em>, 2025 🏅 <strong style="color:red;">Oral</strong></p>
-            <div class="project-links">
-              <a href="mas_zero/index.html">[Project Page]</a>
-              <a href="https://arxiv.org/abs/2505.14996">[Paper]</a>
-              <a href="https://github.com/SalesforceAIResearch/MAS-Zero">[Code]</a>
-              <a href="mas_zero/mas_collection.html">[MAS Collection]</a>
-            </div>
-          </div>
-        </div>
+    // ---------- Page 1: build the loop, then evolve + zoom out into a richer world ----------
+    var SVGNS = 'http://www.w3.org/2000/svg';
+    var capGroup = document.getElementById('capTokens');
+    var memGroup = document.getElementById('memStack');
+    var leadGlow = document.getElementById('leadGlow');
+    var leadNode = document.getElementById('leadNode');
 
-        <div class="project-card">
-          <h3 class="title is-4">
-            <a href="https://llm-reasoning-ai.github.io/" class="project-title">
-              A Survey of Frontiers in LLM Reasoning: Inference Scaling, Learning to Reason, and Agentic Systems
-            </a>
-          </h3>
-          <div class="project-authors">
-            <div class="author-block">
-              <img src="profile/zixuan.jpg" alt="Zixuan Ke">
-              <a href="https://vincent950129.github.io/" class="author-name">Zixuan Ke</a>
-            </div>
-            <div class="author-block">
-              <img src="profile/fangkai.jpg" alt="Fangkai Jiao">
-              <a href="https://jiaofangkai.com/" class="author-name">Fangkai Jiao</a>
-            </div>
-            <div class="author-block">
-              <img src="profile/yifei.jpg" alt="Yifei Ming">
-              <a href="https://alvinmingsf.github.io/" class="author-name">Yifei Ming</a>
-            </div>
-            <div class="author-block">
-              <img src="profile/phi.png" alt="Xuan-Phi Nguyen">
-              <a href="https://nxphi47.github.io/" class="author-name">Xuan-Phi Nguyen</a>
-            </div>
-            <div class="author-block">
-              <img src="profile/austin.jpg" alt="Austin Xu">
-              <a href="https://austinxu87.github.io/" class="author-name">Austin Xu</a>
-            </div>
-            <div class="author-block">
-              <img src="profile/long.jpeg" alt="Do Xuan Long">
-              <a href="https://dxlong2000.github.io/" class="author-name">Do Xuan Long</a>
-            </div>
-            <div class="author-block">
-              <img src="profile/minzhi.png" alt="Minzhi Li">
-              <a href="https://yocodeyo.github.io/" class="author-name">Minzhi Li</a>
-            </div>
-            <div class="author-block">
-              <img src="profile/chengwei.jpg" alt="Chengwei Qin">
-              <a href="https://qcwthu.github.io/" class="author-name">Chengwei Qin</a>
-            </div>
-            <div class="author-block">
-              <img src="profile/peifeng.jpg" alt="Peifeng Wang">
-              <a href="https://wangpf3.github.io/" class="author-name">Peifeng Wang</a>
-            </div>
-            <div class="author-block">
-              <img src="profile/silvio.jpeg" alt="Silvio Savarese">
-              <a href="https://www.linkedin.com/in/silvio-savarese-97b76114" class="author-name">Silvio Savarese</a>
-            </div>
-            <div class="author-block">
-              <img src="profile/caiming.jpg" alt="Caiming Xiong">
-              <a href="http://cmxiong.com/" class="author-name">Caiming Xiong</a>
-            </div>
-            <div class="author-block">
-              <img src="profile/shafiq.jpg" alt="Shafiq Joty">
-              <a href="https://raihanjoty.github.io/" class="author-name">Shafiq Joty</a>
-            </div>
-          </div>
-          <div class="content">
-            <p>
-              Comprehensive survey that maps the rapidly evolving landscape of LLM reasoning across inference-time
-              scaling, learning-to-reason methods, and agentic systems. Highlights unified taxonomies, benchmark
-              trends, and emerging research challenges.
-            </p>
-            <p><strong>Published:</strong> <em>TMLR</em>, 2025 🏅 <strong style="color:red;">Survey Certificate </strong></p>
-            <div class="project-links"></p>
-            <div class="project-links">
-              <a href="https://llm-reasoning-ai.github.io/">[Project Page]</a>
-              <a href="https://arxiv.org/abs/2504.09037">[Survey Paper]</a>
-            </div>
-          </div>
-        </div>
-      </div>  
-    </div>
-  </div>
-</section>
+    function mk(tag, attrs) {
+      var e = document.createElementNS(SVGNS, tag);
+      for (var k in attrs) { if (k === 'href') e.setAttributeNS('http://www.w3.org/1999/xlink', 'href', attrs[k]); e.setAttribute(k, attrs[k]); }
+      return e;
+    }
 
+    // ---- GROW: recursive self-improvement, visualised. ----
+    // The system keeps growing — more capabilities, more sub-agents, deeper memory — and the LEAD
+    // keeps improving itself: a new lead is born while the prior one greys out into a box, building
+    // a rising tower of generations. As it outgrows the frame we ZOOM OUT, so it can keep growing.
+    // This is how we picture the (multi-)agent future.
+    var world = document.getElementById('world');
+    var leadLine = document.getElementById('leadLine');
+    var leadActive = document.getElementById('leadActive');
+    var subGrow = document.getElementById('subGrow');
+    var orchBox = document.getElementById('orchBox');
 
+    // the lead improves ONE generation after another — a single winding lineage (NOT a tree). Each new
+    // lead sprouts from the previous along a twig, and the prior one greys into a box. The chain doesn't
+    // climb straight up — it MEANDERS in diverse directions (up / left / right) as it keeps growing.
+    var FIG_W = 34, FIG_H = 38, BOX_W = 44, BOX_H = 42;
+    var PATH = [
+      { x: 360, y: 66 }, { x: 432, y: 46 }, { x: 452, y: -2 }, { x: 382, y: -16 }, { x: 302, y: -26 },
+      { x: 282, y: -74 }, { x: 352, y: -92 }, { x: 436, y: -98 }, { x: 452, y: -148 }, { x: 372, y: -160 }
+    ];
+    var GROW_MS = 1300;
+    var ORCH_X = 491, ORCH_Y = 190;                 // orchestration box top-left (fixed); it grows right/down to fit
+    var grow = { timer: null, on: false, gens: 0, subs: 0, mems: 0, caps: 0, orchR: 641, orchB: 312 };
 
-<footer class="footer">
-  <div class="container">
-    <div class="content has-text-centered">
-      <a class="icon-link" href="https://llm-reasoning-ai.github.io/" class="external-link" disabled>
-        <i class="fab fa-github"></i>
-      </a>
-    </div>
-    <div class="columns is-centered">
-      <div class="column is-8">
-        <div class="content">
-          <p>
-            This website is licensed under a <a rel="license"
-                                                href="http://creativecommons.org/licenses/by-sa/4.0/">Creative
-            Commons Attribution-ShareAlike 4.0 International License</a>.
-          </p>
-          <p>
-            This means you are free to borrow the <a
-              href="https://github.com/nerfies/nerfies.github.io">source code</a> of this website,
-            we just ask that you link back to this page in the footer.
-            Please remember to remove the analytics code included in the header of the website which
-            you do not want on your website.
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
-</footer>
+    // sub-agents proliferate around orchestration (the box grows to keep them inside);
+    // capabilities fan out to the LEFT of the task in two staggered rows.
+    var SUB_POS = [[512, 248], [558, 240], [604, 254], [650, 246], [610, 296], [660, 304], [702, 256], [544, 302], [592, 324], [700, 310]];
+    var CAP_POS = [[150, 304], [150, 332], [114, 318], [80, 304], [80, 332], [44, 318], [16, 312]];
+
+    // reveal the next generation: it sprouts (pink, glowing) from the previous one along a thin twig,
+    // and that previous lead greys into an archived box — one clear step after another, but each step
+    // can head a different way, so the lineage winds in diverse directions instead of a straight column.
+    function spawnNode() {
+      var i = grow.gens;
+      if (i >= PATH.length) return;
+      var n = PATH[i];
+      if (i > 0) {
+        var pp = PATH[i - 1];
+        leadLine.insertBefore(mk('line', { 'class': 'twig', x1: pp.x, y1: pp.y, x2: n.x, y2: n.y }), leadLine.firstChild);
+        var prev = leadLine.querySelector('.gen--live');
+        if (prev) { prev.classList.remove('gen--live'); prev.classList.add('gen--arch'); prev.querySelector('.genfig').style.color = '#a79eb3'; }
+      }
+      var g = mk('g', { 'class': 'gen gen--live' });
+      g.appendChild(mk('rect', { 'class': 'genbox', x: (n.x - BOX_W / 2).toFixed(1), y: (n.y - BOX_H / 2).toFixed(1), width: BOX_W, height: BOX_H, rx: 10, fill: '#f4f1f7', stroke: '#c7bdd3', 'stroke-width': 1.4 }));
+      var fig = mk('g', { 'class': 'genfig' }); fig.style.color = '#e6007e';
+      fig.appendChild(mk('use', { href: '#person', x: (n.x - FIG_W / 2).toFixed(1), y: (n.y - FIG_H / 2).toFixed(1), width: FIG_W, height: FIG_H }));
+      g.appendChild(fig); leadLine.appendChild(g);
+      grow.gens++;
+    }
+
+    // a sub-agent joins orchestration; the box stretches right/down to keep it inside
+    function spawnSub() {
+      var sp = SUB_POS[grow.subs++];
+      var g = mk('g', { 'class': 'gen' });
+      var f = mk('g'); f.style.color = grow.subs % 2 ? '#6366f1' : '#818cf8';
+      f.appendChild(mk('use', { href: '#person', x: sp[0], y: sp[1], width: 22, height: 24 }));
+      g.appendChild(f); subGrow.appendChild(g);
+      grow.orchR = Math.max(grow.orchR, sp[0] + 34);
+      grow.orchB = Math.max(grow.orchB, sp[1] + 36);
+      orchBox.style.width = (grow.orchR - ORCH_X) + 'px';
+      orchBox.style.height = (grow.orchB - ORCH_Y) + 'px';
+    }
+
+    // zoom the camera out in steps as the winding lineage outgrows the frame, keeping it all in view
+    function applyZoom() {
+      var g = grow.gens;
+      var s = g >= 9 ? 0.55 : g >= 7 ? 0.66 : g >= 5 ? 0.72 : g >= 3 ? 0.86 : g >= 2 ? 0.94 : 1;
+      world.style.transform = 'scale(' + s + ')';
+    }
+
+    function growTick() {
+      for (var k = 0; k < 2 && grow.gens < PATH.length; k++) spawnNode();
+      for (var s = 0; s < 2 && grow.subs < SUB_POS.length; s++) spawnSub();
+      if (grow.caps < CAP_POS.length) { var cp = CAP_POS[grow.caps++]; capGroup.appendChild(mk('rect', { 'class': 'gen', x: cp[0], y: cp[1], width: 26, height: 15, rx: 4, fill: grow.caps % 2 ? '#c4b5fd' : '#d8b4fe' })); }
+      if (grow.subs % 2 === 0 && grow.mems < 5) { memGroup.appendChild(mk('ellipse', { 'class': 'gen', cx: 360, cy: 312 + grow.mems * 13, rx: 34, ry: 9, fill: '#fff', stroke: '#9aa1ad', 'stroke-width': 1.4 })); grow.mems++; }
+      applyZoom();
+      if (grow.gens >= PATH.length && grow.subs >= SUB_POS.length && grow.caps >= CAP_POS.length) { clearInterval(grow.timer); grow.timer = null; }
+    }
+
+    function startGrow() {
+      if (grow.on || reduce) return;
+      grow.on = true;
+      leadActive.style.opacity = '0';   // the static lead hands over to the living, winding lineage
+      grow.gens = grow.subs = grow.mems = grow.caps = 0;
+      grow.orchR = 641; grow.orchB = 312;
+      spawnNode();                      // first lead, exactly over the static one — then it winds onward
+      applyZoom();
+      grow.timer = setInterval(growTick, GROW_MS);
+    }
+
+    function stopGrow() {
+      if (!grow.on) return;
+      grow.on = false;
+      if (grow.timer) { clearInterval(grow.timer); grow.timer = null; }
+      leadLine.innerHTML = '';
+      subGrow.innerHTML = '';
+      Array.prototype.forEach.call(capGroup.querySelectorAll('.gen'), function (n) { n.remove(); });
+      Array.prototype.forEach.call(memGroup.querySelectorAll('.gen'), function (n) { n.remove(); });
+      world.style.transform = '';
+      orchBox.style.width = ''; orchBox.style.height = '';
+      leadActive.style.opacity = '';
+    }
+
+    // re-collect every revealable element
+    p1Layers = loop.querySelectorAll('[data-reveal]');
+
+    function setEvolve(on) {
+      leadNode.classList.toggle('is-evolving', on);
+      leadGlow.style.opacity = '0';   // no single glow — each live frontier lead glows on its own
+      if (on) startGrow(); else stopGrow();
+    }
+
+    function setStep(step) {
+      if (state[1] === step) return;
+      state[1] = step;
+      p1Layers.forEach(function (el) {
+        var r = parseInt(el.getAttribute('data-reveal'), 10);
+        el.classList.toggle('is-on', step >= r);
+        el.classList.toggle('is-current', r === step && step <= 6);
+      });
+      p1Stages.forEach(function (el) {
+        el.classList.toggle('is-active', step <= 6 && parseInt(el.getAttribute('data-stage'), 10) === step);
+      });
+      setEvolve(step >= 7);   // as it learns, the lead grows its next-generation self
+    }
+
+    // click a stage: pause and show the full core loop with that node lit
+    function focusStage(stage) {
+      p1Layers.forEach(function (el) {
+        var r = parseInt(el.getAttribute('data-reveal'), 10);
+        el.classList.toggle('is-on', r <= 6);
+        el.classList.toggle('is-current', r === stage);
+      });
+      p1Stages.forEach(function (el) {
+        el.classList.toggle('is-active', parseInt(el.getAttribute('data-stage'), 10) === stage);
+      });
+      setEvolve(false);
+      state[1] = -1; // allow autoplay to re-apply from scratch later
+    }
+
+    function setPage2(stage) {
+      if (state[2] === stage) return;
+      state[2] = stage;
+      // trunk fills across the three foundational works, then stays drawn
+      spine.style.strokeDashoffset = String(Math.max(0, 1 - Math.min(stage, 3) / 3));
+      p2Dots.forEach(function (el) {
+        el.classList.toggle('is-on', stage >= parseInt(el.getAttribute('data-stage'), 10));
+      });
+      p2Flows.forEach(function (el) {
+        el.classList.toggle('is-on', stage >= parseInt(el.getAttribute('data-stage'), 10));
+      });
+      p2Cards.forEach(function (el) {
+        el.classList.toggle('is-active', parseInt(el.getAttribute('data-stage'), 10) === stage);
+      });
+      var pos = P2_POS[stage];
+      halo.setAttribute('transform', 'translate(' + (pos.x - 58) + ',' + (pos.y - 60) + ')');
+    }
+
+    // Page 2 stays scroll-driven via triggers.
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        setPage2(parseInt(e.target.getAttribute('data-stage'), 10));
+      });
+    }, { rootMargin: '-50% 0px -50% 0px', threshold: 0 });
+    document.querySelectorAll('.trig').forEach(function (t) { observer.observe(t); });
+    setPage2(1);
+
+    // ---------- Page 1: auto-play with optional click-to-explore ----------
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var compact = window.matchMedia('(max-width: 920px)').matches;
+    var p1Timer = null, p1Paused = false;
+
+    function durFor(step) { return step <= 6 ? 900 : 11500; }
+    function p1Tick() {
+      var cur = state[1];
+      setStep((cur >= P1_TOTAL || cur < 1) ? 1 : cur + 1);
+      p1Timer = setTimeout(p1Tick, durFor(state[1]));
+    }
+    function startP1() {
+      if (p1Timer || p1Paused || reduce || compact) return;
+      p1Timer = setTimeout(p1Tick, durFor(state[1] < 1 ? 1 : state[1]));
+    }
+    function stopP1() { if (p1Timer) { clearTimeout(p1Timer); p1Timer = null; } }
+
+    function selectP1(stage) { p1Paused = true; stopP1(); focusStage(stage); }
+
+    p1Stages.forEach(function (el) {
+      el.setAttribute('tabindex', '0');
+      el.setAttribute('role', 'button');
+      var s = parseInt(el.getAttribute('data-stage'), 10);
+      el.addEventListener('click', function () { selectP1(s); });
+      el.addEventListener('keydown', function (ev) {
+        if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); selectP1(s); }
+      });
+    });
+
+    // Static modes: reduced-motion shows the grown loop; small screens show the core loop.
+    if (reduce) { setStep(P1_TOTAL); }
+    else if (compact) { setStep(P1_BUILD); }
+    else { setStep(1); }
+
+    // Auto-play only while the framework is on screen; replay fresh on return.
+    var page1El = document.getElementById('page1');
+    new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { startP1(); }
+        else { stopP1(); p1Paused = false; }
+      });
+    }, { threshold: 0.35 }).observe(page1El);
+
+    // Clean P1 → P2 handoff: fade the framework (and its scroll cue) out as the roadmap scrolls in,
+    // so the two pages never look mashed together at the seam. (Desktop only — pages stack on mobile.)
+    if (!compact) {
+      var fadeP1 = function () {
+        var h = page1El.offsetHeight || window.innerHeight;
+        var o = 1 - (window.scrollY - h * 0.45) / (h * 0.3);
+        o = o < 0 ? 0 : o > 1 ? 1 : o;
+        page1El.style.opacity = o.toFixed(3);
+        page1El.style.pointerEvents = o < 0.04 ? 'none' : '';
+      };
+      var p1Ticking = false;
+      window.addEventListener('scroll', function () {
+        if (p1Ticking) return;
+        p1Ticking = true;
+        requestAnimationFrame(function () { fadeP1(); p1Ticking = false; });
+      }, { passive: true });
+      fadeP1();
+    }
+  })();
+</script>
 
 </body>
 </html>
