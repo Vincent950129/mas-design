@@ -39,6 +39,13 @@
 </head>
 <body>
 
+<!-- View switcher: this is the classic "old view"; "new view" is the animated story page -->
+<nav id="viewSwitcher" aria-label="View switcher" style="position:fixed;top:9px;right:16px;z-index:9999;display:inline-flex;align-items:center;gap:2px;padding:3px;border-radius:999px;background:#fff;border:1px solid #e2e8f0;box-shadow:0 4px 14px rgba(0,0,0,.12);font-size:0.85rem;font-weight:600;line-height:1.2;">
+  <a href="./index.html" style="padding:5px 13px;border-radius:999px;text-decoration:none;color:#3273dc;">New view</a>
+  <span aria-current="page" style="padding:5px 13px;border-radius:999px;background:#3273dc;color:#fff;">Old view</span>
+</nav>
+<style>@media (max-width:1023px){#viewSwitcher{display:none;}}</style>
+
 <style>
     .publication-authors {
         width: 100%;
@@ -294,7 +301,7 @@
               <a href="https://arxiv.org/abs/2601.14652">[Paper]</a>
               <a href="https://github.com/SalesforceAIResearch/MAS-Orchestra">[Code]</a>
               <a href="https://huggingface.co/datasets/Salesforce/MASBench">[MASBench]</a>
-              <a href="https://huggingface.co/datasets/Salesforce/MAS-Orchestra">[Trained Orchestrators]</a>
+              <a href="https://huggingface.co/collections/ZixuanKe/mas-orchestra-checkpoints">[Orchestrator checkpoints]</a>
             </div>
           </div>
         </div>
