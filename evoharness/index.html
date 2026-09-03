@@ -94,7 +94,7 @@
   </button>
 </div>
 
-<nav class="pv-bar" aria-label="Paper sections">
+<nav class="pv-bar" aria-label="Paper sections and live demo">
   <div class="pv-bar-inner">
     <button class="pv-tab is-active" type="button" data-pv="overview">Overview</button>
     <button class="pv-tab" type="button" data-pv="benchmark">Benchmark</button>
@@ -103,6 +103,10 @@
     <button class="pv-tab" type="button" data-pv="cases">Cases</button>
     <button class="pv-tab" type="button" data-pv="evaluate">Evaluate</button>
     <button class="pv-tab" type="button" data-pv="leaderboard">Leaderboard</button>
+    <!-- An anchor rather than a .pv-tab: the demo is a deployment elsewhere, not a view of
+         this page, so it must not go through PV.open. It keeps the hero CTA's emphasis. -->
+    <a class="pv-demo" href="https://mas-orchestra.salesforceresearch.ai/mas_r1/demo/"
+       target="_blank" rel="noopener">Live Demo<span aria-hidden="true">&#8599;</span></a>
   </div>
 </nav>
 
@@ -129,43 +133,37 @@
             <span>Tools · Skills · Agents</span>
             <span>Deployment vs Self-evolving</span>
             <span>FWT / BWT</span>
-            <span>Under submission</span>
           </div>
-          <div class="cta-buttons" style="margin-top: 1.4rem;">
-            <a class="button is-warning is-medium demo-cta" href="https://mas-orchestra.salesforceresearch.ai/mas_r1/demo/" target="_blank" rel="noopener">Live Demo</a>
-            <a class="button is-light is-medium" href="#results">See results</a>
-            <a class="button is-primary is-medium" href="#how">How it works</a>
-            <a class="button is-primary is-medium" href="#service">Eval your agent</a>
-            <a class="button is-dark is-medium" href="#BibTeX">Cite</a>
-          </div>
+          <!-- No CTA row here: every destination it offered is a tab in .pv-bar above,
+               and the demo now rides along with them. -->
           <div class="author-grid">
             <div class="author-card has-text-centered">
               <img src="../profile/zixuan.jpg" alt="Zixuan Ke">
               <a href="https://vincent950129.github.io/">Zixuan Ke<sup>*†1</sup></a>
             </div>
             <div class="author-card has-text-centered">
-              <div class="author-initials" aria-hidden="true">VP</div>
-              <span class="author-name">Vaidehi Patil<sup>*†2</sup></span>
+              <img src="../profile/vaidehi.jpeg" alt="Vaidehi Patil">
+              <a href="https://vaidehi99.github.io/">Vaidehi Patil<sup>*†2</sup></a>
             </div>
             <div class="author-card has-text-centered">
-              <div class="author-initials" aria-hidden="true">HS</div>
-              <span class="author-name">Haizhou Shi<sup>*†1</sup></span>
+              <img src="../profile/haizhou.jpeg" alt="Haizhou Shi">
+              <a href="https://haizhou-shi.github.io/">Haizhou Shi<sup>*†1</sup></a>
             </div>
             <div class="author-card has-text-centered">
-              <div class="author-initials" aria-hidden="true">YL</div>
+              <img src="../profile/yangli.jpeg" alt="Yang Li">
               <span class="author-name">Yang Li<sup>†1</sup></span>
             </div>
             <div class="author-card has-text-centered">
-              <div class="author-initials" aria-hidden="true">Ye</div>
+              <img src="../profile/yeliu.jpeg" alt="Ye Liu">
               <span class="author-name">Ye Liu<sup>1</sup></span>
             </div>
             <div class="author-card has-text-centered">
-              <div class="author-initials" aria-hidden="true">SS</div>
-              <span class="author-name">Sarath Shekkizhar<sup>1</sup></span>
+              <img src="../profile/sarath.png" alt="Sarath Shekkizhar">
+              <a href="https://shekkizh.com/">Sarath Shekkizhar<sup>1</sup></a>
             </div>
             <div class="author-card has-text-centered">
-              <div class="author-initials" aria-hidden="true">AK</div>
-              <span class="author-name">Anurag Koul<sup>1</sup></span>
+              <img src="../profile/anurag.jpg" alt="Anurag Koul">
+              <a href="https://koulanurag.dev/">Anurag Koul<sup>1</sup></a>
             </div>
             <div class="author-card has-text-centered">
               <img src="../profile/jiayu.jpg" alt="Jiayu Wang">
@@ -180,7 +178,7 @@
               <a href="https://www.linkedin.com/in/semih-yavuz-4303518b">Semih Yavuz<sup>‡1</sup></a>
             </div>
             <div class="author-card has-text-centered">
-              <div class="author-initials" aria-hidden="true">MB</div>
+              <img src="../profile/mohit.png" alt="Mohit Bansal">
               <a href="https://www.cs.unc.edu/~mbansal/">Mohit Bansal<sup>‡3</sup></a>
             </div>
             <div class="author-card has-text-centered">
