@@ -1,0 +1,600 @@
+{
+  "business_finance/bpmn_supply_disruption_l3": [
+    {
+      "caption": "Staged input \u00b7 original process diagram",
+      "file": "business_finance__bpmn_supply_disruption_l3__0.webp",
+      "h": 2423,
+      "kind": "image",
+      "role": "input",
+      "src": "task-data/business_finance/bpmn_supply_disruption_l3/base/input/starter_project/original_process_diagram.png",
+      "thumb": "business_finance__bpmn_supply_disruption_l3__0.t.webp",
+      "w": 4302
+    }
+  ],
+  "business_finance/odoo": [
+    {
+      "caption": "Reference output \u00b7 lc split",
+      "file": "business_finance__odoo__0.webp",
+      "h": 720,
+      "kind": "image",
+      "role": "reference",
+      "src": "task-data/business_finance/odoo/odoo_compact/reference/lc_split.png",
+      "thumb": "business_finance__odoo__0.t.webp",
+      "w": 1280
+    }
+  ],
+  "computing_math/clustered_cyclic_code_circuit_level_simulation": [
+    {
+      "caption": "Reference output \u00b7 three codes lfr reference",
+      "file": "computing_math__clustered_cyclic_code_circuit_level_simulation__0.webp",
+      "h": 4715,
+      "kind": "image",
+      "role": "reference",
+      "src": "task-data/computing_math/clustered_cyclic_code_circuit_level_simulation/base/reference/three_codes_lfr_reference.png",
+      "thumb": "computing_math__clustered_cyclic_code_circuit_level_simulation__0.t.webp",
+      "w": 6534
+    }
+  ],
+  "computing_math/cost_optimization_1": [
+    {
+      "caption": "Staged input \u00b7 aws billing dashboard",
+      "file": "computing_math__cost_optimization_1__0.webp",
+      "h": 1652,
+      "kind": "image",
+      "role": "input",
+      "src": "task-data/computing_math/cost_optimization_1/base/input/aws_billing_dashboard.png",
+      "thumb": "computing_math__cost_optimization_1__0.t.webp",
+      "w": 1338
+    }
+  ],
+  "computing_math/go_game_reconstruction_1": [
+    {
+      "caption": "Staged input \u00b7 input board position",
+      "file": "computing_math__go_game_reconstruction_1__0.webp",
+      "h": 780,
+      "kind": "image",
+      "role": "input",
+      "src": "task-data/computing_math/go_game_reconstruction_1/base/input/input-board-position.png",
+      "thumb": "computing_math__go_game_reconstruction_1__0.t.webp",
+      "w": 780
+    }
+  ],
+  "education_info/moodle_gradebook_closeout_reconciliation": [
+    {
+      "caption": "Staged input \u00b7 defect manifest preview",
+      "file": "education_info__moodle_gradebook_closeout_reconciliation__0.webp",
+      "h": 1260,
+      "kind": "image",
+      "role": "input",
+      "src": "task-data/education_info/moodle_gradebook_closeout_reconciliation/base/input/starter_project/screenshots/defect_manifest_preview.png",
+      "thumb": "education_info__moodle_gradebook_closeout_reconciliation__0.t.webp",
+      "w": 2520
+    }
+  ],
+  "education_info/yi_manuscript_translation_1": [
+    {
+      "caption": "Staged input \u00b7 inscription",
+      "file": "education_info__yi_manuscript_translation_1__0.webp",
+      "h": 250,
+      "kind": "image",
+      "role": "input",
+      "src": "task-data/education_info/yi_manuscript_translation_1/base/input/inscription.png",
+      "thumb": "education_info__yi_manuscript_translation_1__0.t.webp",
+      "w": 1324
+    }
+  ],
+  "engineering/2d_drawings_to_3d_bridge_model": [
+    {
+      "caption": "Staged input \u00b7 3D Snapshot",
+      "file": "engineering__2d_drawings_to_3d_bridge_model__0.webp",
+      "h": 1404,
+      "kind": "image",
+      "role": "input",
+      "src": "task-data/engineering/2d_drawings_to_3d_bridge_model/base/input/3D Snapshot.png",
+      "thumb": "engineering__2d_drawings_to_3d_bridge_model__0.t.webp",
+      "w": 1980
+    },
+    {
+      "caption": "Reference output \u00b7 elevation south (reference_renders_colored_v1)",
+      "file": "engineering__2d_drawings_to_3d_bridge_model__1.webp",
+      "h": 2048,
+      "kind": "image",
+      "role": "reference",
+      "src": "task-data/engineering/2d_drawings_to_3d_bridge_model/base/reference/reference_renders_colored_v1/elevation_south.png",
+      "thumb": "engineering__2d_drawings_to_3d_bridge_model__1.t.webp",
+      "w": 2048
+    },
+    {
+      "caption": "Reference output \u00b7 elevation south (reference_renders_v1)",
+      "file": "engineering__2d_drawings_to_3d_bridge_model__2.webp",
+      "h": 1024,
+      "kind": "image",
+      "role": "reference",
+      "src": "task-data/engineering/2d_drawings_to_3d_bridge_model/base/reference/reference_renders_v1/elevation_south.png",
+      "thumb": "engineering__2d_drawings_to_3d_bridge_model__2.t.webp",
+      "w": 1024
+    }
+  ],
+  "engineering/2d_drawings_to_3d_building_model": [
+    {
+      "caption": "Staged input \u00b7 3D Snapshot",
+      "file": "engineering__2d_drawings_to_3d_building_model__0.webp",
+      "h": 1328,
+      "kind": "image",
+      "role": "input",
+      "src": "task-data/engineering/2d_drawings_to_3d_building_model/base/input/3D Snapshot.png",
+      "thumb": "engineering__2d_drawings_to_3d_building_model__0.t.webp",
+      "w": 2296
+    },
+    {
+      "caption": "Reference output \u00b7 elevation west",
+      "file": "engineering__2d_drawings_to_3d_building_model__1.webp",
+      "h": 1024,
+      "kind": "image",
+      "role": "reference",
+      "src": "task-data/engineering/2d_drawings_to_3d_building_model/base/reference/reference_renders_v1/elevation_west.png",
+      "thumb": "engineering__2d_drawings_to_3d_building_model__1.t.webp",
+      "w": 1024
+    }
+  ],
+  "engineering/gcode": [
+    {
+      "caption": "Staged input \u00b7 125162 319",
+      "file": "engineering__gcode__0.webp",
+      "h": 1698,
+      "kind": "image",
+      "role": "input",
+      "src": "task-data/engineering/gcode/125162_319/input/125162_319.jpg",
+      "thumb": "engineering__gcode__0.t.webp",
+      "w": 3067
+    },
+    {
+      "caption": "Staged input \u00b7 PMillLogo",
+      "file": "engineering__gcode__1.webp",
+      "h": 146,
+      "kind": "image",
+      "role": "input",
+      "src": "task-data/engineering/gcode/125162_319/input/125162-319-NCFM-T-cleaned/SetupSheets_files/global/PMillLogo.jpg",
+      "thumb": "engineering__gcode__1.t.webp",
+      "w": 592
+    },
+    {
+      "caption": "Staged input \u00b7 DelcamLogo",
+      "file": "engineering__gcode__2.webp",
+      "h": 150,
+      "kind": "image",
+      "role": "input",
+      "src": "task-data/engineering/gcode/125162_319/input/125162-319-NCFM-T/SetupSheets_files/global/DelcamLogo.jpg",
+      "thumb": "engineering__gcode__2.t.webp",
+      "w": 592
+    }
+  ],
+  "engineering/inner_support_elevation_optimization": [
+    {
+      "caption": "Staged input \u00b7 figure 2 1 project site plan",
+      "file": "engineering__inner_support_elevation_optimization__0.webp",
+      "h": 468,
+      "kind": "image",
+      "role": "input",
+      "src": "task-data/engineering/inner_support_elevation_optimization/base/input/figure_2_1_project_site_plan.png",
+      "thumb": "engineering__inner_support_elevation_optimization__0.t.webp",
+      "w": 569
+    }
+  ],
+  "engineering/mold-flow": [
+    {
+      "caption": "Staged input \u00b7 Cooling CoolingChannel (\u5438\u5634\u7535\u5b50\u70df16\u7a74\uff08220089\uff09_Run2_1)",
+      "file": "engineering__mold-flow__0.webp",
+      "h": 901,
+      "kind": "image",
+      "role": "input",
+      "src": "data/tasks/engineering/mold-flow/220089/input/\u5438\u5634\u7535\u5b50\u70df16\u7a74\uff08220089\uff09/Report/Images/\u5438\u5634\u7535\u5b50\u70df16\u7a74\uff08220089\uff09_Run2_1/Cooling_CoolingChannel.bmp",
+      "thumb": "engineering__mold-flow__0.t.webp",
+      "w": 1288
+    },
+    {
+      "caption": "Staged input \u00b7 Cooling CoolingChannel (MDX-4\u7a74230057_Run1_1)",
+      "file": "engineering__mold-flow__1.webp",
+      "h": 901,
+      "kind": "image",
+      "role": "input",
+      "src": "task-data/engineering/mold-flow/230057/input/4\u7a74230057/Report/Images/MDX-4\u7a74230057_Run1_1/Cooling_CoolingChannel.bmp",
+      "thumb": "engineering__mold-flow__1.t.webp",
+      "w": 1288
+    },
+    {
+      "caption": "Staged input \u00b7 \u5438\u5634\u7535\u5b50\u70df16\u7a74\uff08220089\uff09",
+      "file": "engineering__mold-flow__2.webp",
+      "h": 872,
+      "kind": "image",
+      "role": "input",
+      "src": "data/tasks/engineering/mold-flow/220089/input/\u5438\u5634\u7535\u5b50\u70df16\u7a74\uff08220089\uff09/\u5438\u5634\u7535\u5b50\u70df16\u7a74\uff08220089\uff09.png",
+      "thumb": "engineering__mold-flow__2.t.webp",
+      "w": 1638
+    }
+  ],
+  "engineering/robotics_blender_tabletop_reconstruction": [
+    {
+      "caption": "Staged input \u00b7 texture map (006_mustard_bottle)",
+      "file": "engineering__robotics_blender_tabletop_reconstruction__0.webp",
+      "h": 4096,
+      "kind": "image",
+      "role": "input",
+      "src": "task-data/engineering/robotics_blender_tabletop_reconstruction/base/input/meshes/006_mustard_bottle/texture_map.png",
+      "thumb": "engineering__robotics_blender_tabletop_reconstruction__0.t.webp",
+      "w": 4096
+    },
+    {
+      "caption": "Staged input \u00b7 texture map (010_potted_meat_can)",
+      "file": "engineering__robotics_blender_tabletop_reconstruction__1.webp",
+      "h": 4096,
+      "kind": "image",
+      "role": "input",
+      "src": "task-data/engineering/robotics_blender_tabletop_reconstruction/base/input/meshes/010_potted_meat_can/texture_map.png",
+      "thumb": "engineering__robotics_blender_tabletop_reconstruction__1.t.webp",
+      "w": 4096
+    },
+    {
+      "caption": "Staged input \u00b7 texture map (025_mug)",
+      "file": "engineering__robotics_blender_tabletop_reconstruction__2.webp",
+      "h": 4096,
+      "kind": "image",
+      "role": "input",
+      "src": "task-data/engineering/robotics_blender_tabletop_reconstruction/base/input/meshes/025_mug/texture_map.png",
+      "thumb": "engineering__robotics_blender_tabletop_reconstruction__2.t.webp",
+      "w": 4096
+    }
+  ],
+  "engineering/sanding_performance_scoring_instance_1": [
+    {
+      "caption": "Staged input \u00b7 panel sanded 02",
+      "file": "engineering__sanding_performance_scoring_instance_1__0.webp",
+      "h": 338,
+      "kind": "image",
+      "role": "input",
+      "src": "task-data/engineering/sanding_performance_scoring_instance_1/base/input/panel_sanded_02.png",
+      "thumb": "engineering__sanding_performance_scoring_instance_1__0.t.webp",
+      "w": 782
+    }
+  ],
+  "health_medicine/healthcare_tcga_luad_survival_kras": [
+    {
+      "caption": "Reference output \u00b7 km plot",
+      "file": "health_medicine__healthcare_tcga_luad_survival_kras__0.webp",
+      "h": 1600,
+      "kind": "image",
+      "role": "reference",
+      "src": "task-data/health_medicine/healthcare_tcga_luad_survival_kras/base/reference/reference_outputs/km_plot.png",
+      "thumb": "health_medicine__healthcare_tcga_luad_survival_kras__0.t.webp",
+      "w": 1600
+    }
+  ],
+  "health_medicine/ltmle_targeted_bootstrap_simulation_study": [
+    {
+      "caption": "Staged input \u00b7 lmtp",
+      "file": "health_medicine__ltmle_targeted_bootstrap_simulation_study__0.webp",
+      "h": 2290,
+      "kind": "image",
+      "role": "input",
+      "src": "task-data/health_medicine/ltmle_targeted_bootstrap_simulation_study/base/input/LTMLE_Targeted_Bootstrap_Task_INPUT/lmtp-bootstrap/man/figures/lmtp.png",
+      "thumb": "health_medicine__ltmle_targeted_bootstrap_simulation_study__0.t.webp",
+      "w": 2294
+    }
+  ],
+  "health_medicine/scene3_skullstrip_qc": [
+    {
+      "caption": "Reference output \u00b7 cand2 overlay sag",
+      "file": "health_medicine__scene3_skullstrip_qc__0.webp",
+      "h": 229,
+      "kind": "image",
+      "role": "reference",
+      "src": "task-data/health_medicine/scene3_skullstrip_qc/base/reference/cand2_overlay_sag.png",
+      "thumb": "health_medicine__scene3_skullstrip_qc__0.t.webp",
+      "w": 330
+    }
+  ],
+  "health_medicine/wsi_tumor_localization_1": [
+    {
+      "caption": "Staged input \u00b7 tumor 001",
+      "file": "health_medicine__wsi_tumor_localization_1__0.webp",
+      "h": 3584,
+      "kind": "image",
+      "role": "input",
+      "src": "data/tasks/health_medicine/wsi_tumor_localization_1/bounding_box/input/tumor_001.tif",
+      "thumb": "health_medicine__wsi_tumor_localization_1__0.t.webp",
+      "w": 1536
+    }
+  ],
+  "life_sciences/cell_tracking_instance_1": [
+    {
+      "caption": "Staged input \u00b7 t023",
+      "file": "life_sciences__cell_tracking_instance_1__0.webp",
+      "h": 1024,
+      "kind": "image",
+      "role": "input",
+      "src": "task-data/life_sciences/cell_tracking_instance_1/base/input/01/t023.tif",
+      "thumb": "life_sciences__cell_tracking_instance_1__0.t.webp",
+      "w": 1024
+    },
+    {
+      "caption": "Reference output \u00b7 man seg014",
+      "file": "life_sciences__cell_tracking_instance_1__1.webp",
+      "h": 1024,
+      "kind": "image",
+      "role": "reference",
+      "src": "task-data/life_sciences/cell_tracking_instance_1/base/reference/01_GT/SEG/man_seg014.tif",
+      "thumb": "life_sciences__cell_tracking_instance_1__1.t.webp",
+      "w": 1024
+    },
+    {
+      "caption": "Reference output \u00b7 man track009",
+      "file": "life_sciences__cell_tracking_instance_1__2.webp",
+      "h": 1024,
+      "kind": "image",
+      "role": "reference",
+      "src": "task-data/life_sciences/cell_tracking_instance_1/base/reference/01_GT/TRA/man_track009.tif",
+      "thumb": "life_sciences__cell_tracking_instance_1__2.t.webp",
+      "w": 1024
+    }
+  ],
+  "life_sciences/cell_translocation_analysis": [
+    {
+      "caption": "Staged input \u00b7 BBBC013 A01 s1 w1",
+      "file": "life_sciences__cell_translocation_analysis__0.webp",
+      "h": 640,
+      "kind": "image",
+      "role": "input",
+      "src": "task-data/life_sciences/cell_translocation_analysis/base/input/images/BBBC013_A01_s1_w1.tif",
+      "thumb": "life_sciences__cell_translocation_analysis__0.t.webp",
+      "w": 640
+    }
+  ],
+  "life_sciences/merfish_image_decoding_segmentation_1": [
+    {
+      "caption": "Staged input \u00b7 nuclei fov 000 Z0 H0 C0",
+      "file": "life_sciences__merfish_image_decoding_segmentation_1__0.webp",
+      "h": 2048,
+      "kind": "image",
+      "role": "input",
+      "src": "task-data/life_sciences/merfish_image_decoding_segmentation_1/base/input/nuclei-fov_000-Z0-H0-C0.tiff",
+      "thumb": "life_sciences__merfish_image_decoding_segmentation_1__0.t.webp",
+      "w": 2048
+    }
+  ],
+  "life_sciences/tcga_brca_deg_analysis": [
+    {
+      "caption": "Reference output \u00b7 volcano plot",
+      "file": "life_sciences__tcga_brca_deg_analysis__0.webp",
+      "h": 1200,
+      "kind": "image",
+      "role": "reference",
+      "src": "task-data/life_sciences/tcga_brca_deg_analysis/base/reference/gold_output/volcano_plot.png",
+      "thumb": "life_sciences__tcga_brca_deg_analysis__0.t.webp",
+      "w": 1500
+    }
+  ],
+  "other/aerobics_wc2026_portugal_trio_difficulty_scoring": [
+    {
+      "caption": "Staged input \u00b7 trio",
+      "clip": "other__aerobics_wc2026_portugal_trio_difficulty_scoring__0.mp4",
+      "file": "other__aerobics_wc2026_portugal_trio_difficulty_scoring__0.webp",
+      "h": 506,
+      "kind": "video",
+      "role": "input",
+      "src": "task-data/other/aerobics_wc2026_portugal_trio_difficulty_scoring/variant_1/input/trio.mov",
+      "thumb": "other__aerobics_wc2026_portugal_trio_difficulty_scoring__0.t.webp",
+      "w": 1100
+    }
+  ],
+  "other/mota_exploration": [
+    {
+      "caption": "Staged input \u00b7 magictower",
+      "file": "other__mota_exploration__0.webp",
+      "h": 1216,
+      "kind": "image",
+      "role": "input",
+      "src": "task-data/other/mota_exploration/mota_24_ez/input/mota_template/Graphics/Tilesets/magictower.png",
+      "thumb": "other__mota_exploration__0.t.webp",
+      "w": 256
+    },
+    {
+      "caption": "Staged input \u00b7 024 Support01",
+      "file": "other__mota_exploration__1.webp",
+      "h": 384,
+      "kind": "image",
+      "role": "input",
+      "src": "task-data/other/mota_exploration/mota_24_ez/input/mota_template/Graphics/Animations/024-Support01.png",
+      "thumb": "other__mota_exploration__1.t.webp",
+      "w": 959
+    },
+    {
+      "caption": "Staged input \u00b7 055 Knight01",
+      "file": "other__mota_exploration__2.webp",
+      "h": 128,
+      "kind": "image",
+      "role": "input",
+      "src": "task-data/other/mota_exploration/mota_24_ez/input/mota_template/Graphics/Characters/055-Knight01.png",
+      "thumb": "other__mota_exploration__2.t.webp",
+      "w": 128
+    }
+  ],
+  "physical_sciences/computational_materials_science": [
+    {
+      "caption": "Reference output \u00b7 bandstructure inteqp",
+      "file": "physical_sciences__computational_materials_science__0.webp",
+      "h": 1440,
+      "kind": "image",
+      "role": "reference",
+      "src": "task-data/physical_sciences/computational_materials_science/base/reference/silicon-BSE/bandstructure_inteqp.png",
+      "thumb": "physical_sciences__computational_materials_science__0.t.webp",
+      "w": 1920
+    },
+    {
+      "caption": "Reference output \u00b7 exciton absorption spectra avg",
+      "file": "physical_sciences__computational_materials_science__1.webp",
+      "h": 1800,
+      "kind": "image",
+      "role": "reference",
+      "src": "task-data/physical_sciences/computational_materials_science/base/reference/MoSe2-BSE/exciton_absorption_spectra_avg.png",
+      "thumb": "physical_sciences__computational_materials_science__1.t.webp",
+      "w": 2400
+    }
+  ],
+  "physical_sciences/mose2_bse_absorption_soc": [
+    {
+      "caption": "Reference output \u00b7 exciton absorption spectra avg",
+      "file": "physical_sciences__mose2_bse_absorption_soc__0.webp",
+      "h": 1800,
+      "kind": "image",
+      "role": "reference",
+      "src": "task-data/physical_sciences/mose2_bse_absorption_soc/base/reference/exciton_absorption_spectra_avg.png",
+      "thumb": "physical_sciences__mose2_bse_absorption_soc__0.t.webp",
+      "w": 2400
+    }
+  ],
+  "physical_sciences/qm9_mmff94_forcefield_survey_1": [
+    {
+      "caption": "Reference output \u00b7 pes scan rank1",
+      "file": "physical_sciences__qm9_mmff94_forcefield_survey_1__0.webp",
+      "h": 750,
+      "kind": "image",
+      "role": "reference",
+      "src": "task-data/physical_sciences/qm9_mmff94_forcefield_survey_1/base/reference/pes_scan_rank1.png",
+      "thumb": "physical_sciences__qm9_mmff94_forcefield_survey_1__0.t.webp",
+      "w": 1650
+    }
+  ],
+  "physical_sciences/silicon_bse_absorption": [
+    {
+      "caption": "Reference output \u00b7 bandstructure inteqp",
+      "file": "physical_sciences__silicon_bse_absorption__0.webp",
+      "h": 1440,
+      "kind": "image",
+      "role": "reference",
+      "src": "task-data/physical_sciences/silicon_bse_absorption/base/reference/bandstructure_inteqp.png",
+      "thumb": "physical_sciences__silicon_bse_absorption__0.t.webp",
+      "w": 1920
+    }
+  ],
+  "transport_safety/abm_hangzhou_metro": [
+    {
+      "caption": "Reference output \u00b7 scatter plot",
+      "file": "transport_safety__abm_hangzhou_metro__0.webp",
+      "h": 247,
+      "kind": "image",
+      "role": "reference",
+      "src": "task-data/transport_safety/abm_hangzhou_metro/base/reference/scatter_plot.png",
+      "thumb": "transport_safety__abm_hangzhou_metro__0.t.webp",
+      "w": 254
+    }
+  ],
+  "visual_media/blender_character_reconstruction_from_multiview_01": [
+    {
+      "caption": "Staged input \u00b7 view front three quarter",
+      "file": "visual_media__blender_character_reconstruction_from_multiview_01__0.webp",
+      "h": 2048,
+      "kind": "image",
+      "role": "input",
+      "src": "data/tasks/visual_media/blender_character_reconstruction_from_multiview_01/base/input/view_front_three_quarter.png",
+      "thumb": "visual_media__blender_character_reconstruction_from_multiview_01__0.t.webp",
+      "w": 2048
+    }
+  ],
+  "visual_media/butterfly_flap_animation": [
+    {
+      "caption": "Staged input \u00b7 butterfly",
+      "file": "visual_media__butterfly_flap_animation__0.webp",
+      "h": 755,
+      "kind": "image",
+      "role": "input",
+      "src": "data/tasks/visual_media/butterfly_flap_animation/base/input/butterfly.jpeg",
+      "thumb": "visual_media__butterfly_flap_animation__0.t.webp",
+      "w": 1000
+    }
+  ],
+  "visual_media/chroma_key_from_reference": [
+    {
+      "caption": "Staged input \u00b7 input",
+      "clip": "visual_media__chroma_key_from_reference__0.mp4",
+      "file": "visual_media__chroma_key_from_reference__0.webp",
+      "h": 468,
+      "kind": "video",
+      "role": "input",
+      "src": "data/tasks/visual_media/chroma_key_from_reference/crane_flyingsky/input/input.mp4",
+      "thumb": "visual_media__chroma_key_from_reference__0.t.webp",
+      "w": 1100
+    }
+  ],
+  "visual_media/compress_3dgs_scene_ply": [
+    {
+      "caption": "Staged input \u00b7 DSC05781",
+      "file": "visual_media__compress_3dgs_scene_ply__0.webp",
+      "h": 832,
+      "kind": "image",
+      "role": "input",
+      "src": "data/tasks/visual_media/compress_3dgs_scene_ply/base/input/scene/images/DSC05781.jpg",
+      "thumb": "visual_media__compress_3dgs_scene_ply__0.t.webp",
+      "w": 1264
+    }
+  ],
+  "visual_media/human_mesh_animation_reproduction": [
+    {
+      "caption": "Staged input \u00b7 reference",
+      "clip": "visual_media__human_mesh_animation_reproduction__0.mp4",
+      "file": "visual_media__human_mesh_animation_reproduction__0.webp",
+      "h": 618,
+      "kind": "video",
+      "role": "input",
+      "src": "data/tasks/visual_media/human_mesh_animation_reproduction/base/input/reference.mp4",
+      "thumb": "visual_media__human_mesh_animation_reproduction__0.t.webp",
+      "w": 1100
+    }
+  ],
+  "visual_media/inkscape_cultural_poster_design": [
+    {
+      "caption": "Staged input \u00b7 installation photo 01",
+      "file": "visual_media__inkscape_cultural_poster_design__0.webp",
+      "h": 733,
+      "kind": "image",
+      "role": "input",
+      "src": "data/tasks/visual_media/inkscape_cultural_poster_design/base/input/installation_photo_01.jpg",
+      "thumb": "visual_media__inkscape_cultural_poster_design__0.t.webp",
+      "w": 687
+    }
+  ],
+  "visual_media/skeletal_animation_reproduction": [
+    {
+      "caption": "Staged input \u00b7 s",
+      "file": "visual_media__skeletal_animation_reproduction__0.webp",
+      "h": 1024,
+      "kind": "image",
+      "role": "input",
+      "src": "data/tasks/visual_media/skeletal_animation_reproduction/skeletal_animation_reproduction_singing_anime_character/input/Singing.fbm/s.png",
+      "thumb": "visual_media__skeletal_animation_reproduction__0.t.webp",
+      "w": 1024
+    },
+    {
+      "caption": "Staged input \u00b7 reference",
+      "clip": "visual_media__skeletal_animation_reproduction__1.mp4",
+      "file": "visual_media__skeletal_animation_reproduction__1.webp",
+      "h": 1074,
+      "kind": "video",
+      "role": "input",
+      "src": "data/tasks/visual_media/skeletal_animation_reproduction/skeletal_animation_reproduction_singing_anime_character/input/reference.mp4",
+      "thumb": "visual_media__skeletal_animation_reproduction__1.t.webp",
+      "w": 1100
+    }
+  ],
+  "visual_media/uv_reproduction": [
+    {
+      "caption": "Staged input \u00b7 target material preview",
+      "file": "visual_media__uv_reproduction__0.webp",
+      "h": 1024,
+      "kind": "image",
+      "role": "input",
+      "src": "data/tasks/visual_media/uv_reproduction/uv_reproduction_anime_singing_girl/input/reference_images/target_material_preview.png",
+      "thumb": "visual_media__uv_reproduction__0.t.webp",
+      "w": 1024
+    }
+  ]
+}
