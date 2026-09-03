@@ -198,21 +198,21 @@ const RESULTS = {
        * library came from. EOG only, so the ALE columns and the overall pass
        * rate stay empty rather than being filled with the EOG number. */
       { name: "Empty skills", cat: "skill", eog: 16.9, eogSd: 2.5,
-        eogScore: 56.1, eogScoreSd: 1.4 },
+        eogScore: 56.1, eogScoreSd: 1.4, eogH: 3.5, eogTok: 74.7 },
       { name: "Zero-shot", cat: "skill", eog: 17.6, eogSd: 1.7,
-        eogScore: 54.5, eogScoreSd: 1.3 },
+        eogScore: 54.5, eogScoreSd: 1.3, eogH: 4.4, eogTok: 111.6 },
       { name: "One-shot", cat: "skill", eog: 11.5, eogSd: 0.6,
-        eogScore: 41.1, eogScoreSd: 0.4 },
+        eogScore: 41.1, eogScoreSd: 0.4, eogH: 2.8, eogTok: 61.1 },
       { name: "Raw trajectories", cat: "skill", eog: 20.0, eogSd: 1.7,
-        eogScore: 59.3, eogScoreSd: 0.6 },
+        eogScore: 59.3, eogScoreSd: 0.6, eogH: 4.3, eogTok: 87.5 },
       { name: "Self feedback", cat: "skill", eog: 12.8, eogSd: 2.2,
-        eogScore: 42.1, eogScoreSd: 0.8 },
+        eogScore: 42.1, eogScoreSd: 0.8, eogH: 2.8, eogTok: 57.3 },
       { name: "Batch self feedback", cat: "skill", eog: 16.2, eogSd: 2.4,
-        eogScore: 57.3, eogScoreSd: 2.5 },
+        eogScore: 57.3, eogScoreSd: 2.5, eogH: 3.2, eogTok: 74.3 },
       { name: "Batch teacher feedback", cat: "skill", eog: 22.1, eogSd: 3.0,
-        eogScore: 59.7, eogScoreSd: 0.8 },
+        eogScore: 59.7, eogScoreSd: 0.8, eogH: 3.1, eogTok: 33.8 },
       { name: "Skill creator", cat: "skill", eog: 20.9, eogSd: 1.5,
-        eogScore: 60.6, eogScoreSd: 1.0 },
+        eogScore: 60.6, eogScoreSd: 1.0, eogH: 3.1, eogTok: 33.8 },
       { name: "SkillOpt", cat: "skill", llm: "GPT-5.5", eog: 21.2, eogSd: 3.1,
         eogScore: 61.8, eogScoreSd: 1.6 },
     ],
@@ -1823,8 +1823,12 @@ const LB = (() => {
         <p class="lb-none">No ${ENV[S.env]} cost figures for the systems in view.</p>
       </div>`;
     }
-    const W = 500;
-    const H = 360;
+    /* Labels are laid out in viewBox units, so a fuller field needs a larger canvas
+     * rather than a larger container: stretching the SVG scales the collisions up with
+     * everything else. Room in these units is what lets a name sit beside its point. */
+    const many = rows.length > 12;
+    const W = many ? 760 : 500;
+    const H = many ? 470 : 360;
     const L = 42;
     const R = 14;
     const T = 16;
@@ -1881,9 +1885,36 @@ const LB = (() => {
     /* Recentre the stack on the cloud it came from, so it does not drift downward. */
     const drift = (last - (T + ph)) > 0 ? last - (T + ph) : 0;
     if (drift) pts.forEach((p) => { p.ly -= drift; });
+    /* Clearing the other labels is not enough: a name can still come to rest on top of
+     * somebody else's point, which reads as if that system were unlabelled. Text is not
+     * measurable while the string is still being built, so estimate the box from the
+     * character count at 10.5px bold, then take whichever side and offset covers the
+     * fewest points -- nearest and on the original side when they tie. */
+    const lw = (name) => name.length * 5.7 + 3;
+    const boxOf = (lx, ly, name, right) => {
+      const x0 = right ? lx : lx - lw(name);
+      return { x0, x1: x0 + lw(name), y0: ly - 8.5, y1: ly + 2.5 };
+    };
+    const covered = (b) => pts.filter((q) => {
+      const cx = Math.max(b.x0, Math.min(q.x, b.x1));
+      const cy = Math.max(b.y0, Math.min(q.y, b.y1));
+      return (q.x - cx) ** 2 + (q.y - cy) ** 2 < 6.5 ** 2;   /* marker plus its white ring */
+    }).length;
+    pts.forEach((p) => {
+      const tries = [];
+      [p.right, !p.right].forEach((side) => [10, 17, 26].forEach((off) => {
+        const lx = p.x + (side ? off : -off);
+        const b = boxOf(lx, p.ly, p.r.name, side);
+        if (b.x0 < L - 1 || b.x1 > W - R + 1) return;        /* stays inside the plot */
+        tries.push({ side, lx, n: covered(b), off, home: side === p.right ? 0 : 1 });
+      }));
+      const pick = tries.sort((a, b) => a.n - b.n || a.home - b.home || a.off - b.off)[0];
+      if (pick) { p.right = pick.side; p.lx = pick.lx; }
+      else p.lx = p.x + (p.right ? 10 : -10);
+    });
     pts.forEach((p) => {
       const c = col(p.r);
-      const lx = p.x + (p.right ? 10 : -10);
+      const lx = p.lx;
       g += `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="5" fill="${c}"
         stroke="#fff" stroke-width="1.5"/>`;
       if (p.ly - p.y - 3.5 > 2) {
@@ -1910,8 +1941,20 @@ const LB = (() => {
     const plotted = systems(axis).filter((r) =>
       n1(r[k.pass]) != null && (n1(r[k.t]) != null || n1(r[k.h]) != null));
     const gone = systems(axis).filter((r) => !plotted.includes(r));
+    /* Same two reasons the bars distinguish, and the same care: a row can be absent because
+     * the ablation never ran this environment, or because it ran and the cost was not
+     * recorded. Most of the skill-learning field reports cost, so the family it belongs to
+     * no longer says which case a row is. */
+    const list = (rs) => rs.map((r) => esc(r.name)).join(", ").replace(/, ([^,]*)$/, " and $1");
+    const noArm = gone.filter((r) => n1(r[k.pass]) == null);
+    const noCost = gone.filter((r) => n1(r[k.pass]) != null);
+    const missing = [
+      noArm.length ? `${list(noArm)} report no ${ENV[S.env]} results at all` : "",
+      noCost.length ? `the record keeps no ${ENV[S.env]} tokens or duration for ${
+        list(noCost)}` : "",
+    ].filter(Boolean).join("; ");
     return `${envBtns()}
-    <div class="lb-effgrid">
+    <div class="lb-effgrid${plotted.length > 12 ? " is-roomy" : ""}">
       ${scatter(axis, k.t, "Tokens per sweep (millions, log scale)",
         `Score against tokens \u2014 ${ENV[S.env]}`,
         "Input plus output over the sweep, on a log scale. Up and to the left is better.", true)}
@@ -1923,10 +1966,7 @@ const LB = (() => {
       .map((c) => ({ c: CAT[c].c, lab: CAT[c].label })))}
     <p class="lb-cap">The vertical axis is cropped to the range the systems occupy, since they sit in
       a narrow band. Nothing here is a dollar figure &mdash; the record keeps tokens and duration,
-      not price.${gone.length ? ` Not plotted: ${
-        gone.map((r) => esc(r.name)).join(", ").replace(/, ([^,]*)$/, " and $1")}, since the
-      ${gone.every((r) => r.cat === "skill") ? "skill-learning ablation reports pass and score only"
-        : "record has no cost figures for those runs"}.` : ""}</p>`;
+      not price.${missing ? ` Not plotted: ${missing}.` : ""}</p>`;
   }
 
   // -- wiring -------------------------------------------------------------- //

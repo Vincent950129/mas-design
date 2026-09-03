@@ -227,6 +227,55 @@ def main() -> int:
     check(re.search(r"const plotted = systems\(axis\)\.filter", app) is not None
           and re.search(r"legend\(Array\.from\(new Set\(plotted\.map", app) is not None,
           "efficiency legend follows the points that exist")
+
+    # -- the skill-learning ablation's cost figures ----------------------- #
+    # Table I.2 reports duration and tokens per sweep for every row but SkillOpt.
+    # Keyed by the name the page shows, since that is what a reader matches against
+    # the paper. The pass rate goes in too: it is what identifies the row, and a
+    # transcription that lands the cost on the wrong system would otherwise pass.
+    I2 = {
+        "Empty skills":           (16.9, 3.5, 74.7),
+        "Zero-shot":              (17.6, 4.4, 111.6),
+        "One-shot":               (11.5, 2.8, 61.1),
+        "Raw trajectories":       (20.0, 4.3, 87.5),
+        "Self feedback":          (12.8, 2.8, 57.3),
+        "Batch self feedback":    (16.2, 3.2, 74.3),
+        "Batch teacher feedback": (22.1, 3.1, 33.8),
+        "Skill creator":          (20.9, 3.1, 33.8),
+    }
+    skill = {r["name"]: r for r in rows_of("skills") if r.get("cat") == "skill"}
+    for name, (pass_, hours, toks) in I2.items():
+        r = skill.get(name, {})
+        check((r.get("eog"), r.get("eogH"), r.get("eogTok")) == (pass_, hours, toks),
+              f"{name} keeps its Table I.2 pass rate, hours and tokens",
+              f"{r.get('eog')}, {r.get('eogH')}, {r.get('eogTok')}")
+    check(set(skill) - set(I2) == {"SkillOpt"},
+          "SkillOpt is the only skill row without cost figures", str(set(skill) - set(I2)))
+    check("eogH" not in skill.get("SkillOpt", {}) and "eogTok" not in skill.get("SkillOpt", {}),
+          "SkillOpt reports no cost rather than a borrowed one")
+    # The ablation not reporting cost was once true of the whole family and is now
+    # true of one row, so the chart must not explain an absence by the family.
+    check("skill-learning ablation reports pass and score only" not in app,
+          "the efficiency caption no longer blames the whole family for a missing point")
+    check(re.search(r"const noCost = gone\.filter\(\(r\) => n1\(r\[k\.pass\]\) != null\)", app)
+          is not None,
+          "the efficiency caption separates a missing arm from an unrecorded cost")
+    # Every skill row is EOG-only, so ALE must not gain a point from this.
+    check(all("ale" not in r and "aleH" not in r and "aleTok" not in r for r in skill.values()),
+          "no skill row acquired ALE cost figures")
+
+    # -- the scatter has to stay readable at 18 points -------------------- #
+    # Eight more points nearly doubled the skills field, which the old label
+    # placement could not seat: names came to rest on other systems' markers.
+    check(re.search(r"const many = rows\.length > 12", app) is not None
+          and re.search(r"const W = many \? 760 : 500", app) is not None,
+          "a fuller field is drawn on a larger canvas, in viewBox units")
+    check('.lb-effgrid.is-roomy { grid-template-columns: 1fr; }' in css
+          and 'plotted.length > 12 ? " is-roomy"' in app,
+          "the larger canvas gets the full column width")
+    check(re.search(r"const covered = \(b\) =>", app) is not None
+          and re.search(r"tries\.sort\(\(a, b\) => a\.n - b\.n", app) is not None,
+          "a label prefers a placement that covers no point")
     # Filtering can leave a chart with one point or none; neither existed before
     # the filters, and both used to render NaN coordinates or bare axes.
     check("if (to - from < step / 2) { from -= step; to += step; }" in app,

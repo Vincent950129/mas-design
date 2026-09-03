@@ -1872,6 +1872,9 @@ table.lb tbody td.lb-meta { font-size: 11.5px; font-weight: 650; color: #64748b;
 .lb-legend span { display: inline-flex; align-items: center; gap: 6px; }
 .lb-legend i { width: 13px; height: 13px; border-radius: 3px; display: inline-block; }
 .lb-effgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+/* A field this full draws on a wider canvas, which needs the whole column to stay legible
+   side by side: two of them would render the labels at half the size they were drawn. */
+.lb-effgrid.is-roomy { grid-template-columns: 1fr; }
 .lb-cap {
   margin: 8px 0 0;
   font-size: 0.78rem;
