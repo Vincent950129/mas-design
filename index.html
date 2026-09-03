@@ -52,13 +52,17 @@
     position: sticky; top: 0;
     height: 100vh;
     display: flex; align-items: center;
-    gap: 3vw;
+    gap: clamp(24px, 3vw, 44px);
     max-width: 1280px; margin: 0 auto;
-    padding: 0 5vw;
+    /* the container is capped, so vw padding past that point only eats into the columns */
+    padding: 0 clamp(24px, 5vw, 64px);
   }
   .col { flex: 1 1 50%; min-width: 0; }
   .col--viz { display: flex; align-items: center; justify-content: center; }
   .col--viz svg { width: 100%; height: auto; max-height: 84vh; }
+  /* page 1 carries a deep history off to one side, so it gets the wider half */
+  #page1 .col--viz { flex-basis: 55%; }
+  #page1 .col--text { flex-basis: 45%; }
 
   .page--alt .page__pin { background: var(--paper); }
   .page--alt { background: var(--paper-2); }
@@ -97,13 +101,13 @@
     font-size: clamp(2rem, 3.6vw, 3rem);
     line-height: 1.08;
     letter-spacing: -0.015em;
-    margin: 14px 0 16px;
+    margin: 12px 0 14px;
   }
-  .pintro { color: var(--slate); font-size: 1.08rem; max-width: 46ch; margin: 0 0 26px; }
+  .pintro { color: var(--slate); font-size: 1.08rem; max-width: 46ch; margin: 0 0 20px; }
 
   /* stage list (page 1) */
   .stage-item {
-    padding: 12px 0 12px 20px;
+    padding: 8px 0 8px 20px;
     border-left: 2px solid var(--line);
     opacity: 0.4;
     cursor: pointer;
@@ -111,11 +115,15 @@
   }
   .stage-item:not(.is-active):hover { opacity: 0.7; border-color: #f3a8ce; }
   .stage-item.is-active { opacity: 1; border-color: var(--pink); }
-  .stage-item__t { font-weight: 700; font-size: 1.06rem; display: flex; align-items: center; gap: 10px; }
+  .stage-item__t { font-weight: 700; font-size: 1.02rem; display: flex; align-items: center; gap: 10px; }
   .stage-item__n { font-size: 0.72rem; color: var(--pink); font-weight: 800; letter-spacing: 0.1em; }
+  .stage-item__lvl { font-size: 0.62rem; font-weight: 800; letter-spacing: 0.12em; padding: 2px 7px; border-radius: 999px; }
+  .stage-item__lvl.outer { color: #b45309; background: #fff5e9; border: 1px solid #f3d3ae; }
+  .stage-item__lvl.inner { color: #6d28d9; background: #f5f3ff; border: 1px solid #ddd6fe; }
+  .stage-item__lvl.across { color: #4338ca; background: #eef2ff; border: 1px solid #c7d2fe; }
   .stage-desc {
     max-height: 0; overflow: hidden; opacity: 0;
-    color: var(--slate); font-size: 0.98rem;
+    color: var(--slate); font-size: 0.95rem;
     transition: max-height .45s ease, opacity .45s ease, margin .45s ease;
   }
   .stage-item.is-active .stage-desc { max-height: 140px; opacity: 1; margin-top: 6px; }
@@ -156,7 +164,6 @@
   .demo-cta:hover { transform: translateY(-1px); box-shadow: 0 14px 28px rgba(230, 0, 126, .34); }
 
   /* ---------- SVG animation primitives ---------- */
-  #world { transform-box: view-box; transform-origin: 50% 50%; transition: transform 1s cubic-bezier(.4,0,.2,1); }
   .layer { opacity: 0; transform: translateY(8px); transform-box: fill-box; transform-origin: 50% 50%; transition: opacity .6s ease, transform .45s ease; }
   .layer.is-on { opacity: 1; transform: none; }
   .layer.is-current { transform: scale(1.07); }
@@ -167,22 +174,85 @@
   /* growth: capability chips, sub-agents, memory layers */
   .spark { opacity: 0; transform: scale(.2); transform-box: fill-box; transform-origin: 50% 50%; transition: opacity .5s ease, transform .5s ease; }
   .spark.is-on { opacity: 1; transform: none; }
-  .lead-glow { opacity: 0; transform-box: fill-box; transform-origin: 50% 50%; transition: opacity .9s ease, transform .9s ease; }
 
-  /* recursive self-improvement, branching in DIVERSE directions: each generation sprouts from a parent
-     (a thin twig), the live frontier leads pulse + glow, and prior ones grey into boxes. #world scales
-     down (zoom out) as the branching system outgrows the frame, so it can keep growing. */
-  .lead-active { transform-box: fill-box; transform-origin: 50% 78%; transition: opacity .45s ease; }
-  .gen { transform-box: fill-box; transform-origin: 50% 50%; animation: genIn .55s cubic-bezier(.34, 1.4, .5, 1) both; }
-  .gen .genbox { opacity: 0; transition: opacity .7s ease; }
-  .gen--arch { transition: transform .55s cubic-bezier(.4, 0, .2, 1); }
-  .gen--arch .genbox { opacity: 1; }
-  .gen .genfig { transform-box: fill-box; transform-origin: 50% 78%; transition: color .7s ease, filter .7s ease; }
-  .gen--live .genfig { animation: leadPulse 2.2s ease-in-out infinite; filter: drop-shadow(0 0 5px rgba(230, 0, 126, .5)); }
-  .twig { stroke: #cdbfe0; stroke-width: 1.6; stroke-linecap: round; opacity: 0; animation: twigIn .6s ease forwards; }
-  @keyframes genIn { from { opacity: 0; transform: scale(.45); } to { opacity: 1; transform: none; } }
-  @keyframes leadPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.07); } }
-  @keyframes twigIn { to { opacity: 1; } }
+  /* ---------- Generations, and the scale above them ----------
+     A generation is the whole system at one moment: the harness it was handed, and the loop running
+     inside it. The harness turns over, and over, and eventually it has been through every version it
+     has — and at that point the diagram comes apart into pieces and those pieces pack themselves into
+     a single cell of a grid that is 24 times its size. What that grid gets built into is a robot; so is
+     the small drawing every cell carries, and so is every builder. Once it is finished, the whole of it
+     becomes one cell again, and it happens again, one scale up, faster. The factor is GN/FILL, the
+     ratio of a grid to one of its own cells, so a finished system lands exactly in a slot.
+     Nothing here cross-fades between two different scales, and the camera never moves: every change
+     of size on screen is something actually changing size. `is-nested` is the drop itself, and it is
+     the slowest thing on the page on purpose. */
+  #camera { transition: transform 1.1s cubic-bezier(.4, 0, .2, 1); }
+  .lvl.is-nested { transition: transform 1.25s cubic-bezier(.5, 0, .2, 1); }
+  /* A part of the diagram on its way into the one cell the whole thing is collapsing into: it takes
+     over its own footprint, then travels to its place in the pack, shrinking as it goes. One easing,
+     one duration, and it is the only thing moving — the camera is still and nothing is being scaled
+     against it. */
+  .cell.is-flying { transition: transform .9s cubic-bezier(.45, .02, .2, 1), opacity .3s linear; }
+  /* What is left of the diagram once its parts have gone: frames, labels, arrows, edges. Slow and
+     late, spanning the whole flight, so the frame is never emptier than the shape is full. */
+  #scene.is-shedding #gen,
+  #scene.is-shedding #stateLevel,
+  #scene.is-shedding .statelink { opacity: 0; transition: opacity 2.2s ease .6s; }
+  /* the empty slots are the only thing in the frame while a finished grid is dropping into one of
+     them, so they have to carry it: this is the field the next system gets built in */
+  .lattice circle { fill: #d5cfdd; }
+  .lattice.is-rising { opacity: 0; transition: opacity .9s ease; }
+  .lattice.is-rising.is-on { opacity: 1; }
+  .is-nested > .lattice { display: none; }        /* a scale down it is speckle, and it is not needed */
+  .cell { pointer-events: none; }
+  .cell__box { opacity: .92; }
+  .cell__seat { fill: #eef0fe; stroke: #c7d2fe; stroke-width: 1.4; }
+  /* a cell arrives showing the loop it ran and then settles into a plain block: the frontier is
+     detailed, the interior is masonry */
+  .cell__det { transition: opacity .7s ease; }
+  /* the hop has to land inside one tick, or the builders never arrive anywhere */
+  .agent { pointer-events: none; transition: transform .13s cubic-bezier(.45, 0, .3, 1), opacity .3s ease; }
+  .agent.is-done { opacity: 0; }
+  .bandwrap, .frame { opacity: 0; transition: opacity .6s ease; }
+  .bandwrap.is-on, .frame.is-on { opacity: 1; }
+  .lvl-tag { font: 800 10px 'Inter', sans-serif; letter-spacing: 0.14em; }
+  .band-cap { font: 800 8.5px 'Inter', sans-serif; letter-spacing: 0.14em; }
+
+  /* The harness the current generation was handed: one box, resized to whatever it holds now.
+     Styled by class, not by id, because the snapshots have their ids stripped and would otherwise
+     lose their fill. */
+  .ver__box { fill: #fff8f1; stroke: #e58c3f; stroke-width: 2.2; transition: width .9s cubic-bezier(.4, 0, .2, 1); }
+  .ver__n { font: 800 19px 'Inter', sans-serif; fill: #c2410c; }
+  .ver__edit { font: 800 10px 'Inter', sans-serif; fill: #c2410c; letter-spacing: .06em; opacity: .78; }
+
+  /* persistent state: the one thing that does not recede. It sits outside every generation and
+     gains a layer each time one ends, so the stack is a record of everything still being carried */
+  /* height is deliberately not transitioned: the layer inside it appears at once, and a box easing
+     open behind it leaves the newest bar hanging below the edge for most of a second */
+  #stateBox { fill: #f7f7fe; stroke: #c7d2fe; stroke-width: 1.6; stroke-dasharray: 7 5; }
+  .slayer { transition: opacity .8s ease; }
+  .slayer__n { font: 800 9.5px 'Inter', sans-serif; fill: #6366f1; letter-spacing: .06em; }
+  .statelink { fill: none; stroke: #6366f1; stroke-width: 2.2; stroke-dasharray: 6 6; opacity: 0; transition: opacity .5s ease; }
+  .statelink.is-on { opacity: .55; }
+
+  .inflow { fill: none; stroke: #e58c3f; stroke-width: 2.2; stroke-dasharray: 6 6; opacity: 0; transition: opacity .5s ease; }
+  .inflow.is-on { opacity: .5; }
+  .inflow.is-releasing { opacity: 1; animation: inflowRun .8s linear infinite; }
+  @keyframes inflowRun { to { stroke-dashoffset: -24; } }
+
+  /* a capability pops in when the harness gains it, settles back once it is no longer the new
+     thing, and dims away if a later version retires it — the slots behind it then close the gap */
+  .pop { transform-box: fill-box; transform-origin: 50% 50%; animation: popIn .5s cubic-bezier(.34, 1.4, .5, 1) both; }
+  @keyframes popIn { from { opacity: 0; transform: scale(.4); } to { opacity: 1; transform: none; } }
+  .hcap.is-old { opacity: .5; transition: opacity .7s ease; }
+  .hslot { transition: transform .7s cubic-bezier(.4, 0, .2, 1), opacity .7s ease; }
+  .hslot.is-retired { opacity: .34; filter: grayscale(1); }
+
+  /* inner adaptation: the read/write link runs and the state lights up while the system is
+     rewriting itself against the harness version in front of it */
+  .is-adapting #stateBox { animation: adaptPulse 1.9s ease-in-out infinite; }
+  .is-adapting .statelink { opacity: 1; animation: inflowRun .9s linear infinite; }
+  @keyframes adaptPulse { 0%, 100% { stroke: #c7d2fe; } 50% { stroke: #6366f1; } }
 
   /* sub-agents proliferate as the system grows */
   .subgrow { opacity: 0; transition: opacity .6s ease; }
@@ -213,7 +283,8 @@
     .page__pin { position: static; height: auto; flex-direction: column; padding: 70px 24px; gap: 30px; }
     .col--viz svg { max-height: none; }
     .triggers { display: none; }
-    .layer, .edge { opacity: 1 !important; transform: none !important; }
+    .layer, .edge, .bandwrap, .frame { opacity: 1 !important; transform: none !important; }
+    .inflow, .statelink { opacity: .5 !important; }
     .spine { stroke-dashoffset: 0 !important; }
     .branch { stroke-dashoffset: 0 !important; }
     .tobe { opacity: .6 !important; }
@@ -226,11 +297,22 @@
     .page--alt .page__pin { flex-direction: column-reverse; }
     .scroll-cue { display: none; }
   }
+  /* Short laptops. The stage list is the tallest thing on page 1 and the pin cannot scroll, so
+     everything in the text column gives back a few pixels rather than letting the last stage fall off. */
+  @media (min-width: 921px) and (max-height: 880px) {
+    .ptitle { font-size: clamp(1.75rem, 3vw, 2.4rem); margin: 8px 0 10px; }
+    .pintro { font-size: 1.01rem; margin: 0 0 14px; }
+    .stage-item { padding: 6px 0 6px 18px; }
+    .stage-desc { font-size: 0.9rem; }
+    .stage-item.is-active .stage-desc { max-height: 124px; margin-top: 4px; }
+  }
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
     .layer, .edge, .spine, .branch, .tobe, .lineage, .dot, .dotlbl, #p2halo, .stage-item, .stage-desc,
-    #world, .spark, .lead-glow, .lead-active, .gen, .subgrow { transition: none; }
-    .edge.is-on, .gen, .gen--live .genfig, .twig { animation: none; }
+    .spark, .subgrow, .bandwrap, .frame, .inflow, .statelink, .hcap, .hslot, .slayer,
+    #camera, .cell__det, .agent, .lvl.is-nested, .cell.is-flying, .lattice.is-rising,
+    .ver__box { transition: none; }
+    .edge.is-on, .pop, .inflow.is-releasing, .is-adapting #stateBox, .is-adapting .statelink { animation: none; }
     .chev { animation: none; }
   }
 </style>
@@ -249,12 +331,12 @@
     <!-- LEFT: text -->
     <div class="col col--text">
       <div class="eyebrow">Our Framework</div>
-      <h2 class="ptitle">Our AI<br>learning loop</h2>
-      <p class="pintro">We envision the AI learning loop like this: it takes in both a task and the available capabilities — tools, skills, or agents. These first feed into a lead agent, which outputs an orchestration (single-agent or multi-agent, centralized or decentralized). The response then goes to the environment, whose feedback flows back to the lead agent — or, optionally, into memory.</p>
+      <h2 class="ptitle">Our Self-Improvement<br>Framework</h2>
+      <p class="pintro">A task arrives with a <strong>harness</strong> — the tools it can call, the skills it can reuse, the specialist agents it can delegate to. A lead agent turns that into an orchestration, which acts in the environment; feedback returns to the lead agent and its persistent state. Nothing here holds still: the harness keeps changing, the system rewrites itself to match, and every version of the pair is superseded by the next. Run that far enough and the whole of it — every generation, and everything it kept — is one unit of the next thing being built.</p>
 
       <div class="stage-item" data-page="1" data-stage="1">
-        <div class="stage-item__t"><span class="stage-item__n">01</span> Task + Capability</div>
-        <div class="stage-desc">Each run begins with a task and the external capabilities available to solve it — tools, skills, data, and environments.</div>
+        <div class="stage-item__t"><span class="stage-item__n">01</span> Task + Harness</div>
+        <div class="stage-desc">Each run begins with a task and the harness available to solve it — the tools it can call, the skills it can reuse, and the specialist agents it can delegate to.</div>
       </div>
       <div class="stage-item" data-page="1" data-stage="2">
         <div class="stage-item__t"><span class="stage-item__n">02</span> Lead Agent</div>
@@ -273,24 +355,29 @@
         <div class="stage-desc">The environment returns feedback. This signal is how the system learns whether the orchestration actually worked.</div>
       </div>
       <div class="stage-item" data-page="1" data-stage="6">
-        <div class="stage-item__t"><span class="stage-item__n">06</span> Memory <span style="color:var(--muted);font-weight:600;font-size:.85rem">(optional)</span></div>
-        <div class="stage-desc">Memory carries state across turns, so the lead agent can adapt and improve over time.</div>
+        <div class="stage-item__t"><span class="stage-item__n">06</span> Persistent State <span class="stage-item__lvl across">Across</span></div>
+        <div class="stage-desc">Memory, learned skills, and routing preferences the system keeps for itself. It sits outside the loop because it belongs to neither level alone: the loop writes it, but it outlives every harness — generations end, this only grows.</div>
+      </div>
+      <div class="stage-item" data-page="1" data-stage="7">
+        <div class="stage-item__t"><span class="stage-item__n">07</span> Harness Evolution <span class="stage-item__lvl outer">Outer</span></div>
+        <div class="stage-desc">Tools, skills, and agents are <strong>added</strong>, <strong>revised</strong>, and <strong>retired</strong> as the harness moves to its next version. Each turnover ends one generation and starts the next — and they come faster as they go.</div>
       </div>
     </div>
 
     <!-- RIGHT: animated loop -->
     <div class="col col--viz">
-      <svg id="loop" viewBox="40 8 644 530" role="img" aria-label="A modern AI learning loop where the lead agent and its sub-agents keep growing">
+      <svg id="loop" viewBox="-172 -136 942 960" role="img" aria-label="A self-improvement framework whose harness keeps being revised, each revision ending one generation and starting the next, while the system's persistent state stays put and gains a layer from each one.">
         <defs>
           <linearGradient id="leadGrad" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0" stop-color="#ff4fa3" /><stop offset="1" stop-color="#b5179e" />
           </linearGradient>
-          <radialGradient id="glowGrad"><stop offset="0" stop-color="#ff4fa3" stop-opacity="0.55" /><stop offset="1" stop-color="#ff4fa3" stop-opacity="0" /></radialGradient>
           <filter id="sh" x="-30%" y="-30%" width="160%" height="160%">
             <feDropShadow dx="0" dy="5" stdDeviation="8" flood-color="#14101a" flood-opacity="0.12" />
           </filter>
           <marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#9aa1ad" /></marker>
           <marker id="ap" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7.5" markerHeight="7.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#e6007e" /></marker>
+          <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7.5" markerHeight="7.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#e58c3f" /></marker>
+          <marker id="az" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6366f1" /></marker>
 
           <!-- one consistent "agent" shape: a human-like bust. Lead = large/pink, sub-agents = small/indigo -->
           <symbol id="person" viewBox="0 0 48 52">
@@ -299,34 +386,69 @@
           </symbol>
         </defs>
 
-        <g id="world">
+        <!-- Everything sits under one camera. -->
+        <g id="camera">
+
+        <!-- The recursion lives here. #scene is the system at full size; once its harness has been
+             through every version it has, the whole of #scene is shrunk into one cell of a grid that
+             is building the same shape #scene already is, and #stack gains a level. -->
+        <g id="stack">
+        <g id="scene">
+
+        <!-- ===== THE CURRENT GENERATION =====
+             The harness this run was handed, and the loop running inside it. When the harness turns
+             over, both are rebuilt for the new version: outer and inner go together, because they
+             were one thing and it is that whole thing that has been superseded. -->
+        <g id="gen">
+
+        <!-- OUTER: the harness of this generation, sized to whatever it currently holds -->
+        <g id="harness" class="bandwrap" data-page="1" data-reveal="1">
+          <text x="10" y="-108" class="lvl-tag" fill="#c2410c">OUTER · HARNESS</text>
+          <g id="bandLegend">
+            <rect x="520" y="-116" width="8" height="8" rx="2" fill="#a78bfa" /><text x="533" y="-109" class="band-cap" fill="#8b8794" style="text-anchor:start">TOOLS</text>
+            <rect x="584" y="-116" width="8" height="8" rx="2" fill="#34d399" /><text x="597" y="-109" class="band-cap" fill="#8b8794" style="text-anchor:start">SKILLS</text>
+            <rect x="650" y="-116" width="8" height="8" rx="2" fill="#6366f1" /><text x="663" y="-109" class="band-cap" fill="#8b8794" style="text-anchor:start">AGENTS</text>
+          </g>
+          <rect id="verBox" class="ver__box" x="8" y="-96" width="150" height="66" rx="14" />
+          <text id="verN" class="ver__n" x="22" y="-62">V1</text>
+          <text id="verEdit" class="ver__edit" x="22" y="-45"></text>
+          <g id="verChips"></g>
+        </g>
+
+        <!-- what the harness hands down into the loop this time round -->
+        <path id="inflowA" class="inflow" data-page="1" data-reveal="1" d="M110,-26 C110,110 150,120 150,204" marker-end="url(#ah)" />
+        <path id="inflowB" class="inflow" data-page="1" data-reveal="3" d="M110,-26 C110,110 566,130 566,182" marker-end="url(#ah)" />
+
+        <!-- ===== INNER: the loop the system runs against that harness ===== -->
+        <g id="innerFrame" class="frame" data-page="1" data-reveal="1">
+          <rect x="10" y="10" width="732" height="512" rx="20" fill="none" stroke="#ddd7e3" stroke-width="1.5" stroke-dasharray="5 6" />
+          <text x="28" y="36" class="lvl-tag" fill="#9a90ab">INNER · ADAPTATION</text>
+        </g>
+
+        <g id="innerLevel">
           <!-- CORE EDGES (the loop) -->
           <path class="edge" data-page="1" data-reveal="2" d="M226,232 C280,168 300,138 330,116" fill="none" stroke="#9aa1ad" stroke-width="2.6" marker-end="url(#a)" />
           <path class="edge" data-page="1" data-reveal="3" d="M414,114 C470,144 482,166 502,202" fill="none" stroke="#9aa1ad" stroke-width="2.6" marker-end="url(#a)" />
           <path class="edge" data-page="1" data-reveal="4" d="M566,312 L566,428" fill="none" stroke="#9aa1ad" stroke-width="2.6" marker-end="url(#a)" />
           <path class="edge" data-page="1" data-reveal="5" d="M460,470 L284,470" fill="none" stroke="#9aa1ad" stroke-width="2.6" marker-end="url(#a)" />
           <path class="edge" data-page="1" data-reveal="5" d="M198,432 C150,360 168,182 300,118" fill="none" stroke="#e6007e" stroke-width="2.6" marker-end="url(#ap)" />
-          <path class="edge" data-page="1" data-reveal="6" d="M360,158 L360,268" fill="none" stroke="#9aa1ad" stroke-width="2" marker-end="url(#a)" />
 
-          <!-- NODE: Task + Capability -->
+          <!-- NODE: Task + Harness -->
           <g class="layer" data-page="1" data-reveal="1">
             <rect x="74" y="210" width="152" height="76" rx="16" fill="#fff" stroke="#d6d1da" stroke-width="1.6" filter="url(#sh)" />
             <text x="150" y="242" class="node-label">Task</text>
-            <text x="150" y="264" class="node-sub">+ Capability</text>
+            <text x="150" y="264" class="node-sub">+ Harness</text>
           </g>
-          <!-- capabilities accumulate as the loop keeps running (more added by JS) -->
+          <!-- the tools and skills the harness has released so far (more added by JS at each stage) -->
           <g id="capTokens" data-page="1">
-            <rect class="spark" data-reveal="1" x="88" y="298" width="26" height="15" rx="4" fill="#c4b5fd" />
-            <rect class="spark" data-reveal="1" x="120" y="298" width="26" height="15" rx="4" fill="#d8b4fe" />
+            <rect class="spark hcap" data-reveal="1" x="76" y="296" width="26" height="15" rx="4" fill="#c4b5fd" />
+            <rect class="spark hcap" data-reveal="1" x="106" y="296" width="26" height="15" rx="4" fill="#c4b5fd" />
+            <rect class="spark hcap" data-reveal="1" x="136" y="296" width="26" height="15" rx="4" fill="#a5d8c4" />
           </g>
 
-          <!-- NODE: Lead Agent (it keeps improving — newest lead in front, prior generations archived as boxes) -->
-          <g class="layer" data-page="1" data-reveal="2" id="leadNode">
-            <circle id="leadGlow" class="lead-glow" cx="360" cy="68" r="40" fill="url(#glowGrad)" />
-            <!-- lineage: each prior lead generation, archived into a box (generated by JS) -->
-            <g id="leadLine" data-page="1" data-reveal="7"></g>
-            <!-- the current lead agent (build phase); during grow it hands over to the living tower -->
-            <g id="leadActive" class="lead-active" style="color:#e6007e"><use href="#person" x="340" y="46" width="40" height="44" /></g>
+          <!-- NODE: Lead Agent -->
+          <g class="layer" data-page="1" data-reveal="2">
+            <g style="color:#e6007e"><use href="#person" x="340" y="46" width="40" height="44" /></g>
             <text x="360" y="148" class="node-label" fill="#b5179e">Lead Agent</text>
           </g>
 
@@ -336,11 +458,11 @@
             <text x="506" y="214" class="node-label" fill="#4338ca" style="font-size:15px;text-anchor:start">Orchestration</text>
           </g>
           <g id="subAgents" data-page="1">
-            <g class="spark" data-reveal="3" style="color:#6366f1"><use href="#person" x="512" y="228" width="24" height="26" /></g>
-            <g class="spark" data-reveal="3" style="color:#818cf8"><use href="#person" x="554" y="228" width="24" height="26" /></g>
-            <g class="spark" data-reveal="3" style="color:#6366f1"><use href="#person" x="596" y="228" width="24" height="26" /></g>
+            <g class="spark hcap" data-reveal="3" style="color:#6366f1"><use href="#person" x="512" y="228" width="24" height="26" /></g>
+            <g class="spark hcap" data-reveal="3" style="color:#818cf8"><use href="#person" x="554" y="228" width="24" height="26" /></g>
+            <g class="spark hcap" data-reveal="3" style="color:#6366f1"><use href="#person" x="596" y="228" width="24" height="26" /></g>
           </g>
-          <!-- sub-agents proliferate and move between one another as they grow (generated by JS) -->
+          <!-- specialists released by the harness at later stages (generated by JS) -->
           <g id="subGrow" class="subgrow" data-page="1" data-reveal="7"></g>
 
           <!-- NODE: Environment (icon left, label right — no overlap) -->
@@ -357,15 +479,27 @@
             <text x="214" y="475" class="node-label" fill="#c2185b" style="font-size:15px">Feedback</text>
           </g>
 
-          <!-- NODE: Memory (stack grows taller over time) -->
-          <g class="layer" data-page="1" data-reveal="6">
-            <text x="322" y="290" class="node-sub" style="font-size:12px;text-anchor:end" fill="#6b7280">Memory</text>
-            <ellipse cx="360" cy="284" rx="34" ry="9" fill="#fff" stroke="#9aa1ad" stroke-width="1.6" />
-            <path d="M326,284 v22 a34,9 0 0 0 68,0 v-22" fill="#fff" stroke="#9aa1ad" stroke-width="1.6" />
-            <ellipse cx="360" cy="284" rx="34" ry="9" fill="#fff" stroke="#9aa1ad" stroke-width="1.6" />
-          </g>
-          <g id="memStack" data-page="1"></g>
         </g>
+        </g>
+        <!-- /gen -->
+
+        <!-- ===== ACROSS: persistent state =====
+             It is deliberately outside the generation. Generations get superseded and replaced;
+             this does not. It stays exactly where it is and takes on another layer each time one
+             ends, so the stack below is everything the system is still carrying. -->
+        <path class="statelink" data-page="1" data-reveal="6" d="M214,512 C214,548 224,570 258,580" marker-start="url(#az)" marker-end="url(#az)" />
+        <g id="stateLevel" class="bandwrap" data-page="1" data-reveal="6">
+          <rect id="stateBox" x="268" y="552" width="492" height="71" rx="18" />
+          <text x="286" y="582" class="lvl-tag" fill="#4f46e5">ACROSS · PERSISTENT STATE</text>
+          <g id="stateLayers"></g>
+        </g>
+
+        </g>
+        <!-- /scene -->
+        </g>
+        <!-- /stack -->
+        </g>
+        <!-- /camera -->
       </svg>
     </div>
 
@@ -381,7 +515,7 @@
   <div class="page__pin">
     <!-- LEFT: animated timeline -->
     <div class="col col--viz">
-      <svg id="road" viewBox="0 0 360 900" role="img" aria-label="Roadmap: a foundational trunk that branches into directions and converges into a live demo">
+      <svg id="road" viewBox="0 0 360 1020" role="img" aria-label="Roadmap: a foundational trunk that branches into directions and converges into a live demo">
         <defs>
           <linearGradient id="haloGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff4fa3" /><stop offset="1" stop-color="#b5179e" /></linearGradient>
         </defs>
@@ -389,16 +523,17 @@
         <!-- foundational trunk: Survey → MAS-Zero → MAS-Orchestra -->
         <path class="spine" id="spine" d="M58,40 L58,300" pathLength="1" />
 
-        <!-- three parallel directions grow out of MAS-Orchestra -->
+        <!-- four parallel directions grow out of MAS-Orchestra -->
         <path class="branch" data-page="2" data-stage="4" d="M58,300 C64,356 112,372 112,420" pathLength="1" />
         <path class="branch" data-page="2" data-stage="5" d="M58,300 C66,470 112,478 112,540" pathLength="1" />
         <path class="branch" data-page="2" data-stage="6" d="M58,300 C70,600 112,602 112,660" pathLength="1" />
+        <path class="branch" data-page="2" data-stage="7" d="M58,300 C74,700 112,714 112,780" pathLength="1" />
 
         <!-- direct lineage: the live demo is MAS-Orchestra's application -->
-        <path class="lineage" data-page="2" data-stage="7" d="M58,316 L58,743" />
+        <path class="lineage" data-page="2" data-stage="8" d="M58,316 L58,863" />
 
         <!-- and the demo points forward to the open frontier -->
-        <path class="tobe" data-page="2" data-stage="8" d="M58,781 L58,842" />
+        <path class="tobe" data-page="2" data-stage="9" d="M58,901 L58,962" />
 
         <!-- moving halo -->
         <g id="p2halo"><circle cx="58" cy="60" r="17" fill="none" stroke="url(#haloGrad)" stroke-width="3" /></g>
@@ -423,17 +558,20 @@
         <g class="dot" data-page="2" data-stage="6"><circle cx="112" cy="660" r="6.5" fill="#fff" stroke="#e6007e" stroke-width="2.4" /></g>
         <g class="dotlbl" data-page="2" data-stage="6"><text x="138" y="655" class="node-tag" fill="#8b8794" style="text-anchor:start">2026 · ANALYSIS</text><text x="138" y="673" class="node-label" style="text-anchor:start;font-size:15px">IlluMAS · LiveResearchBench</text></g>
 
+        <g class="dot" data-page="2" data-stage="7"><circle cx="112" cy="780" r="6.5" fill="#fff" stroke="#e6007e" stroke-width="2.4" /></g>
+        <g class="dotlbl" data-page="2" data-stage="7"><text x="138" y="775" class="node-tag" fill="#8b8794" style="text-anchor:start">2026 · ENVIRONMENT</text><text x="138" y="793" class="node-label" style="text-anchor:start;font-size:15px">EvoHarnessBench</text></g>
+
         <!-- the application: where the whole series converges into something you can run -->
-        <g class="dot dot--demo" data-page="2" data-stage="7">
-          <circle cx="58" cy="762" r="19" fill="none" stroke="#ff9ecb" stroke-width="2" opacity="0.7" />
-          <circle cx="58" cy="762" r="13" fill="#e6007e" />
-          <path d="M53.5,755 L53.5,769 L66,762 Z" fill="#fff" />
+        <g class="dot dot--demo" data-page="2" data-stage="8">
+          <circle cx="58" cy="882" r="19" fill="none" stroke="#ff9ecb" stroke-width="2" opacity="0.7" />
+          <circle cx="58" cy="882" r="13" fill="#e6007e" />
+          <path d="M53.5,875 L53.5,889 L66,882 Z" fill="#fff" />
         </g>
-        <g class="dotlbl" data-page="2" data-stage="7"><text x="86" y="757" class="node-tag" fill="#e6007e" style="text-anchor:start">TRY IT LIVE</text><text x="86" y="775" class="node-label" style="text-anchor:start;font-size:15px">MAS-Orchestra Demo</text></g>
+        <g class="dotlbl" data-page="2" data-stage="8"><text x="86" y="877" class="node-tag" fill="#e6007e" style="text-anchor:start">TRY IT LIVE</text><text x="86" y="895" class="node-label" style="text-anchor:start;font-size:15px">MAS-Orchestra Demo</text></g>
 
         <!-- frontier: where the demo and research head next -->
-        <g class="dot" data-page="2" data-stage="8"><circle cx="58" cy="852" r="7" fill="#fff" stroke="#9aa1ad" stroke-width="2.2" stroke-dasharray="3 3" /></g>
-        <g class="dotlbl" data-page="2" data-stage="8"><text x="84" y="847" class="node-tag" fill="#8b8794" style="text-anchor:start">NEXT · FRONTIER</text><text x="84" y="865" class="node-label" style="text-anchor:start;font-size:15px">Policy · Verification · Env</text></g>
+        <g class="dot" data-page="2" data-stage="9"><circle cx="58" cy="972" r="7" fill="#fff" stroke="#9aa1ad" stroke-width="2.2" stroke-dasharray="3 3" /></g>
+        <g class="dotlbl" data-page="2" data-stage="9"><text x="84" y="967" class="node-tag" fill="#8b8794" style="text-anchor:start">NEXT · FRONTIER</text><text x="84" y="985" class="node-label" style="text-anchor:start;font-size:15px">Policy · Verification · Env</text></g>
       </svg>
     </div>
 
@@ -490,7 +628,15 @@
         <div class="mlinks"><a href="https://multi-agent-eval.github.io/" target="_blank" rel="noopener">IlluMAS Page</a><a href="https://arxiv.org/abs/2606.13003" target="_blank" rel="noopener">IlluMAS Paper</a></div>
       </div>
 
-      <div class="mcard mcard--app" data-page="2" data-stage="7">
+      <div class="mcard" data-page="2" data-stage="7">
+        <div class="mcard__date">2026 · Environment</div>
+        <div class="mcard__t">EvoHarnessBench</div>
+        <p class="mcard__b">Everything above assumes the harness holds still. It doesn't. <strong>Can your agents keep pace with an evolving harness?</strong> — a benchmark that isolates the simplest slice of that problem, pure growth: tools, skills, and specialist agents accumulate around a fixed model, stage by stage, nothing is retired, and outer harness evolution is separated from the system's own inner adaptation. 17 harness streams, 802 tasks, 520 tools, 42 skills, 62 agents. Expansion alone costs frontier agents work they had already solved: <strong>harness-induced forgetting</strong> of up to 46.4% on the agent axis.</p>
+        <div class="chips"><span class="chip evaluation">evaluation</span><span class="chip">tools · skills · agents</span><span class="chip venue">under submission</span></div>
+        <div class="mlinks"><a href="evoharness/" target="_blank" rel="noopener">Project Page</a></div>
+      </div>
+
+      <div class="mcard mcard--app" data-page="2" data-stage="8">
         <div class="app-kicker">try it live</div>
         <div class="mcard__t">Vibe-code your MAS</div>
         <p class="mcard__b">Where the whole series becomes something you can run. Describe a problem and Orchestra <strong>designs a multi-agent plan, executes it, and lets you refine it in chat</strong> — across math, search, deep research, and enterprise ops.</p>
@@ -515,10 +661,10 @@
         <a class="demo-cta" href="https://mas-orchestra.salesforceresearch.ai/mas_r1/demo" target="_blank" rel="noopener">Open the live demo →</a>
       </div>
 
-      <div class="mcard" data-page="2" data-stage="8">
+      <div class="mcard" data-page="2" data-stage="9">
         <div class="mcard__date">What's next</div>
         <div class="mcard__t">The open challenges</div>
-        <p class="mcard__b">A lead agent configures the environment, orchestrates sub-agents, receives feedback, and updates memory. The hard parts that remain: <strong>Policy</strong> (a huge action space), <strong>Verification</strong> (judging a plan without a full rollout), and <strong>Environment</strong> (an evolving harness).</p>
+        <p class="mcard__b">A lead agent configures the environment, orchestrates sub-agents, receives feedback, and updates persistent state. The hard parts that remain: <strong>Policy</strong> (a huge action space), <strong>Verification</strong> (judging a plan without a full rollout), and <strong>Environment</strong> — where EvoHarnessBench now gives us a measuring stick, and the open problem becomes <strong>bi-level adaptation</strong>: learning inside a stage in a way that still holds up once the harness moves again.</p>
         <div class="chips"><span class="chip">Policy</span><span class="chip">Verification</span><span class="chip">Environment</span></div>
         <div class="mlinks"><a href="https://zixuanke.substack.com/p/a-one-year-milestone-in-multi-agent" target="_blank" rel="noopener">Read the blog</a></div>
       </div>
@@ -534,13 +680,19 @@
     <div class="trig" data-page="2" data-stage="6"></div>
     <div class="trig" data-page="2" data-stage="7"></div>
     <div class="trig" data-page="2" data-stage="8"></div>
+    <div class="trig" data-page="2" data-stage="9"></div>
   </div>
 </section>
 
 <script>
   (function () {
-    var P2_POS = [null, { x: 58, y: 60 }, { x: 58, y: 180 }, { x: 58, y: 300 }, { x: 112, y: 420 }, { x: 112, y: 540 }, { x: 112, y: 660 }, { x: 58, y: 762 }, { x: 58, y: 852 }]; // node centres by stage (1..8)
-    var P2_TOTAL = 8, P1_BUILD = 6, P1_TOTAL = 7;
+    var P2_POS = [null, { x: 58, y: 60 }, { x: 58, y: 180 }, { x: 58, y: 300 }, { x: 112, y: 420 }, { x: 112, y: 540 }, { x: 112, y: 660 }, { x: 112, y: 780 }, { x: 58, y: 882 }, { x: 58, y: 972 }]; // node centres by stage (1..9)
+    // Everything past the last harness version — the diagram coming apart, and the robot that gets
+    // built out of it a scale up — hangs off this one flag. Turn it on and all of it is back; the
+    // machinery for it stays intact either way. It gates the autoplay step as well as the animation,
+    // so with it off there is no dead step sitting and waiting for something that will never start.
+    var RECURSE = false;
+    var P2_TOTAL = 9, P1_BUILD = 6, P1_LISTED = 7, P1_TOTAL = RECURSE ? 8 : 7;
 
     var loop = document.getElementById('loop');
     var road = document.getElementById('road');
@@ -555,12 +707,9 @@
 
     var state = { 1: 0, 2: 0 };
 
-    // ---------- Page 1: build the loop, then evolve + zoom out into a richer world ----------
+    // ---------- Page 1: build the loop, then evolve the harness around it ----------
     var SVGNS = 'http://www.w3.org/2000/svg';
     var capGroup = document.getElementById('capTokens');
-    var memGroup = document.getElementById('memStack');
-    var leadGlow = document.getElementById('leadGlow');
-    var leadNode = document.getElementById('leadNode');
 
     function mk(tag, attrs) {
       var e = document.createElementNS(SVGNS, tag);
@@ -568,114 +717,759 @@
       return e;
     }
 
-    // ---- GROW: recursive self-improvement, visualised. ----
-    // The system keeps growing — more capabilities, more sub-agents, deeper memory — and the LEAD
-    // keeps improving itself: a new lead is born while the prior one greys out into a box, building
-    // a rising tower of generations. As it outgrows the frame we ZOOM OUT, so it can keep growing.
-    // This is how we picture the (multi-)agent future.
-    var world = document.getElementById('world');
-    var leadLine = document.getElementById('leadLine');
-    var leadActive = document.getElementById('leadActive');
+    // ---- Generations, animated. ----
+    // A generation is the whole system at one moment: the harness it was handed (OUTER) plus the loop
+    // running inside it (INNER). Turning the harness over ends a generation and starts the next, and
+    // the persistent state (ACROSS) is the exception that sits outside all of them and only grows.
+    // When the harness has been through every version it has, the whole system — every generation of
+    // it, and the state it accumulated — shrinks to a single cell of a grid that is being built into
+    // the shape the system already is. Then that starts over one scale up. See RECURSE below.
     var subGrow = document.getElementById('subGrow');
     var orchBox = document.getElementById('orchBox');
+    var camera = document.getElementById('camera');
+    var stack = document.getElementById('stack');
+    var sceneEl = document.getElementById('scene');
+    var stateBox = document.getElementById('stateBox');
+    var genEl = document.getElementById('gen');
+    var verBox = document.getElementById('verBox');
+    var verN = document.getElementById('verN');
+    var verEdit = document.getElementById('verEdit');
+    var verChips = document.getElementById('verChips');
+    var stateLayers = document.getElementById('stateLayers');
+    var inflowA = document.getElementById('inflowA');
+    var inflowB = document.getElementById('inflowB');
+    var inflows = genEl.querySelectorAll('.inflow');
 
-    // the lead improves ONE generation after another — a single winding lineage (NOT a tree). Each new
-    // lead sprouts from the previous along a twig, and the prior one greys into a box. The chain doesn't
-    // climb straight up — it MEANDERS in diverse directions (up / left / right) as it keeps growing.
-    var FIG_W = 34, FIG_H = 38, BOX_W = 44, BOX_H = 42;
-    var PATH = [
-      { x: 360, y: 66 }, { x: 432, y: 46 }, { x: 452, y: -2 }, { x: 382, y: -16 }, { x: 302, y: -26 },
-      { x: 282, y: -74 }, { x: 352, y: -92 }, { x: 436, y: -98 }, { x: 452, y: -148 }, { x: 372, y: -160 }
+    var VB = { x: -172, y: -136, w: 942, h: 960 }, VB_PAD = 9;   // must match #loop's viewBox
+    var GEN = { x: -8, y: -126, w: 768, h: 648 };
+    var GEN_CX = GEN.x + GEN.w / 2, GEN_CY = GEN.y + GEN.h / 2;
+    var STATE = { x: 268, y: 552, w: 492 };
+
+    // ---- The recursion. ----
+    // SPAN is the square the whole system occupies, and also the square the grid above it occupies:
+    // they are the same size on purpose. A grid is N cells across with each cell covering FILL of its
+    // slot, so the grid is exactly N/FILL times one cell — and that ratio, ZOOM, is what a completed
+    // system is divided by when it becomes one cell of the next one. Nothing else sets the scale.
+    var GN = 19, FILL = 0.78, ZOOM = GN / FILL;
+    var SPAN = 886, PITCH = SPAN / GN, CELL = PITCH * FILL;
+    var RX = 376, RY = 317;                     // centre of the recursion square, = centre of #scene
+    var GX0 = RX - SPAN / 2, GY0 = RY - SPAN / 2;
+    // RAMP is what sets the pace. The robot is a solid shape, so there is always far more frontier than
+    // there are builders to put on it and the build is limited by how fast builders are added, not by
+    // where they can go — the growth accelerates the whole way rather than levelling off.
+    var LEVELS = 2, TICK = 190, AG_MAX = 36, RAMP = 6.0;
+    var CELL_FILL = ['#6366f1', '#6f72f2', '#5b5ee6', '#7a7df4', '#585bdd'];   // the shell, shaded
+    var DET_U = CELL / GN * 0.88;              // one map square, at the size the mark inside a cell is
+    // eyes, orchestration, arms, feet, antenna and mouth — the diagram's own five accents, reused, so
+    // the robot is visibly made of the parts of the system that came apart to make it
+    var NODE_FILL = ['#e6007e', '#6366f1', '#16a34a', '#c2185b', '#e58c3f'], CORE_FILL = '#8b8df5';
+    var CORE_K = 5, SHELL_K = 6;                 // what part of the robot a slot is, past the accents
+    // the diagram's own solid parts, which are what the first symbol gets built out of
+    var PIECE_SEL = '#verBox, #verChips > g, .hslot, #capTokens > rect, #subAgents > g, ' +
+      '.slayer > rect, #innerLevel > g.layer';
+    var FLY = 900, FLY_STAGGER = 18, FLY_HANDOVER = 300, PIECE_MAX_X = 3, PIECE_MAX_Y = 2;
+
+    var CHIP = 11, CHIP_PITCH = 13, CHIP_X = 92, CHIP_Y = -69, VER_X = 8, VER_PAD = 14;
+    var AXIS_FILL = { tool: '#a78bfa', skill: '#34d399', agent: '#6366f1' };
+    var AXIS_ORDER = { tool: 0, skill: 1, agent: 2 };
+
+    // Each harness version is an edit on the one before it, not just an addition: capabilities get
+    // added, revised in place, and retired. Index 0 is V1, the harness the system starts out with.
+    // Ten of them, each a small edit, so the harness is visibly never finished with.
+    var RELEASE = [
+      { add: { tool: 2, skill: 1, agent: 1 } },
+      { add: { tool: 1, skill: 1 } },
+      { add: { tool: 1, agent: 1 }, revise: 1 },
+      { add: { tool: 1, skill: 1 }, retire: { tool: 1 } },
+      { add: { agent: 1 }, revise: 1 },
+      { add: { tool: 2 }, retire: { skill: 1 } },
+      { add: { skill: 1, agent: 1 }, revise: 1, retire: { tool: 1 } },
+      { add: { tool: 1, skill: 1 } },
+      { add: { agent: 1 }, revise: 1, retire: { tool: 1, agent: 1 } },
+      { add: { tool: 1, skill: 1, agent: 1 }, retire: { skill: 1 } }
     ];
-    var GROW_MS = 1300;
+    // Turnovers come faster as the run goes on. Compounding acceleration is the whole claim, so the
+    // animation had better not keep a metronome.
+    function growGap(j) { return Math.max(700, Math.round(1500 * Math.pow(0.9, j - 1))); }
     var ORCH_X = 491, ORCH_Y = 190;                 // orchestration box top-left (fixed); it grows right/down to fit
-    var grow = { timer: null, on: false, gens: 0, subs: 0, mems: 0, caps: 0, orchR: 641, orchB: 312 };
+    var grow = {
+      timer: null, flashT: null, foldT: null, on: false, step: 0,
+      subs: [], caps: [], deadSubs: [], deadCaps: [], layers: 0,
+      level: 0, top: null, cells: null, agents: [], ticks: 0, doneAt: 0, flying: [], run: 0,
+      tickT: null, upT: null, condT: null
+    };
 
-    // sub-agents proliferate around orchestration (the box grows to keep them inside);
-    // capabilities fan out to the LEFT of the task in two staggered rows.
-    var SUB_POS = [[512, 248], [558, 240], [604, 254], [650, 246], [610, 296], [660, 304], [702, 256], [544, 302], [592, 324], [700, 310]];
-    var CAP_POS = [[150, 304], [150, 332], [114, 318], [80, 304], [80, 332], [44, 318], [16, 312]];
+    // Slots the loop's capabilities flow through. Live ones sit full size; retired ones shrink into
+    // the vestige rows below them rather than vanishing, so within a single generation the loop
+    // carries its own small history the same way the run of generations does.
+    var SUB_POS = [[512, 264], [554, 264], [596, 264], [650, 228], [650, 264], [512, 300], [554, 300], [596, 300], [650, 300], [692, 228]];
+    var CAP_POS = [[166, 296], [196, 296], [226, 296], [76, 315], [106, 315], [136, 315], [166, 315],
+      [196, 315], [226, 315], [76, 334], [106, 334], [136, 334], [166, 334]];
+    var DEAD_CAP_POS = [[76, 353], [93, 353], [110, 353], [127, 353], [144, 353], [161, 353]];
+    var DEAD_SUB_POS = [[499, 294], [518, 294], [537, 294], [556, 294]];
+    var DEAD_S = 0.52;
 
-    // reveal the next generation: it sprouts (pink, glowing) from the previous one along a thin twig,
-    // and that previous lead greys into an archived box — one clear step after another, but each step
-    // can head a different way, so the lineage winds in diverse directions instead of a straight column.
-    function spawnNode() {
-      var i = grow.gens;
-      if (i >= PATH.length) return;
-      var n = PATH[i];
-      if (i > 0) {
-        var pp = PATH[i - 1];
-        leadLine.insertBefore(mk('line', { 'class': 'twig', x1: pp.x, y1: pp.y, x2: n.x, y2: n.y }), leadLine.firstChild);
-        var prev = leadLine.querySelector('.gen--live');
-        if (prev) { prev.classList.remove('gen--live'); prev.classList.add('gen--arch'); prev.querySelector('.genfig').style.color = '#a79eb3'; }
+    // Replay the edits up to version i. Retirements from the previous version are gone for good,
+    // so the harness is free to shrink; everything surviving settles into "carried". Each item
+    // remembers how it got here, which is what the box draws.
+    function versionAt(i) {
+      var items = [], j, k, n, a, r;
+      for (j = 0; j <= i; j++) {
+        r = RELEASE[j];
+        items = items.filter(function (it) { return it.st !== 'retired'; });
+        items.forEach(function (it) { it.st = 'carried'; });
+        for (a in (r.retire || {})) {                     // oldest capability on that axis is deprecated first
+          for (n = 0; n < r.retire[a]; n++) {
+            for (k = 0; k < items.length; k++) {
+              if (items[k].st === 'carried' && items[k].axis === a) { items[k].st = 'retired'; break; }
+            }
+          }
+        }
+        for (n = 0; n < (r.revise || 0); n++) {           // the most recent one gets reworked in place
+          for (k = items.length - 1; k >= 0; k--) { if (items[k].st === 'carried') { items[k].st = 'revised'; break; } }
+        }
+        for (a in r.add) { for (k = 0; k < r.add[a]; k++) items.push({ axis: a, st: 'new' }); }
       }
-      var g = mk('g', { 'class': 'gen gen--live' });
-      g.appendChild(mk('rect', { 'class': 'genbox', x: (n.x - BOX_W / 2).toFixed(1), y: (n.y - BOX_H / 2).toFixed(1), width: BOX_W, height: BOX_H, rx: 10, fill: '#f4f1f7', stroke: '#c7bdd3', 'stroke-width': 1.4 }));
-      var fig = mk('g', { 'class': 'genfig' }); fig.style.color = '#e6007e';
-      fig.appendChild(mk('use', { href: '#person', x: (n.x - FIG_W / 2).toFixed(1), y: (n.y - FIG_H / 2).toFixed(1), width: FIG_W, height: FIG_H }));
-      g.appendChild(fig); leadLine.appendChild(g);
-      grow.gens++;
+      return items;
     }
 
-    // a sub-agent joins orchestration; the box stretches right/down to keep it inside
-    function spawnSub() {
-      var sp = SUB_POS[grow.subs++];
-      var g = mk('g', { 'class': 'gen' });
-      var f = mk('g'); f.style.color = grow.subs % 2 ? '#6366f1' : '#818cf8';
-      f.appendChild(mk('use', { href: '#person', x: sp[0], y: sp[1], width: 22, height: 24 }));
-      g.appendChild(f); subGrow.appendChild(g);
-      grow.orchR = Math.max(grow.orchR, sp[0] + 34);
-      grow.orchB = Math.max(grow.orchB, sp[1] + 36);
-      orchBox.style.width = (grow.orchR - ORCH_X) + 'px';
-      orchBox.style.height = (grow.orchB - ORCH_Y) + 'px';
+    // how many capabilities this version added, revised and retired relative to the one it replaced
+    function editLabel(i) {
+      var r = RELEASE[i], a, added = 0, dropped = 0, parts = [];
+      if (i === 0) return '';
+      for (a in r.add) added += r.add[a];
+      for (a in (r.retire || {})) dropped += r.retire[a];
+      if (added) parts.push('+' + added);
+      if (r.revise) parts.push('~' + r.revise);
+      if (dropped) parts.push('\u2212' + dropped);
+      return parts.join(' ');
     }
 
-    // zoom the camera out in steps as the winding lineage outgrows the frame, keeping it all in view
-    function applyZoom() {
-      var g = grow.gens;
-      var s = g >= 9 ? 0.55 : g >= 7 ? 0.66 : g >= 5 ? 0.72 : g >= 3 ? 0.86 : g >= 2 ? 0.94 : 1;
-      world.style.transform = 'scale(' + s + ')';
+    function bandWidth(n) { return CHIP_X - VER_X + n * CHIP_PITCH + VER_PAD; }
+
+    // The harness in front of the system right now, grouped by axis: capabilities carried over from
+    // the last version sit faded, this version's additions are solid, revisions are ringed and
+    // retirements hollow. The box resizes to whatever it holds, so a harness that has just shed half
+    // of itself does not look like one that doubled.
+    function buildBand(i) {
+      var items = versionAt(i).slice().sort(function (p, q) { return AXIS_ORDER[p.axis] - AXIS_ORDER[q.axis]; });
+      verN.textContent = 'V' + (i + 1);
+      verEdit.textContent = editLabel(i);
+      verChips.textContent = '';
+      items.forEach(function (it, k) {
+        var g = mk('g', it.st === 'carried' ? {} : { 'class': 'pop' });
+        var c = mk('rect', {
+          x: CHIP_X + k * CHIP_PITCH, y: CHIP_Y, width: CHIP, height: CHIP, rx: 2,
+          fill: it.st === 'retired' ? '#fff' : AXIS_FILL[it.axis],
+          opacity: it.st === 'carried' ? 0.45 : 1
+        });
+        if (it.st === 'retired') { c.setAttribute('stroke', '#cfc7bd'); c.setAttribute('stroke-width', 1.2); }
+        if (it.st === 'revised') { c.setAttribute('stroke', '#c2410c'); c.setAttribute('stroke-width', 1.6); }
+        g.appendChild(c);
+        verChips.appendChild(g);
+      });
+      grow.bandW = bandWidth(items.length);
+      verBox.style.width = grow.bandW + 'px';
+      aimInflow();
     }
 
+    // the two arrows carrying this version's harness down into the loop, aimed at the task and at
+    // orchestration; they leave from the end of the harness box, wherever it now reaches
+    function aimInflow() {
+      var cx = VER_X + grow.bandW - 30;
+      inflowA.setAttribute('d', 'M' + cx + ',-28 C' + cx + ',110 150,120 150,204');
+      inflowB.setAttribute('d', 'M' + cx + ',-28 C' + cx + ',110 566,130 566,182');
+    }
+
+    // ---- The shape the grid is building ----
+    // Drawn out square by square rather than rasterised from curves: nineteen across is small enough
+    // that every square is a decision, and a curve fitter only gets in the way. '#' is shell, '@' the
+    // core, and the digits index NODE_FILL. The core sits dead centre, on the slot the level below
+    // lands in, so a robot always grows out of the robot it is made of.
+    // There is deliberately only one symbol in the whole animation: what the cells build is the same
+    // thing every cell is a picture of, one scale up. That is the entire claim, and a second symbol
+    // anywhere would break it.
+    var ROBOT = [
+      '...................',
+      '.........4.........',
+      '.........#.........',
+      '.....#########.....',
+      '.....#00###00#.....',
+      '.....#00###00#.....',
+      '.....#########.....',
+      '.....##44444##.....',
+      '........###........',
+      '....22###@###22....',
+      '....22##@@@##22....',
+      '....22###@###22....',
+      '....22#######22....',
+      '....22#######22....',
+      '......#######......',
+      '......##...##......',
+      '......##...##......',
+      '.....333...333.....',
+      '...................'
+    ];
+    var STEP = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+
+    var GLYPH = (function () {
+      var kind = {}, nb = {}, cells = [], set = {}, start = ((GN - 1) / 2) * (GN + 1), q = [start], i;
+      ROBOT.forEach(function (row, gy) {
+        row.split('').forEach(function (c, gx) {
+          if (c !== '.') kind[gy * GN + gx] = c === '#' ? SHELL_K : c === '@' ? CORE_K : +c;
+        });
+      });
+      // Everything, reached by walking out from the core the way a builder walks. A builder only ever
+      // steps to a 4-neighbour, and the growth only ever begins in one place, so anything the core
+      // cannot reach could never be built — taking it out here means the shape is exactly what will
+      // get built rather than that plus a few squares that stay empty forever.
+      set[start] = 1;
+      while (q.length) {
+        i = q.pop(); cells.push(i);
+        STEP.forEach(function (d) {
+          var px = (i % GN) + d[0], py = ((i / GN) | 0) + d[1], j = py * GN + px;
+          if (px < 0 || py < 0 || px >= GN || py >= GN || set[j] || kind[j] === undefined) return;
+          set[j] = 1; q.push(j);
+        });
+      }
+      // the moves a builder is allowed, precomputed
+      cells.forEach(function (i) {
+        var out = [];
+        STEP.forEach(function (d) {
+          var px = (i % GN) + d[0], py = ((i / GN) | 0) + d[1], j = py * GN + px;
+          if (px >= 0 && py >= 0 && px < GN && py < GN && set[j]) out.push(j);
+        });
+        nb[i] = out;
+      });
+      return { cells: cells, nb: nb, kind: kind, start: start };
+    })();
+
+    function cellCentre(i) {
+      return { x: GX0 + PITCH * ((i % GN) + 0.5), y: GY0 + PITCH * (((i / GN) | 0) + 0.5) };
+    }
+
+    // The block on its own, in the colour its square has in the robot: eyes, antenna, arms and feet in
+    // their own, the core in the core's, and the shell shaded by position rather than by when the cell
+    // landed — position is stable, so the shell reads as one textured surface instead of reshuffling
+    // as the builders wander over it.
+    function cellBox(i) {
+      var h = CELL / 2, k = GLYPH.kind[i];
+      return mk('rect', {
+        'class': 'cell__box', x: -h, y: -h, width: CELL, height: CELL, rx: CELL * 0.25,
+        fill: k < 5 ? NODE_FILL[k] : k === CORE_K ? CORE_FILL
+          : CELL_FILL[(((i % GN) * 7 + ((i / GN) | 0) * 13) >>> 0) % CELL_FILL.length]
+      });
+    }
+
+    function atSlot(g, i) {
+      var c = cellCentre(i);
+      g.style.transform = 'translate(' + c.x.toFixed(1) + 'px,' + c.y.toFixed(1) + 'px)';
+      return g;
+    }
+
+    // ---- The diagram reorganised into the symbol ----
+    // Every solid part of the diagram, broken into pieces no bigger than a few cells. A node box or a
+    // layer of the state stack is far too big to be one cell of the shape, so it comes apart into the
+    // handful it is worth — which is why the diagram can supply most of the symbol itself instead of
+    // handing over one token and letting something else build the rest.
+    // getBoundingClientRect rather than getBBox: nearly all of these are positioned by transforms that
+    // have been animating all through the harness run, and only the screen box knows where they are.
+    function diagramPieces() {
+      var out = [], m = sceneEl.getScreenCTM().inverse(), a, b;
+      Array.prototype.forEach.call(sceneEl.querySelectorAll(PIECE_SEL), function (el) {
+        var r = el.getBoundingClientRect(), nx, ny, w, h, ix, iy;
+        if (r.width < 2 || r.height < 2) return;
+        a = loop.createSVGPoint(); a.x = r.left; a.y = r.top; a = a.matrixTransform(m);
+        b = loop.createSVGPoint(); b.x = r.right; b.y = r.bottom; b = b.matrixTransform(m);
+        nx = Math.max(1, Math.min(PIECE_MAX_X, Math.round((b.x - a.x) / CELL)));
+        ny = Math.max(1, Math.min(PIECE_MAX_Y, Math.round((b.y - a.y) / CELL)));
+        w = (b.x - a.x) / nx; h = (b.y - a.y) / ny;
+        for (iy = 0; iy < ny; iy++) {
+          for (ix = 0; ix < nx; ix++) {
+            out.push({
+              el: el, x: a.x + w * (ix + 0.5), y: a.y + h * (iy + 0.5),
+              w: Math.max(w, 3), h: Math.max(h, 3)
+            });
+          }
+        }
+      });
+      return out;
+    }
+
+    // Where each piece ends up inside the one slot it is all collapsing into: a packed grid, filled in
+    // the order the diagram is read, so the block that is left is the diagram with its own arrangement
+    // still in it rather than an anonymous square. Rows are centred on their own count so a short last
+    // row does not sit off to one side, and each is ordered left to right the way the diagram was.
+    function packSlots(ps) {
+      var side = Math.ceil(Math.sqrt(ps.length)), rows = Math.ceil(ps.length / side);
+      var sub = CELL / side, c = cellCentre(GLYPH.start), r, row, n;
+      for (r = 0; r < rows; r++) {
+        row = ps.slice(r * side, r * side + side).sort(function (a, b) { return a.x - b.x; });
+        n = row.length;
+        row.forEach(function (p, k) {
+          p.tx = c.x + (k + 0.5 - n / 2) * sub;
+          p.ty = c.y + (r + 0.5 - rows / 2) * sub;
+          ps[r * side + k] = p;
+        });
+      }
+      return sub;
+    }
+
+    // The diagram does not spread out into the shape — it collapses into a single cell of it. Every
+    // solid part detaches, becomes a block the shape of its own footprint, and flies to its place in a
+    // pack filling one slot at the centre, shrinking on the way. What is left is one block that is
+    // visibly made of the entire system, and the shape then grows out of that one block.
+    // This is the same move as every scale change above it, and that is the point of the whole thing:
+    // a finished system is not an endpoint, it is one component of the next one.
+    function reorganise() {
+      // top to bottom, so the diagram is taken apart and packed in the order it is read
+      var ps = diagramPieces().sort(function (a, b) { return (a.y - b.y) || (a.x - b.x); });
+      var run = grow.run, sub = packSlots(ps), end = ps.length * FLY_STAGGER + FLY_HANDOVER + FLY;
+      newLevel(false);
+      ps.forEach(function (p, k) {
+        var g = mk('g', { 'class': 'cell is-flying' }), at = k * FLY_STAGGER;
+        g.appendChild(cellBox(GLYPH.start));
+        g.style.opacity = '0';
+        g.style.transform = 'translate(' + p.x.toFixed(1) + 'px,' + p.y.toFixed(1) + 'px) scale(' +
+          (p.w / CELL).toFixed(3) + ',' + (p.h / CELL).toFixed(3) + ')';
+        grow.cells.appendChild(g);
+        grow.flying.push(g);
+        // Each part hands over to its own blocks where it stands, and only then do they leave. The
+        // handover has to be staggered with the flight rather than done to the whole diagram at once,
+        // or the parts are all gone a second before their blocks have got anywhere. A part that came
+        // apart into several blocks goes when the first of them is ready to take over.
+        // The run token: there are two of these per piece and a few hundred in flight, so rather than
+        // track them all, a reset invalidates them and they retire on their own.
+        setTimeout(function () {
+          if (grow.run !== run) return;
+          if (p.el.style.opacity !== '0') {
+            p.el.style.transition = 'opacity ' + FLY_HANDOVER + 'ms ease';
+            p.el.style.opacity = '0';
+          }
+          g.style.opacity = '1';
+        }, at);
+        setTimeout(function () {
+          if (grow.run !== run) return;
+          g.style.transform = 'translate(' + p.tx.toFixed(2) + 'px,' + p.ty.toFixed(2) + 'px) scale(' +
+            (sub * 0.88 / CELL).toFixed(4) + ')';
+        }, at + FLY_HANDOVER);
+      });
+      // the rest of the diagram — frames, labels, arrows, edges — has no part to give, so it just goes
+      sceneEl.classList.add('is-shedding');
+      // The pack is now a cell-sized square of the diagram's own pieces, so the cell it has become can
+      // simply come up underneath it and the pack fade off: same size, same place, no cut.
+      grow.upT = setTimeout(function () {
+        buildCell(GLYPH.start, true);
+        sceneEl.style.display = 'none';
+        grow.flying.forEach(function (g) { g.style.opacity = '0'; });
+        grow.condT = setTimeout(function () {
+          grow.flying.forEach(function (g) { g.remove(); });
+          grow.flying = [];
+        }, 700);
+        grow.upT = setTimeout(beginLevel, 620);   // it sits there alone for a beat first
+      }, end + 140);
+    }
+
+    // The robot small enough to fit in one square, laid out on the same nineteen-square grid the built
+    // one is laid out on and measured from the same centre, so the little one and the big one are the
+    // same drawing at two scales rather than two drawings that resemble each other. Too small for 135
+    // separate squares, so it is the silhouette: eleven blocks in map coordinates.
+    function robotMark(g, u, shell, accent, eye) {
+      [[9.1, 2, 0.8, 1.6, shell], [8, 0.9, 3, 1.5, accent],
+      [5, 3, 9, 5, shell], [6.2, 4.1, 1.9, 1.9, eye], [10.9, 4.1, 1.9, 1.9, eye],
+      [7.4, 6.9, 4.2, 1.1, accent], [8, 7.8, 3, 1.6, shell],
+      [4, 9.4, 2, 4.6, shell], [13, 9.4, 2, 4.6, shell], [6, 9, 7, 6, shell],
+      [6, 15.2, 3, 2.9, shell], [10, 15.2, 3, 2.9, shell]].forEach(function (b) {
+        g.appendChild(mk('rect', {
+          x: ((b[0] - 9.5) * u).toFixed(2), y: ((b[1] - 9.5) * u).toFixed(2),
+          width: (b[2] * u).toFixed(2), height: (b[3] * u).toFixed(2),
+          rx: (Math.min(b[2], b[3]) * u * 0.3).toFixed(2), fill: b[4]
+        }));
+      });
+      return g;
+    }
+
+    // A cell is one whole system, at the size a whole system is when you are a scale up from it. It
+    // arrives showing what it is — a robot, drawn small — and then settles into a plain block, because
+    // from here what it was internally stops mattering and only that it got built does. The frontier
+    // is detailed and the interior is masonry.
+    function buildCell(i, quiet) {
+      var g = mk('g', { 'class': 'cell' }), pop = mk('g', quiet ? {} : { 'class': 'pop' }), h = CELL / 2;
+      var det = mk('g', { 'class': 'cell__det' });
+      pop.appendChild(cellBox(i));
+      det.appendChild(mk('rect', { x: -h, y: -h, width: CELL, height: CELL, rx: CELL * 0.25, fill: '#fff', stroke: '#e2dce8', 'stroke-width': 1.2 }));
+      robotMark(det, DET_U, '#c7c1d4', '#e6007e', '#8b8df5');
+      pop.appendChild(det);
+      g.appendChild(pop);
+      grow.cells.appendChild(atSlot(g, i));
+      // hand off from "a system, in detail" to "a system, counted"
+      setTimeout(function () { det.style.opacity = '0'; }, 620);
+      return g;
+    }
+
+    // A builder is a copy of the shape it is filling in, at the size of one cell. That is the whole
+    // claim in one object: the thing doing the building is the thing being built, one scale down.
+    // Its arrival animation gets a group of its own. popIn ends on `transform: none` and fills both
+    // ways, and an animated transform outranks an inline one — on the positioned element it would
+    // overwrite the translate that puts the builder on its square, for good, and park it at the origin.
+    function buildAgentEl() {
+      var g = mk('g', { 'class': 'agent' });
+      g.appendChild(robotMark(mk('g'), CELL * 0.048, '#e6007e', '#e6007e', '#fff'));
+      grow.agentsEl.appendChild(g);
+      return g;
+    }
+
+    function placeAgent(ag) {
+      var c = cellCentre(ag.idx);
+      ag.el.style.transform = 'translate(' + c.x.toFixed(1) + 'px,' + c.y.toFixed(1) + 'px)';
+    }
+
+    // The camera holds still. It has to: a grid is deliberately the same size as the system it was
+    // built out of, so once the recursion starts there is never anything new to frame, and every
+    // apparent change of scale on screen is a real one — the previous grid actually shrinking into a
+    // slot — rather than the view moving. The only adjustment is at the start of the recursion, from
+    // the diagram's box (768 x 884) to the grid's square (886), which is under three percent.
+    function fitCamera() {
+      var x0, y0, x1, y1, s, tx, ty;
+      if (grow.level === 0) {
+        x0 = Math.min(GEN.x, STATE.x); y0 = Math.min(GEN.y, STATE.y);
+        x1 = Math.max(GEN.x + GEN.w, STATE.x + STATE.w);
+        y1 = Math.max(GEN.y + GEN.h, STATE.y + stateHeight(grow.layers));
+      } else {
+        x0 = GX0; y0 = GY0; x1 = GX0 + SPAN; y1 = GY0 + SPAN;
+      }
+      s = Math.min((VB.w - 2 * VB_PAD) / (x1 - x0), (VB.h - 2 * VB_PAD) / (y1 - y0));
+      tx = VB.x + (VB.w - (x1 - x0) * s) / 2 - x0 * s;
+      ty = VB.y + (VB.h - (y1 - y0) * s) / 2 - y0 * s;
+      camera.style.transform = 'translate(' + tx.toFixed(1) + 'px,' + ty.toFixed(1) + 'px) scale(' + s.toFixed(4) + ')';
+    }
+
+    // A new grid, one scale up from whatever is currently on top, and always starting from exactly one
+    // filled slot at its centre: whatever the level below turned out to be, that is now one component.
+    // `shrink` is how the level below gets into that slot. It is false only for the first grid, where
+    // the diagram gets there by coming apart and packing itself in rather than by contracting whole.
+    // Everywhere above, the shrink factor is not a taste decision — it is GN/FILL, the ratio of a grid
+    // to one of its own cells, so the level below lands exactly in a slot and the grid above is
+    // exactly the size the level below used to be. That is also why the camera never has to move.
+    function newLevel(shrink) {
+      var below = grow.top, lvl = mk('g', { 'class': 'lvl' }), lat = mk('g', { 'class': 'lattice' }), i;
+      grow.level++;
+      // Every slot the grid has, marked, so that a part landing in one reads as landing in a field of
+      // them rather than just stopping somewhere. Fades up rather than appearing.
+      for (i = 0; i < GN * GN; i++) {
+        var c = cellCentre(i);
+        lat.appendChild(mk('circle', { cx: c.x.toFixed(1), cy: c.y.toFixed(1), r: 2.8 }));
+      }
+      lat.classList.add('is-rising');
+      lvl.appendChild(lat);
+      setTimeout(function () { lat.classList.add('is-on'); }, 30);
+      // The slot the level below lands in, backed by a pale block: a finished grid reduces to a small
+      // mark, and it needs something behind it or its slot reads as a hole in the masonry, and that
+      // something has to be pale or the mark is indigo on indigo. What sits in it is the whole of the
+      // previous grid, which is the only place the recursion is literally visible.
+      lvl.appendChild(atSlot(mk('g', { 'class': 'cell' }), GLYPH.start)).appendChild(mk('rect', {
+        'class': 'cell__seat', x: -CELL / 2, y: -CELL / 2, width: CELL, height: CELL, rx: CELL * 0.25
+      }));
+      if (shrink) lvl.appendChild(below);
+      grow.cells = mk('g', { 'class': 'cells' });
+      grow.agentsEl = mk('g', { 'class': 'agents' });
+      lvl.appendChild(grow.cells);
+      lvl.appendChild(grow.agentsEl);
+      stack.appendChild(lvl);
+      grow.top = lvl;
+      // after the move into the new level, not before: reparenting mid-transition can drop it
+      if (shrink) {
+        below.style.transformOrigin = RX + 'px ' + RY + 'px';
+        below.classList.add('is-nested');
+        requestAnimationFrame(function () {
+          below.style.transform = 'scale(' + (1 / ZOOM).toFixed(5) + ')';
+        });
+      }
+      grow.live = {};
+      grow.live[GLYPH.start] = 1;                   // whatever came before is the cell it lands in
+      grow.agents = [];
+      grow.ticks = 0;
+      grow.doneAt = 0;
+      fitCamera();
+    }
+
+    // The shape grows out of that one cell. The first builder stands beside the centre slot rather
+    // than on it: that slot is the level below, and two marks in one slot reads as a mistake.
+    function beginLevel() {
+      var nb = GLYPH.nb[GLYPH.start];
+      spawn(nb[(Math.random() * nb.length) | 0], true);
+      cellTick();
+    }
+
+    // The new grid starts building while the old one is still visibly shrinking into its slot, which
+    // is the only thing that keeps a 24-fold drop from leaving the frame empty for a second — and it
+    // is also the truer picture, since the next system is not waiting for the last one to finish
+    // becoming a component of it.
+    function levelUp() {
+      newLevel(true);
+      grow.upT = setTimeout(beginLevel, 360);
+    }
+
+    function spawn(i, atStart) {
+      var ag = { idx: i, el: buildAgentEl() };
+      placeAgent(ag);
+      if (!atStart) ag.el.firstChild.classList.add('pop');
+      grow.agents.push(ag);
+      return ag;
+    }
+
+    // One tick of the build. Every builder lays a cell where it stands and steps to a neighbour of
+    // the shape that nobody has taken; boxed in, it is finished and goes. Then the frontier is
+    // restocked up to a budget that grows with the square of the tick count, so a level opens with
+    // one builder and ends with dozens — the acceleration is in the head count, not the clock.
+    function cellTick() {
+      var t = grow.ticks++, live = [], taken = {}, frontier = [], budget, k, i;
+      grow.agents.forEach(function (ag) { taken[ag.idx] = 1; });
+      grow.agents.forEach(function (ag) {
+        if (!grow.live[ag.idx]) { grow.live[ag.idx] = 1; buildCell(ag.idx); }
+        var open = GLYPH.nb[ag.idx].filter(function (j) { return !grow.live[j] && !taken[j]; });
+        if (!open.length) { ag.el.classList.add('is-done'); setTimeout(function () { ag.el.remove(); }, 340); return; }
+        ag.idx = open[(Math.random() * open.length) | 0];
+        taken[ag.idx] = 1;
+        placeAgent(ag);
+        live.push(ag);
+      });
+      grow.agents = live;
+      // Every square a builder could put something in next: neighbours of what is already there, which
+      // is why the whole robot comes out of the one square at its centre and never starts anywhere
+      // else. New builders are only ever put on this list, so growth stays one connected front.
+      Object.keys(grow.live).forEach(function (i) {
+        GLYPH.nb[i | 0].forEach(function (j) {
+          if (!grow.live[j] && !taken[j] && frontier.indexOf(j) < 0) frontier.push(j);
+        });
+      });
+      if (!frontier.length && !live.length) {
+        grow.doneAt = 1;
+        fitCamera();
+        if (grow.level < LEVELS) grow.upT = setTimeout(levelUp, 700);
+        return;
+      }
+      // a level opens with one builder and ends with dozens, and each level runs the ramp harder than
+      // the one below: a grid 24 times the size is not 24 times the wait
+      budget = Math.min(AG_MAX, Math.max(grow.level, Math.floor(Math.pow(t / (RAMP / (1 + 0.62 * (grow.level - 1))), 2))));
+      for (k = grow.agents.length; k < budget && frontier.length; k++) {
+        i = (Math.random() * frontier.length) | 0;
+        spawn(frontier[i], false);
+        frontier.splice(i, 1);
+      }
+      fitCamera();
+      grow.tickT = setTimeout(cellTick, TICK);
+    }
+
+    function stateHeight(n) { return 56 + 15 * n; }
+
+    // The state stack: one layer per generation that has run, and the box grows to hold them. It is
+    // the one thing on screen that only ever gets bigger.
+    function buildStateLayers(n) {
+      var k, g, t;
+      grow.layers = n;
+      stateLayers.textContent = '';
+      for (k = 0; k < n; k++) {
+        g = mk('g', { 'class': 'slayer' + (k === n - 1 ? ' pop' : '') });
+        t = mk('text', { 'class': 'slayer__n', x: 286, y: 609 + k * 15 });
+        t.textContent = 'V' + (k + 1);
+        g.appendChild(t);
+        g.appendChild(mk('rect', {
+          x: 318, y: 600 + k * 15, width: 424, height: 10, rx: 5,
+          fill: k === n - 1 ? '#6366f1' : '#a5b4fc',
+          opacity: k === n - 1 ? 1 : 0.5
+        }));
+        stateLayers.appendChild(g);
+      }
+      stateBox.style.height = stateHeight(n) + 'px';
+    }
+
+    // ...and the same capability lands inside the loop, where the system now has to cope with it.
+    // Each one is a positioned wrapper around a popping chip, so survivors can re-flow into the
+    // slot grid when something ahead of them is retired.
+    function innerCap(axis) {
+      var g = mk('g', { 'class': 'hslot', 'data-axis': axis });
+      var pop = mk('g', { 'class': 'pop hcap' });
+      pop.appendChild(mk('rect', { x: 0, y: 0, width: 26, height: 15, rx: 4, fill: axis === 'skill' ? '#a5d8c4' : '#c4b5fd' }));
+      g.appendChild(pop);
+      capGroup.appendChild(g);
+      grow.caps.push(g);
+      flowCaps();
+    }
+
+    // a released specialist joins orchestration; the box resizes to hold whoever is currently there
+    function innerSub() {
+      var g = mk('g', { 'class': 'hslot', 'data-axis': 'agent' });
+      var pop = mk('g', { 'class': 'pop hcap' });
+      var f = mk('g'); f.style.color = grow.subs.length % 2 ? '#6366f1' : '#818cf8';
+      f.appendChild(mk('use', { href: '#person', x: 0, y: 0, width: 22, height: 24 }));
+      pop.appendChild(f); g.appendChild(pop);
+      subGrow.appendChild(g);
+      grow.subs.push(g);
+      flowSubs();
+    }
+
+    // A retired capability does not leave the loop, it shrinks out of service: the oldest one on
+    // that axis drops into the vestige row, the live slots close the gap above it, and the little
+    // greyed remnants pile up as the system keeps improving past them.
+    function dropInner(live, dead, axis, reflow) {
+      var idx = -1, k;
+      for (k = 0; k < live.length; k++) { if (live[k].getAttribute('data-axis') === axis) { idx = k; break; } }
+      if (idx < 0) return;
+      var g = live.splice(idx, 1)[0];
+      g.classList.add('is-retired');
+      dead.push(g);
+      reflow();
+    }
+
+    function flowCaps() {
+      grow.caps.forEach(function (g, k) { put(g, CAP_POS[Math.min(k, CAP_POS.length - 1)], 1); });
+      grow.deadCaps.forEach(function (g, k) { put(g, DEAD_CAP_POS[Math.min(k, DEAD_CAP_POS.length - 1)], DEAD_S); });
+    }
+
+    function flowSubs() {
+      var r = ORCH_X + 150, b = ORCH_Y + 122;
+      grow.subs.forEach(function (g, k) {
+        var p = SUB_POS[Math.min(k, SUB_POS.length - 1)];
+        put(g, p, 1);
+        r = Math.max(r, p[0] + 34); b = Math.max(b, p[1] + 36);
+      });
+      grow.deadSubs.forEach(function (g, k) {
+        var p = DEAD_SUB_POS[Math.min(k, DEAD_SUB_POS.length - 1)];
+        put(g, p, DEAD_S);
+        r = Math.max(r, p[0] + 22 * DEAD_S + 10); b = Math.max(b, p[1] + 24 * DEAD_S + 12);
+      });
+      orchBox.style.width = (r - ORCH_X) + 'px';
+      orchBox.style.height = (b - ORCH_Y) + 'px';
+    }
+
+    function put(g, p, s) {
+      g.style.transform = 'translate(' + p[0] + 'px,' + p[1] + 'px) scale(' + s + ')';
+    }
+
+    // pulse the inflow arrows while a release travels from the harness into the system
+    function flashInflow() {
+      Array.prototype.forEach.call(inflows, function (n) { n.classList.add('is-releasing'); });
+      clearTimeout(grow.flashT);
+      grow.flashT = setTimeout(function () {
+        Array.prototype.forEach.call(inflows, function (n) { n.classList.remove('is-releasing'); });
+      }, 1200);
+    }
+
+    // One harness turnover, which is also the end of a generation. The harness in front of the system
+    // is rebuilt for the new version and the edit lands inside the loop: what was added shows up,
+    // what was retired shrinks into the vestige row, and everything that came through is marked as
+    // inherited rather than new. The state below is untouched — it just gains a layer.
+    function release(i) {
+      var r = RELEASE[i], gone = versionAt(i).filter(function (it) { return it.st === 'retired'; }), axis, k;
+      Array.prototype.forEach.call(genEl.querySelectorAll('.hcap'), function (n) { n.classList.add('is-old'); });
+      buildBand(i);
+      buildStateLayers(i + 1);
+      fitCamera();
+      gone.forEach(function (it) {
+        if (it.axis === 'agent') dropInner(grow.subs, grow.deadSubs, 'agent', flowSubs);
+        else dropInner(grow.caps, grow.deadCaps, it.axis, flowCaps);
+      });
+      for (axis in r.add) {
+        for (k = 0; k < r.add[axis]; k++) {
+          if (axis === 'agent') innerSub(); else innerCap(axis);
+        }
+      }
+      flashInflow();
+    }
+
+    // V1 at level 0: the harness the system starts out with, the first layer of its state, and the
+    // camera in as close as it will ever be. Any levels a previous run stacked up are torn back down.
+    function resetGens() {
+      stack.appendChild(sceneEl);                   // out of whatever level it was nested in, first
+      Array.prototype.forEach.call(stack.querySelectorAll('.lvl'), function (e) { e.remove(); });
+      sceneEl.style.transform = '';
+      sceneEl.style.transformOrigin = '';
+      sceneEl.style.display = '';
+      sceneEl.classList.remove('is-shedding');
+      // every part that flew off to become a cell has to be put back where it was
+      Array.prototype.forEach.call(sceneEl.querySelectorAll(PIECE_SEL), function (el) {
+        el.style.transition = ''; el.style.opacity = '';
+      });
+      grow.flying = [];
+      grow.run++;
+      grow.level = 0;
+      grow.top = sceneEl;
+      grow.cells = null;
+      grow.agentsEl = null;
+      grow.agents = [];
+      grow.live = {};
+      grow.ticks = 0;
+      grow.doneAt = 0;
+      buildBand(0);
+      buildStateLayers(1);
+      fitCamera();
+    }
+
+    // The harness runs out of versions, and the system it has been building takes itself apart and
+    // puts itself back together as the shape it has been an instance of all along — or, with RECURSE
+    // off, the run simply ends on its last version and holds there.
     function growTick() {
-      for (var k = 0; k < 2 && grow.gens < PATH.length; k++) spawnNode();
-      for (var s = 0; s < 2 && grow.subs < SUB_POS.length; s++) spawnSub();
-      if (grow.caps < CAP_POS.length) { var cp = CAP_POS[grow.caps++]; capGroup.appendChild(mk('rect', { 'class': 'gen', x: cp[0], y: cp[1], width: 26, height: 15, rx: 4, fill: grow.caps % 2 ? '#c4b5fd' : '#d8b4fe' })); }
-      if (grow.subs % 2 === 0 && grow.mems < 5) { memGroup.appendChild(mk('ellipse', { 'class': 'gen', cx: 360, cy: 312 + grow.mems * 13, rx: 34, ry: 9, fill: '#fff', stroke: '#9aa1ad', 'stroke-width': 1.4 })); grow.mems++; }
-      applyZoom();
-      if (grow.gens >= PATH.length && grow.subs >= SUB_POS.length && grow.caps >= CAP_POS.length) { clearInterval(grow.timer); grow.timer = null; }
+      if (grow.step >= RELEASE.length - 1) {
+        grow.timer = null;
+        if (RECURSE) grow.condT = setTimeout(reorganise, 520);
+        return;
+      }
+      grow.step++;
+      release(grow.step);
+      grow.timer = setTimeout(growTick, growGap(grow.step));
     }
 
     function startGrow() {
-      if (grow.on || reduce) return;
+      if (grow.on) return;
       grow.on = true;
-      leadActive.style.opacity = '0';   // the static lead hands over to the living, winding lineage
-      grow.gens = grow.subs = grow.mems = grow.caps = 0;
-      grow.orchR = 641; grow.orchB = 312;
-      spawnNode();                      // first lead, exactly over the static one — then it winds onward
-      applyZoom();
-      grow.timer = setInterval(growTick, GROW_MS);
+      grow.step = 0;
+      // Static modes get the whole run of harness versions in one shot and stop there, holding the
+      // labelled diagram at its last version. The recursion above it is not something a single frame
+      // can say — and a frame of it would be a grid of anonymous blocks, which costs these readers
+      // the entire explanation for a shape that would not explain itself.
+      if (reduce || compact) {
+        while (grow.step < RELEASE.length - 1) { grow.step++; release(grow.step); }
+        return;
+      }
+      growTick();
     }
 
     function stopGrow() {
       if (!grow.on) return;
       grow.on = false;
-      if (grow.timer) { clearInterval(grow.timer); grow.timer = null; }
-      leadLine.innerHTML = '';
+      if (grow.timer) { clearTimeout(grow.timer); grow.timer = null; }
+      clearTimeout(grow.flashT);
+      clearTimeout(grow.tickT);
+      clearTimeout(grow.upT);
+      clearTimeout(grow.condT);
+      Array.prototype.forEach.call(inflows, function (n) { n.classList.remove('is-releasing'); });
+      Array.prototype.forEach.call(genEl.querySelectorAll('.hcap'), function (n) { n.classList.remove('is-old'); });
+      Array.prototype.forEach.call(capGroup.querySelectorAll('.hslot'), function (n) { n.remove(); });
       subGrow.innerHTML = '';
-      Array.prototype.forEach.call(capGroup.querySelectorAll('.gen'), function (n) { n.remove(); });
-      Array.prototype.forEach.call(memGroup.querySelectorAll('.gen'), function (n) { n.remove(); });
-      world.style.transform = '';
+      grow.subs = []; grow.caps = []; grow.deadSubs = []; grow.deadCaps = [];
       orchBox.style.width = ''; orchBox.style.height = '';
-      leadActive.style.opacity = '';
+      resetGens();
     }
 
     // re-collect every revealable element
     p1Layers = loop.querySelectorAll('[data-reveal]');
 
-    function setEvolve(on) {
-      leadNode.classList.toggle('is-evolving', on);
-      leadGlow.style.opacity = '0';   // no single glow — each live frontier lead glows on its own
+    // the figure's description only covers what it is actually going to do
+    if (RECURSE) {
+      loop.setAttribute('aria-label', loop.getAttribute('aria-label') + ' Once the harness has been ' +
+        'through every version it has, the whole system comes apart and packs itself into a single ' +
+        'cell of a robot being assembled a scale up, out of cells that are each a robot themselves, ' +
+        'and then it starts over.');
+    }
+
+    // Step 7 starts the outer harness turning over, and the step after it puts the inner adaptation in
+    // the foreground — the state stack lights up because that is what the system is rewriting. With no
+    // recursion step to be that one, step 7 carries both, or the state stack would never light at all.
+    var P1_INNER = RECURSE ? 8 : 7;
+
+    function setEvolve(on, inner) {
+      loop.classList.toggle('is-adapting', !!inner);
       if (on) startGrow(); else stopGrow();
     }
 
@@ -685,25 +1479,27 @@
       p1Layers.forEach(function (el) {
         var r = parseInt(el.getAttribute('data-reveal'), 10);
         el.classList.toggle('is-on', step >= r);
-        el.classList.toggle('is-current', r === step && step <= 6);
+        el.classList.toggle('is-current', r === step && step <= P1_BUILD);
       });
+      // The recursion is not a step of the loop and has no entry in the list, so the last one that does
+      // stays lit through it — it is what running the harness out to its last version leads to.
       p1Stages.forEach(function (el) {
-        el.classList.toggle('is-active', step <= 6 && parseInt(el.getAttribute('data-stage'), 10) === step);
+        el.classList.toggle('is-active', parseInt(el.getAttribute('data-stage'), 10) === Math.min(step, P1_LISTED));
       });
-      setEvolve(step >= 7);   // as it learns, the lead grows its next-generation self
+      setEvolve(step >= 7, step >= P1_INNER);   // the harness expands; the system adapts inside it
     }
 
-    // click a stage: pause and show the full core loop with that node lit
+    // click a stage: pause and show the loop with that node lit
     function focusStage(stage) {
       p1Layers.forEach(function (el) {
         var r = parseInt(el.getAttribute('data-reveal'), 10);
-        el.classList.toggle('is-on', r <= 6);
+        el.classList.toggle('is-on', r <= P1_BUILD || stage >= 7);
         el.classList.toggle('is-current', r === stage);
       });
       p1Stages.forEach(function (el) {
-        el.classList.toggle('is-active', parseInt(el.getAttribute('data-stage'), 10) === stage);
+        el.classList.toggle('is-active', parseInt(el.getAttribute('data-stage'), 10) === Math.min(stage, P1_LISTED));
       });
-      setEvolve(false);
+      setEvolve(stage >= 7, stage >= P1_INNER);
       state[1] = -1; // allow autoplay to re-apply from scratch later
     }
 
@@ -740,7 +1536,15 @@
     var compact = window.matchMedia('(max-width: 920px)').matches;
     var p1Timer = null, p1Paused = false;
 
-    function durFor(step) { return step <= 6 ? 900 : 11500; }
+    // Step 7 holds the run of harness turnovers; step 8 holds the recursion above it, which is two
+    // levels of grid and so much the longer of the two. Both are keyed off the animation's own
+    // timings rather than being round numbers: if growGap, TICK or LEVELS change, these follow.
+    // With the recursion off, step 7 is the last thing that happens and has to hold a few seconds
+    // past the end of the run as well, or the cycle restarts the instant the last version lands.
+    function durFor(step) {
+      if (step <= P1_BUILD) return 900;
+      return step === 7 ? (RECURSE ? 9300 : 13200) : 18500;
+    }
     function p1Tick() {
       var cur = state[1];
       setStep((cur >= P1_TOTAL || cur < 1) ? 1 : cur + 1);
@@ -764,9 +1568,11 @@
       });
     });
 
-    // Static modes: reduced-motion shows the grown loop; small screens show the core loop.
-    if (reduce) { setStep(P1_TOTAL); }
-    else if (compact) { setStep(P1_BUILD); }
+    // put V1 on screen, alone, before anything else runs
+    resetGens();
+
+    // Static modes: both reduced-motion and small screens get the fully evolved harness, held still.
+    if (reduce || compact) { setStep(P1_TOTAL); }
     else { setStep(1); }
 
     // Auto-play only while the framework is on screen; replay fresh on return.
