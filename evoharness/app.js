@@ -1201,6 +1201,123 @@ const TG = (() => {
         `<span class="tg-chip${cls ? " " + cls : ""}">${esc(x)}</span>`).join("")}</div>`
     : '<p class="tg-sub">none</p>');
 
+  /* What each gym tool is, fetched on first use. A name on its own does not say what
+   * `find_contact_by_portal_user` takes or how it differs from `find_user`, and the corpus
+   * cannot answer that -- the descriptions live in the gyms, so tools/dump_tool_docs.py
+   * asks them. Kept out of the gallery's own load: it is 424 KB that only a reader who
+   * opens a tool needs, on a tab that already fetches four megabytes of corpus. */
+  let docs = null;
+  let docsPending = null;
+  function loadDocs() {
+    if (docs) return Promise.resolve(docs);
+    if (!docsPending) {
+      docsPending = fetch("static/tool_docs.json")
+        .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`${r.status}`))))
+        .then((d) => (docs = d))
+        .catch(() => (docs = { servers: {}, gyms: {}, failed: true }));
+    }
+    return docsPending;
+  }
+
+  /* A tool is documented by the gym that serves it, and 29 names are served by more than
+   * one gym with a different meaning in each: `list_users` filters employees on HR and
+   * returns Graph objects on Teams. So the task's own servers answer first.
+   *
+   * They cannot answer everything. A fifth of what a task is offered comes from another
+   * domain's gym, which is the cumulative harness working as intended -- the pool grows
+   * across stages, so a CSM task ends up carrying calendar and drive tools it has no use
+   * for. Those still have a description; it just belongs to the gym that serves them, so
+   * the panel says whose it is. Where several gyms disagree and the task's own is not
+   * among them, the answer is one of theirs and the panel admits the rest exist. */
+  function toolDoc(t, name) {
+    if (!docs) return null;
+    for (const server of names(t[T.GYM])) {
+      const gym = (docs.servers || {})[server];
+      const entry = gym && (docs.gyms[gym] || {})[name];
+      if (entry) return { gym, own: true, ...entry };
+    }
+    const others = Object.keys(docs.gyms || {}).filter((g) => docs.gyms[g][name]);
+    if (!others.length) return null;
+    return { gym: others[0], own: false, alts: others.slice(1), ...docs.gyms[others[0]][name] };
+  }
+
+  /* Only worth offering where the gyms can answer: an EOG task acts on them, whereas an
+   * ALE task's chips are installed software, which they know nothing about. */
+  const hasGyms = (t) => names(t[T.GYM]).some((s) => (docs?.servers || SERVERS)[s]);
+  /* Server names as of the harvest, so the chips can be live before the docs arrive. */
+  const SERVERS = { "gym-calendar": 1, "gym-email-mcp": 1, "sn-hr-internal": 1,
+                    "gym-itsm-mcp": 1, "gym-teams-mcp": 1, "sn-csm-server": 1,
+                    "gym-google-drive-mcp": 1 };
+
+  /* Tool chips, each opening its own description. The panel rides with the group so a
+   * long pool does not push its answer off the end of the modal. */
+  const toolChips = (items, t, cls) => {
+    if (!items.length) return '<p class="tg-sub">none</p>';
+    if (!hasGyms(t)) return chips(items, cls);
+    return `<div class="tg-toolgrp">
+      <div class="tg-chips">${items.map((x) =>
+        `<button type="button" class="tg-chip is-doc${cls ? " " + cls : ""}"
+          data-tool="${esc(x)}">${esc(x)}</button>`).join("")}</div>
+      <div class="tg-doc" data-tg-doc hidden></div>
+    </div>`;
+  };
+
+  const GYM_LABEL = { calendar: "Calendar", csm: "CSM", drive: "Drive", email: "Email",
+                      hr: "HR", itsm: "ITSM", teams: "Teams" };
+
+  function docPanel(t, name) {
+    const d = toolDoc(t, name);
+    if (!d) {
+      return `<p class="tg-doc-none"><code>${esc(name)}</code> &mdash; ${docs && docs.failed
+        ? "the tool descriptions could not be loaded."
+        : `the gym no longer exposes this tool, so it has no description to read. The corpus
+           still offers it at this stage, which is what the chip reflects.`}</p>`;
+    }
+    const args = d.a || [];
+    const rets = d.o || [];
+    const gymName = esc(GYM_LABEL[d.gym] || d.gym);
+    const alts = (d.alts || []).map((g) => GYM_LABEL[g] || g);
+    return `<div class="tg-doc-head">
+        <code class="tg-doc-name">${esc(name)}</code>
+        <span class="tg-doc-gym">as the ${gymName} gym describes it${d.own ? ""
+          : `, which serves it into this task's pool${alts.length
+            ? ` &mdash; ${esc(alts.join(" and "))} define a tool of this name differently` : ""}`}</span>
+      </div>
+      ${d.d ? `<p class="tg-doc-d">${esc(d.d)}</p>` : ""}
+      ${args.length ? `<table class="tg-doc-args">
+        <thead><tr><th>Argument</th><th>Type</th><th>What it is</th></tr></thead>
+        <tbody>${args.map(([an, ty, req, gloss]) => `<tr>
+          <td><code>${esc(an)}</code>${req ? '<span class="tg-doc-req">required</span>' : ""}</td>
+          <td class="tg-doc-ty">${esc(ty || "\u2014")}</td>
+          <td>${esc(gloss || "\u2014")}</td>
+        </tr>`).join("")}</tbody></table>`
+        : '<p class="tg-sub">Takes no arguments.</p>'}
+      ${rets.length ? `<p class="tg-doc-o"><b>Returns</b> ${
+        rets.map((f) => `<code>${esc(f)}</code>`).join(" ")}</p>` : ""}`;
+  }
+
+  /* Fill the panel that belongs to the clicked chip's own group, and let a second click on
+   * the same chip close it again. */
+  function openDoc(btn) {
+    const grp = btn.closest(".tg-toolgrp");
+    const panel = grp && grp.querySelector("[data-tg-doc]");
+    if (!panel) return;
+    const was = btn.classList.contains("is-open");
+    grp.querySelectorAll(".tg-chip.is-open").forEach((c) => c.classList.remove("is-open"));
+    if (was) { panel.hidden = true; return; }
+    btn.classList.add("is-open");
+    panel.hidden = false;
+    const name = btn.dataset.tool;
+    if (docs) { panel.innerHTML = docPanel(S.open, name); return; }
+    panel.innerHTML = '<p class="tg-sub">Reading the tool description\u2026</p>';
+    loadDocs().then(() => {
+      /* The reader may have moved on, or closed the modal, while this was in flight. */
+      if (btn.classList.contains("is-open") && btn.dataset.tool === name) {
+        panel.innerHTML = docPanel(S.open, name);
+      }
+    });
+  }
+
   /* Figures in the detail view. Each is a button so it can open full size, and
    * the caption keeps the provenance of the file it came from. */
   function figBlock(t) {
@@ -1264,13 +1381,16 @@ const TG = (() => {
     <pre class="tg-pre">${esc(prompt(t))}</pre>
 
     <h4 class="tg-h4">Oracle ${esc(UNIT[tr])} &middot; what this task needs</h4>
-    ${chips(oracle)}
+    ${tr === "tools" ? toolChips(oracle, t) : chips(oracle)}
     <h4 class="tg-h4">Also in the pool at this stage${extra.length ? ` &middot; ${extra.length} more` : ""}</h4>
     ${extra.length
-      ? `<p class="tg-sub">Offered alongside the oracle set, and not needed here.</p>${chips(extra, "is-extra")}`
+      ? `<p class="tg-sub">Offered alongside the oracle set, and not needed here.${
+        tr === "tools" && hasGyms(t) ? " Open any of them to read what it does." : ""}</p>${
+        tr === "tools" ? toolChips(extra, t, "is-extra") : chips(extra, "is-extra")}`
       : '<p class="tg-sub">Nothing beyond the oracle set.</p>'}
 
-    ${sel.length ? `<h4 class="tg-h4">Tools mounted for it (${sel.length})</h4>${chips(sel, "is-extra")}` : ""}
+    ${sel.length ? `<h4 class="tg-h4">Tools mounted for it (${sel.length})</h4>${
+      toolChips(sel, t, "is-extra")}` : ""}
     ${soft.length ? `<h4 class="tg-h4">Software</h4>${chips(soft, "is-extra")}` : ""}
 
     ${vs.length ? `<h4 class="tg-h4">Graded on ${vs.length} check${vs.length === 1 ? "" : "s"}</h4>
@@ -1402,7 +1522,9 @@ const TG = (() => {
     dlg.addEventListener("click", (e) => { if (e.target === dlg) dlg.close(); });
     el("[data-tg-detail]").addEventListener("click", (e) => {
       const b = e.target.closest("[data-fig]");
-      if (b) zoom(Number(b.dataset.fig));
+      if (b) { zoom(Number(b.dataset.fig)); return; }
+      const chip = e.target.closest(".tg-chip.is-doc");
+      if (chip) openDoc(chip);
     });
 
     /* Stop the clip on close so audio-less playback doesn't keep decoding. */

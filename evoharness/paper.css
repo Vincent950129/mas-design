@@ -1586,6 +1586,52 @@ table.cs-tbl tbody tr:hover { background: #fbfcff; }
 .tg-chip.is-extra { background: #f8fafc; color: #64748b; border-color: #e2e8f0; }
 .tg-sub { margin: 0 0 7px; font-size: 0.78rem; color: var(--muted); }
 
+/* A tool chip that can be opened. Only the cursor and a hover lift say so: a pool runs to
+   seventy-odd of these, and anything louder would turn the list into a wall of buttons. */
+.tg-chip.is-doc { font-family: inherit; cursor: pointer; transition: background .12s, border-color .12s; }
+.tg-chip.is-doc:hover { background: #e0e7ff; border-color: #a5b4fc; }
+.tg-chip.is-extra.is-doc:hover { background: #eef2ff; border-color: #c7d2fe; color: #4338ca; }
+.tg-chip.is-doc:focus-visible { outline: 2px solid #4e54c8; outline-offset: 1px; }
+.tg-chip.is-doc.is-open { background: #4e54c8; border-color: #4e54c8; color: #fff; }
+
+.tg-toolgrp { margin: 0 0 7px; }
+.tg-doc {
+  margin: 7px 0 0;
+  padding: 11px 13px;
+  background: #f8faff;
+  border: 1px solid #e0e7ff;
+  border-radius: 10px;
+}
+.tg-doc-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; }
+.tg-doc-name { font-size: 0.8rem; font-weight: 750; color: #312e81; }
+.tg-doc-gym { font-size: 0.7rem; font-weight: 650; color: var(--muted); }
+.tg-doc-d { margin: 6px 0 0; font-size: 0.79rem; line-height: 1.6; color: #1f2a44; }
+.tg-doc-none { margin: 0; font-size: 0.78rem; line-height: 1.6; color: var(--muted); }
+.tg-doc-args { width: 100%; margin: 9px 0 0; border-collapse: collapse; font-size: 0.74rem; }
+.tg-doc-args th {
+  text-align: left;
+  padding: 0 8px 4px 0;
+  font-size: 0.66rem;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: 1px solid #e0e7ff;
+}
+.tg-doc-args td { padding: 5px 8px 5px 0; vertical-align: top; border-bottom: 1px solid #eef2ff; }
+.tg-doc-args tr:last-child td { border-bottom: 0; }
+.tg-doc-args code { font-size: 0.72rem; color: #3730a3; }
+.tg-doc-req {
+  margin-left: 5px;
+  font-size: 0.6rem;
+  font-weight: 750;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  color: #b45309;
+}
+.tg-doc-ty { color: var(--muted); font-family: var(--mono, ui-monospace, monospace); }
+.tg-doc-o { margin: 9px 0 0; font-size: 0.74rem; line-height: 1.9; color: var(--muted); }
+.tg-doc-o code { font-size: 0.72rem; color: #475569; background: #eef2ff; padding: 1px 5px; border-radius: 4px; }
+
 .tg-vf {
   border: 1px solid var(--border);
   border-radius: 10px;
