@@ -18,7 +18,11 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 OUT = ROOT / "tools/proofs"
 BASE = "http://127.0.0.1:8777/evoharness/index.html"
 BANNER = "run the evolving mode in your browser"
-DEMO = "https://mas-orchestra.salesforceresearch.ai/mas_r1/demo/"
+# The demo the page sends readers to, with the state the paper wants them to land in:
+# the enterprise arm, the CSM gym, evolving mode already on. A quick tunnel, so the
+# hostname is only good for as long as the tunnel runs -- see the reachability check.
+DEMO = ("https://fails-scotland-diagnostic-joy.trycloudflare.com/"
+        "?mode=enterprise&gym=csm&evolving=1")
 
 fails: list[str] = []
 checks = 0
@@ -64,6 +68,16 @@ def main() -> int:
         check(pill.get_attribute("target") == "_blank"
               and "noopener" in (pill.get_attribute("rel") or ""),
               "the demo pill opens safely")
+        # A quick tunnel keeps its hostname only while the tunnel runs, and the page has no
+        # way to know it went away: the pill would still look right and land on a Cloudflare
+        # error. So follow it. A network failure here is not the page's fault, hence a note.
+        if DEMO.startswith("http"):
+            try:
+                probe = pg.request.get(DEMO, timeout=15000)
+                check(probe.ok, "the demo the pill points at is reachable",
+                      f"{probe.status} {DEMO}")
+            except Exception as exc:                       # offline run, or the tunnel is down
+                note("could not reach the demo", f"{type(exc).__name__}: {DEMO}")
         # Emphasis was the point of keeping it, so it must not render as one more tab.
         look = pg.eval_on_selector(
             ".pv-demo", "n => { const s = getComputedStyle(n);"
