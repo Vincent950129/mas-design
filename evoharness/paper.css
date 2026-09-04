@@ -366,6 +366,444 @@ body {
   .mq-track { animation: none; }
 }
 
+/* =====================================================================
+   The floor under the band: four systems running inside a stage, and the
+   moment the stage turns over. Everything here is driven off one attribute,
+   [data-phase] on .sim -- run, drop, adapt, and swap when one axis hands over
+   to the next -- so a phase is a state the page can be stopped in and read,
+   not a sequence of one-off transitions.
+   ===================================================================== */
+.sim-sec { padding: 0.6rem 0 0.4rem; }
+.sim {
+  border: 1px solid #e7e9f4;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 18px 34px -28px rgba(15, 23, 42, 0.55);
+  padding: 0.7rem 0.85rem 0.8rem;
+}
+.sim-head {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding-bottom: 0.55rem;
+  border-bottom: 1px solid #f0f2f9;
+  margin-bottom: 0.6rem;
+}
+/* Where the panel lands. It is the harness the whole floor is running against, so it holds
+   the stage and the pool, and it takes the hit when the next release arrives. */
+.sim-stage {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  flex: none;
+  padding: 0.3rem 0.6rem;
+  border-radius: 9px;
+  background: #eef0fb;
+  border: 1px solid #dfe3f7;
+  transition: background 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+}
+.sim-stage b { font-size: 0.9rem; font-weight: 800; color: #1f2a44; }
+.sim-stage b sub { font-size: 0.62em; }
+/* The three axes, and which one is being evaluated. They are three separate streams and a
+   system is measured on one at a time, so only the live one carries a pool: the other two
+   are named, greyed, and empty, because no run ever holds all three at once. Coloured as
+   the task gallery colours its axes.
+
+   They are also the way in. Waiting for an axis to come round is not a feature, so each
+   chip is a button that switches the floor to that stream -- which is why the two idle
+   ones are the ones that look pressable, and the live one does not. */
+.sim-mets { display: flex; align-items: baseline; gap: 4px; }
+.sim-met {
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 750;
+  line-height: 1.45;
+  white-space: nowrap;
+  cursor: pointer;
+  border-radius: 999px;
+  padding: 1px 7px;
+  color: #98a2b3;
+  background: #fff;
+  border: 1px solid #dfe3f0;
+  transition: color 0.25s ease, background 0.25s ease, border-color 0.25s ease;
+}
+.sim-met:hover { color: #475569; border-color: #c3cbdf; background: #f7f8fc; }
+.sim-met:focus-visible { outline: 2px solid #4e54c8; outline-offset: 1px; }
+.sim-met.is-live { cursor: default; }
+.sim-met.is-live[data-ax="tools"] {
+  color: var(--accent);
+  background: rgba(78, 84, 200, 0.1);
+  border-color: rgba(78, 84, 200, 0.22);
+}
+.sim-met.is-live[data-ax="skills"] {
+  color: #0f766e;
+  background: rgba(13, 148, 136, 0.1);
+  border-color: rgba(13, 148, 136, 0.22);
+}
+.sim-met.is-live[data-ax="agents"] {
+  color: #c2410c;
+  background: rgba(194, 65, 12, 0.09);
+  border-color: rgba(194, 65, 12, 0.2);
+}
+/* A count landing. Set on the node as it is written, so the two are one event. */
+.sim-met.is-up { animation: simUp 0.9s ease-out; }
+@keyframes simUp {
+  0%  { transform: translateY(-4px) scale(1.12); }
+  60% { transform: none; }
+}
+.sim[data-phase="adapt"] .sim-stage {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+  transform: scale(1.04);
+}
+/* Handing over to another axis. A release makes the harness flare; this is the opposite --
+   one evaluation ending and another starting, so the floor goes quiet and pale and the
+   capabilities of the stream that just ran fade out before the new axis writes its own. */
+.sim[data-phase="swap"] .sim-stage { background: #f6f7fb; border-color: #e9ecf5; }
+.sim[data-phase="swap"] .sn-cap { opacity: 0.25; }
+.sim[data-phase="swap"] .sn-cap rect,
+.sim[data-phase="swap"] .sn-lead rect,
+.sim[data-phase="swap"] .sn-work rect,
+.sim[data-phase="swap"] .sn-mem rect,
+.sim[data-phase="swap"] .sn-bar rect { animation: none; }
+.sim[data-phase="swap"] .sf { animation: none; opacity: 0; }
+.sim-say {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  color: #475569;
+}
+.sim-say b { color: #1f2a44; }
+.sim-say code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.72rem;
+  color: #3730a3;
+  background: #eef2ff;
+  border-radius: 4px;
+  padding: 1px 5px;
+  margin-left: 3px;
+}
+.sim-btn {
+  flex: none;
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--muted);
+  background: #fff;
+  border: 1px solid #e2e6f3;
+  border-radius: 999px;
+  padding: 0.24rem 0.7rem;
+  cursor: pointer;
+}
+.sim-btn:hover { color: var(--accent); border-color: #c7d2fe; }
+.sim-btn:focus-visible { outline: 2px solid #4e54c8; outline-offset: 1px; }
+
+/* The four cards are examples, and a reader who takes them for the supported list has read
+   the floor backwards: the benchmark grips a shape, and anyone can bring a system that has
+   one. Said once, quietly, under the grid rather than in the moving status line. */
+.sim-foot {
+  margin: 0.45rem 0 0;
+  font-size: 0.68rem;
+  line-height: 1.35;
+  color: #9aa3b4;
+}
+/* The one thing on this line a reader can act on, so it carries the accent while the
+   sentence around it stays quiet. */
+.sim-cta {
+  color: var(--accent);
+  font-weight: 650;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(79, 70, 229, 0.3);
+}
+.sim-cta:hover,
+.sim-cta:focus-visible { border-bottom-color: var(--accent); }
+
+.sim-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+.sim-card {
+  border: 1px solid #eef0f8;
+  border-radius: 12px;
+  background: #fbfcff;
+  padding: 0.45rem 0.6rem 0.5rem;
+}
+.sim-card-h {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.sim-card-h b {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  font-family: 'Google Sans', 'Noto Sans', sans-serif;
+  font-size: 0.79rem;
+  font-weight: 750;
+  color: #1f2a44;
+}
+.sim-kind {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.68rem;
+  color: #94a3b8;
+}
+/* The card is a family, and the family is the claim: anyone can bring a system and find it
+   in one of the four. The paper's own runs are named here only as a way in, so they are the
+   smallest and quietest thing in the header -- and on a narrow card they go first. */
+.sim-eg {
+  flex: 0 0 auto;
+  font-size: 0.62rem;
+  color: #b6bfd0;
+  white-space: nowrap;
+}
+@media (max-width: 900px) {
+  .sim-eg { display: none; }
+}
+.sim-mode {
+  flex: none;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #64748b;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  padding: 1px 7px;
+}
+/* One of the four keeps something. Saying so quietly is enough, because the tray below
+   shows it happening. */
+.sim-card[data-mode="self-evolving"] .sim-mode {
+  color: #047857;
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+}
+
+/* The figure carries its own margin inside the viewBox now, so it needs less around it. */
+.sim-fig { display: block; width: 100%; height: auto; margin: 0.14rem 0 0.1rem; }
+.sn rect {
+  fill: #fff;
+  stroke: #d9deef;
+  stroke-width: 1;
+}
+.sn text {
+  fill: #475569;
+  font-family: 'Google Sans', 'Noto Sans', sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+.sn-lead rect { fill: #eef0fb; stroke: #c7cdf0; }
+.sn-lead text { fill: #3730a3; }
+.sn-in rect { fill: #f8fafc; stroke-dasharray: 3 2; }
+/* A capability carries the axis it came off, in the colours the task gallery uses for the
+   three: a harness is tools and skills and specialist agents at once, and which kind just
+   arrived is the first thing to know about a release. The pulse runs between the two, so
+   the tint survives the animation instead of being painted over by it. */
+.sn { --tint: var(--accent); --edge: #d9deef; }
+.sn-cap rect { fill: #fff; stroke: var(--edge); }
+.sn-cap text {
+  fill: #475569;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 7.4px;
+}
+.sn-cap[data-ax="tools"] { --tint: #4e54c8; --edge: #ccd0ee; }
+.sn-cap[data-ax="tools"] text { fill: #4348a6; }
+.sn-cap[data-ax="skills"] { --tint: #0f766e; --edge: #bfdedb; }
+.sn-cap[data-ax="skills"] text { fill: #0f766e; }
+.sn-cap[data-ax="agents"] { --tint: #c2410c; --edge: #f0cdb7; }
+.sn-cap[data-ax="agents"] text { fill: #b8400e; }
+/* And drawn as what it is. A tool is an endpoint with an edge you call across. A skill is a
+   procedure -- nothing to call, so its outline is broken. A specialist agent is a member of
+   the system, so it is filled and rounded like the workers it arrives among. */
+.sn-cap[data-ax="skills"] rect { stroke-dasharray: 3.5 2.5; }
+.sn-cap[data-ax="agents"] rect { rx: 10px; fill: rgba(194, 65, 12, 0.05); }
+.sn-mem rect, .sn-bar rect { fill: #f6f7fd; stroke: #dfe3f7; }
+.sn-mem text, .sn-bar text { fill: #64748b; font-size: 7.6px; }
+.sl { stroke: #e2e6f3; stroke-width: 1.1; }
+/* A packet: a short dash running the length of its own line. */
+/* A dash and a gap wider than any line here, so exactly one packet is ever on a wire. The
+   offset carries a unit on both ends of the animation: a bare number and a calc() are
+   different types to interpolate between, and the packet parks at the far end instead of
+   travelling. */
+.sf {
+  stroke: var(--accent);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-dasharray: 9 999;
+  stroke-dashoffset: 9px;
+  opacity: 0;
+}
+@keyframes simFlow {
+  0%        { stroke-dashoffset: 9px; opacity: 0; }
+  2%        { opacity: 1; }
+  26%       { stroke-dashoffset: calc(var(--len) * -1px); opacity: 1; }
+  27%, 100% { stroke-dashoffset: calc(var(--len) * -1px); opacity: 0; }
+}
+@keyframes simHit {
+  0%, 6%   { stroke: var(--edge); }
+  10%      { stroke: var(--tint); }
+  30%      { stroke: var(--edge); }
+}
+/* The hub is on the path of every exchange, so it lights three times to the others' once. */
+@keyframes simHub {
+  0%, 4%, 36%, 40%, 70%, 74% { fill: #eef0fb; }
+  12%, 48%, 82%              { fill: #dfe3fb; }
+}
+.sim[data-phase] .sf {
+  animation: simFlow var(--cyc) linear infinite;
+  animation-delay: var(--d);
+}
+.sim[data-phase] .sn-cap rect,
+.sim[data-phase] .sn-work rect,
+.sim[data-phase] .sn-mem rect,
+.sim[data-phase] .sn-bar rect {
+  animation: simHit var(--cyc) linear infinite;
+  animation-delay: var(--d);
+}
+.sim[data-phase] .sn-hub rect { animation: simHub var(--cyc) linear infinite; }
+.sim { --cyc: 3.6s; }
+/* What just arrived is marked green for the beat it arrives on, and by the time the systems
+   are working the stage it is one more thing in the pool, in its axis's own colour. That is
+   the whole life of a capability in this benchmark. */
+.sim[data-phase="adapt"] .sn-cap.is-new { --tint: #059669; --edge: #6ee7b7; }
+.sim[data-phase="adapt"] .sn-cap.is-new rect { fill: #ecfdf5; }
+.sim[data-phase="adapt"] .sn-cap.is-new text { fill: #047857; }
+
+/* The beat the release lands on. Whatever any of them was doing stops mid-stride -- the
+   harness underneath them is not the one they were working -- and the only thing lit is
+   what just arrived and the part of each system that has to account for it. */
+/* Dropping the animation rather than pausing it: a paused one still holds the opacity it
+   was animating, and the packet would sit frozen on the wire instead of coming off it. */
+.sim[data-phase="adapt"] .sf { animation: none; }
+.sim[data-phase="adapt"] .sn-lead rect,
+.sim[data-phase="adapt"] .sn-work rect {
+  animation: simThink 1.1s ease-in-out infinite;
+}
+/* Nothing else is arriving anywhere, so nothing else lights: a node still pulsing here is
+   answering traffic that came off the wires a second ago. */
+.sim[data-phase="adapt"] .sn-cap rect,
+.sim[data-phase="adapt"] .sn-bar rect { animation: none; }
+.sim[data-phase="adapt"] .sn-cap.is-new rect { animation: simRing 1.1s ease-in-out infinite; }
+/* Except z_t, which is the one thing on the floor that a boundary does not cost anything. */
+.sim[data-phase="adapt"] .sn-mem rect { animation: none; fill: #ecfdf5; stroke: #a7f3d0; }
+.sim[data-phase="adapt"] .sn-mem text { fill: #047857; }
+@keyframes simThink {
+  0%, 100% { fill: #fff7ed; stroke: #f0c99a; }
+  50%      { fill: #fff; stroke: #e2e6f3; }
+}
+@keyframes simRing {
+  0%, 100% { stroke: #6ee7b7; stroke-width: 1; }
+  50%      { stroke: #34d399; stroke-width: 2.4; }
+}
+/* Held: everything stops where it stands rather than jumping back to a beat boundary. Last
+   in the block and specific enough to outrank every rule above, because each of those sets
+   the `animation` shorthand, which resets the play state to running along with everything
+   else it touches. */
+.sim.is-held[data-phase] .sf,
+.sim.is-held[data-phase] .sn rect,
+.sim.is-held[data-phase] .sn-cap.is-new rect { animation-play-state: paused; }
+
+/* Tasks finishing, and what is left of them once the stage turns over. */
+.sim-tray {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding-top: 0.32rem;
+  border-top: 1px dashed #eceff8;
+}
+.sim-tag {
+  flex: none;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+.sim-tag sub { text-transform: none; }
+.sim-marks { display: flex; gap: 3px; }
+.sim-marks i {
+  width: 12px;
+  height: 8px;
+  border-radius: 2px;
+  background: #eef1f8;
+  border: 1px solid #e2e6f3;
+  transition: background 0.35s ease, border-color 0.35s ease, opacity 0.5s ease, transform 0.35s ease;
+}
+.sim-marks i.is-on { background: #c7cdf0; border-color: #a9b2ea; }
+/* Carried, and no longer true of the harness it was written under. */
+.sim-marks i.is-stale {
+  background: repeating-linear-gradient(45deg, #fde8c8 0 3px, #fff7ed 3px 6px);
+  border-color: #f3d3ae;
+}
+.sim[data-phase="adapt"] .sim-card[data-mode="deployment"] .sim-marks i {
+  transform: scale(0.55);
+  opacity: 0.45;
+}
+.sim-note {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 750;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+.sim-card[data-mode="self-evolving"] .sim-note { color: #047857; }
+
+/* The release, mid-air. A real panel out of the band when the task it belongs to is on
+   screen; otherwise the release itself, which is the part the floor is about to answer for. */
+.sim-fly {
+  position: fixed;
+  z-index: 60;
+  pointer-events: none;
+  transform-origin: top left;
+  /* Solid for the fall, gone on arrival: fading it across the whole flight leaves nothing
+     to watch by the time it reaches the floor. */
+  transition: transform 1.15s cubic-bezier(0.45, 0.05, 0.55, 0.95),
+              opacity 0.3s ease-in 0.85s;
+}
+.sim-fly.is-pkt {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 9px;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid #c7d2fe;
+  box-shadow: 0 16px 30px -18px rgba(15, 23, 42, 0.6);
+}
+.sim-pkt-st {
+  font-size: 10px;
+  font-weight: 800;
+  color: #4338ca;
+  background: #eef2ff;
+  border-radius: 999px;
+  padding: 1px 7px;
+}
+.sim-fly.is-pkt code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px;
+  color: #64748b;
+}
+
+@media (max-width: 780px) {
+  .sim-grid { grid-template-columns: 1fr; }
+  .sim-head { flex-wrap: wrap; }
+  .sim-say { order: 3; flex-basis: 100%; }
+}
+/* Asked not to animate: the floor still says who runs and what they hold, it just does not
+   perform any of it. */
+@media (prefers-reduced-motion: reduce) {
+  .sim[data-phase] .sf,
+  .sim[data-phase] .sn rect { animation: none; }
+  .sf { opacity: 0.55; stroke-dasharray: 3 4; }
+}
+
 .author-grid {
   margin-top: 2.5rem;
   display: flex;
@@ -515,7 +953,9 @@ footer.footer { background: none; }
 }
 @media (max-width: 640px) {
   .diff-h { font-size: 1.25rem; }
-  .diff-pill { font-size: 0.8rem; }
+  /* Narrow enough that the longer claims run to two lines: hold every pill to the full
+     width so the wrapped ones and the short one keep the same edges. */
+  .diff-pill { font-size: 0.8rem; width: 100%; }
 }
 
 /* ---------- Cards used by MAS-Zero / MAS-Orchestra ---------- */

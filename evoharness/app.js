@@ -136,14 +136,19 @@ const MQ = (() => {
     });
   }
 
+  /* The manifest, once. The floor below the band runs off the same stages, so it waits on
+   * this rather than fetching its own copy. */
+  let feed = null;
+
   function init() {
     const band = document.querySelector("[data-mq]");
     if (!band) return;
     /* Opened from disk rather than served, no fetch can reach the manifest, and a blocked
      * one is a console error the catch below never sees. The band stays out instead. */
     if (location.protocol === "file:") return;
-    fetch("static/marquee.json")
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`${r.status}`))))
+    feed = fetch("static/marquee.json")
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`${r.status}`))));
+    feed
       .then((panels) => {
         if (!panels.length) return;
         const track = band.querySelector("[data-mq-track]");
@@ -166,6 +171,534 @@ const MQ = (() => {
       /* The band is scenery: a page served without the manifest simply does without it. */
       .catch(() => {});
   }
+  return { init, feed: () => feed || Promise.reject(new Error("no manifest")) };
+})();
+
+/* The floor under the band. The band is the outer half of this benchmark -- the harness
+ * arriving stage by stage -- and on its own it says nothing about what that costs anyone.
+ * This is the inner half: four families of system running inside a stage, and what each of
+ * them does when a panel drops out of the band and the pool underneath them grows.
+ *
+ * Families rather than products, because the benchmark is not a list of four agents -- any
+ * system that takes a harness can be run against it, and the shape is what decides how a
+ * release lands. So each card is drawn as the thing that separates it: where the deciding
+ * happens, and whether anything survives a boundary. A single agent decides in one place and
+ * calls the harness itself. A centralized MAS decides in one place and delegates, so the lead
+ * sits on the path of every exchange. A decentralized one has no such place at all: peers run
+ * at once off a shared context and pass findings to each other. The second card is the first
+ * one again, plus the one thing that outlives a stage.
+ *
+ * That boundary is the whole point. Under deployment evaluation the next stage hands the
+ * system a fresh instance and this stage's work is gone. A self-evolving system carries z_t
+ * across, which is worth something and costs something: part of what it holds now describes
+ * a harness that has moved.
+ *
+ * The stages, the pool counts and the names in the boxes are real streams out of the corpus,
+ * so the floor is running the benchmark rather than a cartoon of it. */
+const SIM = (() => {
+  const still = window.matchMedia("(prefers-reduced-motion: reduce)");
+  /* One stage in three beats, and they are slow beats: this sits directly under a band that
+   * is already drifting, and two things moving quickly in one eyeful is a page nobody reads. */
+  const RUN = 7600, DROP = 1500, ADAPT = 3000, SWAP = 2600;
+  const BEAT = 1250;   // a task finishing, which is what puts a mark in a tray
+  const HOLD = 3;      // capability names a card shows at once
+  const MARKS = 6;     // marks a tray holds before the stage turns over
+  const LEG = 3;       // stages of one stream before a different axis takes over
+  const AX = ["tools", "skills", "agents"];   // the three, in the order the paper reads them
+
+  const esc = (v) => String(v == null ? "" : v).replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  /* Names are the corpus's own and a few of them are long, so a box cuts to what it holds:
+   * a character every four and a half units, at the size the labels are drawn. */
+  const cut = (s, w) => {
+    const n = Math.floor((w - 8) / 4.5);
+    return s && s.length > n ? s.slice(0, n - 1) + "\u2026" : s || "";
+  };
+
+  /* ---- the pieces every diagram is made of ------------------------------------------- */
+  /* Wide and shallow: four of these sit two-up under a band that is already tall, so the
+   * diagrams lie down rather than stack, and the row of capabilities runs down the side
+   * instead of taking a third of the page to say the same thing.
+   *
+   * The drawing fills its coordinate space to the edges, so the viewport is given a margin
+   * of its own. A rect stroked on the boundary is otherwise cut in half by the viewport --
+   * and a box with no bottom edge, a few pixels above the tray's own line, reads as a
+   * diagram overlapping the row beneath it. The ratio is stated as well as implied, for
+   * engines that will not take an intrinsic size from a viewBox alone. */
+  const VW = 300, VH = 64, PAD = 2;
+  const fig = (inner) =>
+    `<svg class="sim-fig" viewBox="${-PAD} ${-PAD} ${VW + PAD * 2} ${VH + PAD * 2}"
+      preserveAspectRatio="xMidYMid meet"
+      style="aspect-ratio:${VW + PAD * 2}/${VH + PAD * 2}" aria-hidden="true">${inner}</svg>`;
+  /* A node, and when the traffic reaches it: the pulse is on a delay so it lands with the
+   * packet rather than on a rhythm of its own. */
+  const box = (x, y, w, h, t, cls = "", d = 0) =>
+    `<g class="sn ${cls}" style="--d:${d}s">` +
+    `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="5"/>` +
+    `<text x="${x + w / 2}" y="${y + h / 2 + 3}">${esc(t)}</text></g>`;
+  /* A capability, which is the one kind of node that changes: it carries the axis it came
+   * off, since a harness is tools and skills and specialists at once and only one of the
+   * three grows at a time. */
+  const cap = (x, y, w, h, c, d) =>
+    `<g class="sn sn-cap" data-ax="${esc(c ? c.ax : "tools")}" style="--d:${d}s">` +
+    `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="5"/>` +
+    `<text x="${x + w / 2}" y="${y + h / 2 + 3}">${esc(cut(c && c.n, w))}</text></g>`;
+  const wire = (a, b) => `<line class="sl" x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}"/>`;
+  /* A packet is a dash travelling the line it belongs to. Give it the line's length and it
+   * works on a diagonal, a vertical, anything -- no keyframes per link. */
+  const flow = (a, b, d) =>
+    `<line class="sf" x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}"` +
+    ` style="--len:${Math.hypot(b[0] - a[0], b[1] - a[1]).toFixed(1)};--d:${d}s"/>`;
+
+  /* Where the capabilities sit, for however many of them the pool holds. Early stages of the
+   * agents axis open with two specialists, not three, and a row with a blank in it reads as
+   * a rendering fault rather than a small pool. */
+  const rows = (n) => (n > 2 ? [0, 22, 44] : n === 2 ? [11, 33] : [22]);
+  const cols = (n) => (n > 2 ? [52, 150, 248] : n === 2 ? [101, 199] : [150]);
+
+  /* ---- the four systems --------------------------------------------------------------- */
+  /* What a capability is depends on the axis, so the picture has to as well. A tool is an
+   * endpoint: the system calls out and a result comes back. A skill is a procedure: it is
+   * read and complied with, never called, so the traffic runs inward. A specialist agent is
+   * neither -- on that axis the arrivals are not things the system calls but members it
+   * gains, so they take the place of the generic workers instead of sitting beyond them. */
+  const inward = (ax) => ax === "skills";
+  const roster = (ax) => ax === "agents";
+
+  /* One agent, working the harness itself. The system is the box on the left. */
+  function react(h, ax) {
+    const A = [76, 31];
+    let w = "", f = "", n = "";
+    rows(h.length).forEach((y, i) => {
+      const c = [176, y + 10], t = i * 1.2;
+      w += wire(A, c);
+      f += inward(ax) ? flow(c, A, t) : flow(A, c, t) + flow(c, A, t + 0.5);
+      n += cap(176, y, 120, 20, h[i], t + 0.35);
+    });
+    return fig(w + f + box(4, 16, 72, 30, "agent", "sn-lead") + n);
+  }
+
+  /* The same agent, and the one thing that outlives the stage: z_t is what it stands on, read
+   * before it acts and written after, which is how a stale entry comes to be there at all. */
+  function mem(h, ax) {
+    const A = [86, 10];
+    /* Read up, write down, and far enough apart that a packet has somewhere to travel. */
+    let w = wire([30, 36], [30, 20]) + wire([56, 20], [56, 36]);
+    let f = flow([30, 36], [30, 20], 0) + flow([56, 20], [56, 36], 1.9);
+    let n = "";
+    rows(h.length).forEach((y, i) => {
+      const c = [146, y + 10], t = i * 1.2 + 0.5;
+      w += wire(A, c);
+      f += inward(ax) ? flow(c, A, t) : flow(A, c, t) + flow(c, A, t + 0.4);
+      n += cap(146, y, 150, 20, h[i], t + 0.3);
+    });
+    return fig(w + f + box(4, 0, 82, 20, "agent", "sn-lead")
+      + box(4, 36, 82, 28, "z\u209C memory", "sn-mem", 2.1) + n);
+  }
+
+  /* Centralized: nothing reaches a capability except through a specialist, and no specialist
+   * acts except when the lead says so. Every exchange is two hops out and two back, one at a
+   * time, so the lead is on the path of all of it. On the agents axis the specialists are
+   * the arrivals themselves: the roster is what grows, and the lead routes straight to it. */
+  function hub(h, ax) {
+    const L = [54, 31];
+    let w = "", f = "", n = "";
+    rows(h.length).forEach((y, i) => {
+      const t = i * 1.2;
+      if (roster(ax)) {
+        const c = [120, y + 10];
+        w += wire(L, c);
+        f += flow(L, c, t) + flow(c, L, t + 0.6);
+        n += cap(120, y, 176, 20, h[i], t + 0.3);
+        return;
+      }
+      const a = [76, y + 10], b = [132, y + 10], c = [152, y + 10];
+      w += wire(L, a) + wire(b, c);
+      f += inward(ax)
+        ? flow(c, b, t) + flow(a, L, t + 0.5)
+        : flow(L, a, t) + flow(b, c, t + 0.28) + flow(c, b, t + 0.56) + flow(a, L, t + 0.84);
+      n += box(76, y, 56, 20, "specialist", "sn-work", t + 0.2)
+        + cap(152, y, 144, 20, h[i], t + 0.45);
+    });
+    return fig(w + f + box(2, 16, 52, 30, "lead", "sn-lead sn-hub") + n);
+  }
+
+  /* Decentralized: no lead to route through. Workers run at once off a shared workspace and
+   * pass what they find to each other, so an expansion reaches all of them at the same
+   * moment and none waits for a turn. On the agents axis the arrivals are the peers: a new
+   * specialist joins the workspace above and the bus they talk over below. */
+  function mesh(h, ax) {
+    const X = cols(h.length);
+    let w = "", f = "", n = "";
+    X.forEach((x, i) => {
+      if (roster(ax)) {
+        w += wire([x, 20], [x, 12]) + wire([x, 44], [x, 58]);
+        f += flow([x, 20], [x, 12], 0.2 + i * 0.3);
+        n += cap(x - 46, 20, 92, 24, h[i], 0.6 + i * 0.3);
+        return;
+      }
+      w += wire([x, 20], [x, 12]) + wire([x, 39], [x, 44]);
+      f += (inward(ax) ? flow([x, 44], [x, 39], 0.1)
+        : flow([x, 39], [x, 44], 0.1) + flow([x, 44], [x, 39], 0.7))
+        + flow([x, 20], [x, 12], 2.3);
+      n += box(x - 30, 20, 60, 19, "worker", "sn-work", 0.9)
+        + cap(x - 47, 44, 94, 20, h[i], 0.45);
+    });
+    /* Peer to peer, both ways, while the work is still going on. */
+    if (roster(ax)) {
+      const a = [X[0], 58], b = [X[X.length - 1], 58];
+      w += wire(a, b);
+      f += flow(a, b, 1.5) + flow(b, a, 2.2);
+    } else {
+      [[82, 120], [180, 218]].forEach(([a, b]) => {
+        w += wire([a, 30], [b, 30]);
+        f += flow([a, 30], [b, 30], 1.4) + flow([b, 30], [a, 30], 1.8);
+      });
+    }
+    return fig(w + f + box(4, 0, 292, 12, "shared workspace", "sn-bar", 2.9) + n);
+  }
+
+  /* Four families, not four products. Nothing here is tied to a particular agent: what the
+   * benchmark grips is the shape -- where the deciding happens, and whether anything survives
+   * a stage boundary -- so anyone can bring their own system and find it in one of these.
+   * The paper's own runs are named as examples, in small grey, and that is all they are. */
+  const SYS = [
+    { id: "sas", name: "Single agent", kind: "one agent, calling the harness",
+      eg: "ReAct, Codex", mode: "deployment", draw: react },
+    { id: "mem", name: "Agent with memory", kind: "same agent, carrying z\u209C",
+      eg: "Raw Memory", mode: "self-evolving", draw: mem },
+    { id: "cmas", name: "Centralized MAS", kind: "a lead routes to specialists",
+      eg: "AutoGen", mode: "deployment", draw: hub },
+    { id: "dmas", name: "Decentralized MAS", kind: "peer to peer, shared context",
+      eg: "DeLM", mode: "deployment", draw: mesh },
+  ];
+
+  /* ---- the floor ---------------------------------------------------------------------- */
+  /* The three axes are three separate evaluations, not one harness growing on all of them.
+   * The construction pipeline runs independently per axis, so a stream evolves tools, or
+   * skills, or specialist agents -- seventeen streams, and a system is measured on one of
+   * them at a time. The floor therefore climbs one stream, then hands over to a different
+   * axis and starts that one on its own, and the two axes it is not running are named but
+   * carry no pool: nothing arrives on all three at once, because no run ever sees all three.
+   *
+   * Taking the stages from wherever the band happened to be would run a pool of 82 tools
+   * into one of 5 agents and call it growth. A stream is where the claim is legible: the
+   * pool only ever grows and the stage numbers are contiguous. */
+  let root = null, lads = [], lad = 0, at = 0, seat = [], leg = 0;
+  let held = [], live = false, on = true;
+  let byTid = new Map();     // the manifest behind a rendered panel, for the one that drops
+  let turn = 0, pulse = 0;   // the phase chain, and the tick that fills the trays
+
+  const now = () => lads[lad];
+  const rung = () => now().rungs[at];
+
+  /* What the cards are holding: the newest capabilities in the pool of the one stream being
+   * run, newest first. All of one axis, because that is all a stream has. Nothing is dropped
+   * for being old -- it falls off the end of a three-box row because newer ones arrived,
+   * which is the pool doing its work. Returns how many of them just landed. */
+  function refill() {
+    const rs = now().rungs, out = [];
+    for (let i = at; i >= 0 && out.length < HOLD; i -= 1) {
+      rs[i].items.forEach((n) => {
+        if (out.length < HOLD && !out.includes(n)) out.push(n);
+      });
+    }
+    held = out.map((n) => ({ n, ax: now().ax }));
+    return Math.min(rs[at].items.length, HOLD);
+  }
+
+  const card = (s) => `<article class="sim-card" data-sys="${s.id}" data-mode="${s.mode}">
+      <header class="sim-card-h"><b>${esc(s.name)}</b>
+        <span class="sim-kind">${esc(s.kind)}</span>
+        <span class="sim-eg">e.g. ${esc(s.eg)}</span>
+        <span class="sim-mode">${esc(s.mode)}</span></header>
+      ${s.draw(held, now().ax)}
+      <div class="sim-tray">
+        <span class="sim-tag">${s.mode === "deployment" ? "this stage" : "z<sub>t</sub>"}</span>
+        <span class="sim-marks">${Array.from({ length: MARKS },
+    (_, i) => `<i style="--i:${i}"></i>`).join("")}</span>
+        <span class="sim-note" data-note></span>
+      </div>
+    </article>`;
+
+  const say = (html) => { root.querySelector("[data-say]").innerHTML = html; };
+  const note = (s, t) => {
+    root.querySelector(`[data-sys="${s}"] [data-note]`).textContent = t;
+  };
+  const cards = () => Array.from(root.querySelectorAll(".sim-card"));
+
+  /* What the harness holds, drawn into every card at once: the systems differ in what they
+   * do with a capability, never in which ones they were handed. Redrawn rather than
+   * relabelled, because the picture itself depends on what kind of thing arrived -- an
+   * endpoint to call, a procedure to follow, or another member of the system. */
+  function label(fresh) {
+    cards().forEach((c) => {
+      const sys = SYS.find((x) => x.id === c.dataset.sys);
+      c.querySelector(".sim-fig").outerHTML = sys.draw(held, now().ax);
+      c.querySelectorAll(".sn-cap").forEach((g, i) => {
+        g.classList.toggle("is-new", fresh > 0 && i < fresh);
+      });
+    });
+  }
+
+  function phase(p) {
+    root.dataset.phase = p;
+    clearTimeout(pulse);
+    if (p === "run") pulse = setTimeout(fill, BEAT);
+  }
+
+  /* Tasks finishing, one every beat. Nothing about a mark says which system earned it --
+   * they all run the same evaluation split -- but a tray that fills is a stage with work in
+   * it, which is what makes the boundary cost something. */
+  function fill() {
+    if (root.dataset.phase !== "run") return;
+    cards().forEach((c) => {
+      const row = c.querySelector(".sim-marks");
+      const next = row.querySelector("i:not(.is-on)");
+      if (next) { next.classList.add("is-on"); return; }
+      /* A deployment tray fills and then waits for the boundary to empty it. z_t is never
+       * emptied, so its tray is the last few pieces of work instead: the oldest drops off
+       * the end, which is how the stale ones eventually leave. */
+      if (c.dataset.mode !== "deployment") {
+        row.firstElementChild.remove();
+        row.insertAdjacentHTML("beforeend", '<i class="is-on"></i>');
+      }
+    });
+    pulse = setTimeout(fill, BEAT);
+  }
+
+  const unit = (n, ax) => (n === 1 ? ax.replace(/s$/, "") : ax);
+
+  /* The stage, and the pool it opens -- on the one axis this stream evolves. The other two
+   * axes are named and left empty: they are separate streams, run separately, and putting a
+   * count on them here would claim a harness that grows on three axes at once. */
+  function gauge(r, flash) {
+    root.querySelector("[data-st]").innerHTML = `H<sub>${r.st}</sub>`;
+    root.querySelectorAll("[data-met]").forEach((m) => {
+      const live_ = m.dataset.met === now().ax;
+      m.classList.toggle("is-live", live_);
+      m.setAttribute("aria-pressed", String(live_));
+      m.textContent = live_ ? `${r.pool} ${unit(r.pool, now().ax)}` : m.dataset.met;
+      m.classList.remove("is-up");
+      if (live_ && flash) {
+        /* Reflowing the node is what restarts the animation on it, so the count landing and
+         * the flash that marks it landing are the same event. */
+        void m.offsetWidth;
+        m.classList.add("is-up");
+      }
+    });
+  }
+
+  /* The stage boundary, which is where the two evaluation modes part company. */
+  function expand(r) {
+    const s = now();
+    label(refill());
+    gauge(r, true);
+    say(`<b>+${r.new} ${esc(unit(r.new, s.ax))}</b> arrive${r.new === 1 ? "s" : ""}`);
+    cards().forEach((c) => {
+      const dep = c.dataset.mode === "deployment";
+      c.querySelectorAll(".sim-marks i").forEach((m, i) => {
+        m.classList.toggle("is-on", !dep && m.classList.contains("is-on"));
+        /* What z_t keeps is not all still true: the entries written before this release
+         * describe a harness that no longer exists. */
+        m.classList.toggle("is-stale", !dep && i < 2 && m.classList.contains("is-on"));
+      });
+      note(c.dataset.sys, dep ? "fresh instance" : "carried \u00b7 2 stale");
+    });
+  }
+
+  /* Handing over to a different axis, which is not a release: it is another evaluation
+   * altogether, on a stream of its own. So nothing carries -- not the trays, and not z_t,
+   * which belonged to the stream that just ended. */
+  function open(r) {
+    refill();
+    label(0);
+    gauge(r, false);
+    /* Nothing is marked as having arrived, because on a handover nothing did. */
+    cards().forEach((c) => {
+      c.querySelectorAll(".sim-marks i").forEach((m) => {
+        m.classList.remove("is-on", "is-stale");
+      });
+      note(c.dataset.sys, "");
+    });
+  }
+
+  /* A panel has to be whole to be worth dropping -- one sliced off by the edge of the window
+   * looks like a rendering fault in mid-air. The band itself only has to be on screen: it
+   * runs the full width of the page, so it is never inside it. */
+  const near = (r) => r.width > 0 && r.top < innerHeight - 40 && r.bottom > 0;
+  const whole = (r) => near(r) && r.left > 0 && r.right < innerWidth;
+
+  /* The panel that drops. A task standing at the stage the floor is climbing to, if the band
+   * has one on screen, so what falls is a real task arriving at a real stage; otherwise the
+   * release itself. Either way the numbers on the floor are the streams' -- the panel comes
+   * without its own harness strip, which speaks for a stream of its own. */
+  function fly(r) {
+    const dock = root.querySelector("[data-dock]");
+    const band = document.querySelector("[data-mq]");
+    if (!dock || !band || still.matches) return;
+    const hit = Array.from(document.querySelectorAll(".mq-panel"))
+      .filter((n) => !n.hasAttribute("aria-hidden") && whole(n.getBoundingClientRect()))
+      .find((n) => (byTid.get(n.dataset.tid) || {}).st === r.st);
+    const g = document.createElement("div");
+    g.className = "sim-fly";
+    g.setAttribute("aria-hidden", "true");
+    let box;
+    if (hit) {
+      g.innerHTML = hit.innerHTML;
+      g.querySelector(".mq-harn")?.remove();
+      box = hit.getBoundingClientRect();
+    } else {
+      const b = band.getBoundingClientRect();
+      if (!near(b)) return;
+      g.classList.add("is-pkt");
+      g.innerHTML = `<span class="sim-pkt-st">stage ${r.st}</span>` +
+        r.items.map((x) => `<code data-ax="${esc(now().ax)}">${esc(x)}</code>`).join("");
+      box = { left: b.left + b.width / 2 - 95, top: b.bottom - 46, width: 190 };
+    }
+    Object.assign(g.style,
+      { left: `${box.left}px`, top: `${box.top}px`, width: `${box.width}px` });
+    document.body.appendChild(g);
+    const d = dock.getBoundingClientRect();
+    const s = 0.42, h = g.offsetHeight;
+    const tx = d.left + d.width / 2 - box.left - (box.width * s) / 2;
+    const ty = d.top + d.height / 2 - box.top - (h * s) / 2;
+    requestAnimationFrame(() => {
+      g.style.transform = `translate(${tx.toFixed(1)}px, ${ty.toFixed(1)}px) scale(${s})`;
+      g.style.opacity = "0";
+    });
+    setTimeout(() => g.remove(), DROP + 200);
+  }
+
+  /* A different axis takes over. The stream that just ran is remembered where it stopped,
+   * so when this axis comes round again it carries on climbing rather than restarting -- and
+   * what the reader sees between the two is a handover, not a release: no panel drops, the
+   * trays empty, and the pool moves to the axis that is now being evaluated. */
+  function hand() {
+    /* The release is over, so the marks that named it come off before the handover starts. */
+    root.querySelectorAll(".sn-cap.is-new").forEach((g) => g.classList.remove("is-new"));
+    seat[lad] = (at + 1) % now().rungs.length;
+    lad = (lad + 1) % lads.length;
+    at = seat[lad];
+    leg = LEG;
+    phase("swap");
+    say("a different axis, evaluated separately");
+    turn = setTimeout(() => { open(rung()); cycle(); }, SWAP);
+  }
+
+  function cycle() {
+    if (!live || !on) return;
+    phase("run");
+    say("support any agentic system");
+    cards().forEach((c) => note(c.dataset.sys, ""));
+    turn = setTimeout(() => {
+      /* One more stage of this stream if the leg has one left, otherwise the next axis. */
+      if (leg <= 1 || at + 1 >= now().rungs.length) { hand(); return; }
+      at += 1;
+      leg -= 1;
+      phase("drop");
+      say("the harness is moving under them");
+      fly(rung());
+      turn = setTimeout(() => {
+        expand(rung());
+        phase("adapt");
+        turn = setTimeout(cycle, ADAPT);
+      }, DROP);
+    }, RUN);
+  }
+
+  function stop() { clearTimeout(turn); clearTimeout(pulse); }
+  function start() { stop(); cycle(); }
+
+  /* The axis chips are controls, not readouts. Three axes means three separate evaluations,
+   * and a reader who came for the one the floor is not running should not have to wait for
+   * it to come round: clicking picks up that stream where it was left, which is what the
+   * handover would have done anyway. */
+  function jump(ax) {
+    const i = lads.findIndex((l) => l.ax === ax);
+    if (i < 0 || i === lad) return;
+    stop();
+    seat[lad] = at;
+    lad = i;
+    at = seat[lad];
+    leg = LEG;
+    if (live && on) { open(rung()); cycle(); return; }
+    /* Held, or asked not to move: show the axis that was asked for and leave it there. */
+    root.dataset.phase = "run";
+    open(rung());
+    say("support any agentic system");
+  }
+
+  function chips() {
+    root.querySelectorAll("[data-met]").forEach((m) => {
+      m.addEventListener("click", () => jump(m.dataset.met));
+    });
+  }
+
+  /* Motion nobody asked for, in the corner of the eye, forever: the button is the way out of
+   * that, and it doubles as the way to hold a phase still and read it. */
+  function button() {
+    const b = root.querySelector("[data-btn]");
+    b.addEventListener("click", () => {
+      on = !on;
+      root.classList.toggle("is-held", !on);
+      b.textContent = on ? "Pause" : "Play";
+      b.setAttribute("aria-pressed", String(!on));
+      if (on) start(); else stop();
+    });
+  }
+
+  function init() {
+    root = document.querySelector("[data-sim]");
+    if (!root || location.protocol === "file:") return;
+    Promise.all([
+      fetch("static/stream.json").then((r) => (r.ok ? r.json() : Promise.reject(r.status))),
+      /* The band's manifest, for the panel that drops. It is already on its way for the
+       * band itself, and the floor runs without it if it never lands. */
+      MQ.feed().catch(() => []),
+    ]).then(([streams, panels]) => {
+      lads = streams.filter((s) => s.rungs.length > 1);
+      if (lads.length < 2) return;
+      panels.forEach((p) => byTid.set(p.tid, p));
+      seat = lads.map(() => 0);
+      leg = LEG;
+      const r = rung();
+      refill();
+      root.innerHTML = `<div class="sim-head">
+          <span class="sim-stage" data-dock><b data-st>H<sub>${r.st}</sub></b>
+            <span class="sim-mets">${AX.map((a) => {
+    const live_ = a === now().ax;
+    return `<button class="sim-met${live_ ? " is-live" : ""}" type="button" data-met="${a}"
+      data-ax="${a}" aria-pressed="${live_}"
+      title="Evaluate on the ${a} axis">${
+      live_ ? `${r.pool} ${unit(r.pool, a)}` : a}</button>`;
+  }).join("")}</span>
+          </span>
+          <span class="sim-say" data-say></span>
+          <button class="sim-btn" type="button" data-btn aria-pressed="false">Pause</button>
+        </div>
+        <div class="sim-grid">${SYS.map(card).join("")}</div>
+        <p class="sim-foot">Any system that takes a harness can be evaluated on these
+          streams. <a class="sim-cta" href="#evaluate">Bring your own agent!</a></p>`;
+      root.hidden = false;
+      button();
+      chips();
+      if (still.matches) {
+        /* Asked not to animate: the floor still says who is running and what they were
+         * handed, it just does not perform it. */
+        root.dataset.phase = "run";
+        root.querySelector("[data-btn]").hidden = true;
+        say("support any agentic system");
+        return;
+      }
+      /* A stage clock running behind a tab nobody is looking at is heat, not information. */
+      new IntersectionObserver((es) => {
+        live = es[0].isIntersecting;
+        if (live && on) start(); else stop();
+      }, { threshold: 0.15 }).observe(root);
+    }).catch(() => {});
+  }
+
   return { init };
 })();
 
@@ -2675,6 +3208,7 @@ const PV = (() => {
 })();
 
 MQ.init();
+SIM.init();
 LP.init();
 initResults();
 initNav();

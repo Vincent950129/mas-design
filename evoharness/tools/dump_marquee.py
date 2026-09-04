@@ -24,6 +24,10 @@ import re
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SRC = ROOT / "static" / "tasks.json"
 OUT = ROOT / "static" / "marquee.json"
+# The floor under the band walks one stream at a time rather than the band's spread of
+# them: four systems running against a pool that jumps from 82 tools to 5 agents and back
+# is not a harness evolving, it is a slideshow.
+LADDER = ROOT / "static" / "stream.json"
 ALE_DIR = "static/images/ale/"
 ENV_DIR = "static/images/env/"
 
@@ -140,6 +144,36 @@ def facts(d: dict, pool: dict, rows: list) -> dict:
         "ax": sorted({d["tracks"][r[COL["track"]]] for r in rows}),
         "hx": hx[0],
     }
+
+
+def ladders(pool: dict) -> list[dict]:
+    """One stream per axis, as the stage ladder the floor climbs.
+
+    A stream is where the paper's claim is legible: the pool only grows, every stage adds
+    something with a name, and the stage numbers are contiguous. Picked per axis and by
+    length, so the floor shows a tools stream, then a skills stream, then an agents one,
+    rather than looping on whichever happens to be longest.
+    """
+    best: dict[str, tuple] = {}
+    for (env, dom, ax), stages in pool.items():
+        seen: set[str] = set()
+        rungs = []
+        for st in sorted(stages):
+            fresh = stages[st] - seen
+            seen |= stages[st]
+            # Shortest names first: these land in boxes on a diagram. The opening stage
+            # names three, since everything in that pool is new and the floor has three
+            # boxes to fill; later stages name the two that arrived.
+            rungs.append({"st": st, "pool": len(seen), "new": len(fresh),
+                          "items": sorted(fresh, key=lambda s: (len(s), s))[:3 if not rungs else 2]})
+        if len(rungs) < 3 or not all(r["items"] for r in rungs):
+            continue
+        score = (len(rungs), sum(r["new"] for r in rungs))
+        if ax not in best or score > best[ax][0]:
+            best[ax] = (score, {"env": env, "dom": dom, "ax": ax,
+                                "lab": "ALE" if env == "ale" else dom.title(),
+                                "rungs": rungs})
+    return [best[a][1] for a in AXES if a in best]
 
 
 def dims(rel: str, w: int, h: int) -> tuple[int, int]:
@@ -281,6 +315,14 @@ def main() -> None:
     panels = allocate(ale, eog)
 
     OUT.write_text(json.dumps(panels, separators=(",", ":")) + "\n")
+    streams = ladders(pool)
+    LADDER.write_text(json.dumps(streams, separators=(",", ":")) + "\n")
+    print(f"{len(streams)} streams -> {LADDER.relative_to(ROOT)} "
+          f"({LADDER.stat().st_size} B)")
+    for s in streams:
+        rung = " -> ".join(f"H{r['st']}:{r['pool']}(+{r['new']})" for r in s["rungs"])
+        print(f"    {s['env']:>3} {s['lab'][:24]:24.24} {s['ax']:<6} {rung}")
+        print(f"        {'; '.join(', '.join(r['items']) for r in s['rungs'])[:96]}")
     kb = OUT.stat().st_size / 1024
     imgs = sum((ROOT / p["src"]).stat().st_size for p in panels) / 1024
     print(f"{len(panels)} panels -> {OUT.relative_to(ROOT)}  ({kb:.1f} KB manifest, "
