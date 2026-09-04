@@ -1,5 +1,8 @@
 :root {
-  --bg: #f7f8fc;
+  /* Warm paper rather than white, the way agents-last-exam.org reads: the cards,
+     figures and tables on this page are all white or near it, and a page tone
+     with some warmth in it makes them look placed rather than merged. */
+  --bg: #f7f5f2;
   --panel: #ffffff;
   --panel-2: #eef0fb;
   --border: #e0e7ff;

@@ -17,6 +17,158 @@ function alignFeedbackLoop() {
 }
 window.addEventListener("resize", alignFeedbackLoop);
 
+/* The inner loop closes through the persistent state: the environment's feedback may write
+ * z_t, and the next task starts from whatever it holds. Both legs cross from inside the
+ * stage box out to the band below it, which is the point -- z_t outlives the stage -- so
+ * they are drawn as an overlay and measured off the nodes they join. */
+function alignFwCycle() {
+  const fw = document.querySelector("#fw");
+  if (!fw) return;
+  const cyc = fw.querySelector(".fw-cycle");
+  const task = fw.querySelector(".fw-loop .fw-node");
+  const env = fw.querySelector(".fw-node--env");
+  const zb = fw.querySelector(".fw-band--across");
+  if (!cyc || !task || !env || !zb) return;
+  /* Nothing is measurable while the view above this one is display:none, and once the loop
+   * row wraps the return leg would run up through whatever Task wrapped above. Either way
+   * the .fw-fb line carries the same thing in words instead. */
+  const read = () => {
+    const box = fw.getBoundingClientRect();
+    const t = task.getBoundingClientRect();
+    const e = env.getBoundingClientRect();
+    const z = zb.getBoundingClientRect();
+    const ok = box.width > 50 && Math.abs(t.top - e.top) < 2 && z.top - e.bottom > 24;
+    return { box, t, e, z, ok };
+  };
+  let m = read();
+  fw.classList.toggle("is-looped", m.ok);
+  if (!m.ok) return;
+  /* Drawing the legs retires that line, which moves the state band up by its height: measure
+   * again now it has, or both legs get placed against a boundary that no longer exists. The
+   * gap left is still twice the bar above, so this cannot turn the legs back off. */
+  m = read();
+  if (!m.ok) { fw.classList.remove("is-looped"); return; }
+  const HEAD = 9;   // the arrowhead sits beyond the line, so the line stops short of its tip
+  const GAP = 4;    // and neither leg touches the node it leaves from
+  const put = (sel, x, top, h) => {
+    const r = cyc.querySelector(sel);
+    r.style.left = `${x - m.box.left - 1}px`;
+    r.style.top = `${top - m.box.top}px`;
+    r.style.height = `${Math.max(0, h)}px`;
+  };
+  const down = m.e.bottom + GAP;
+  const up = m.t.bottom + GAP + HEAD;
+  put(".fw-riser--w", (m.e.left + m.e.right) / 2, down, m.z.top - HEAD - down);
+  put(".fw-riser--r", (m.t.left + m.t.right) / 2, up, m.z.top - up);
+}
+window.addEventListener("resize", alignFwCycle);
+/* Node widths move when the webfont lands, and both loops are anchored to node centres. */
+document.fonts?.ready.then(() => { alignFeedbackLoop(); alignFwCycle(); });
+
+/* The drifting band of task figures at the top of the overview tab. It carries its own few-KB
+ * manifest of thumbnails the gallery already ships, so the first thing the page shows about a
+ * task costs nothing like the 4.3MB corpus behind the gallery -- that only loads if someone
+ * clicks a panel, which takes them to the task itself.
+ *
+ * The manifest arrives ordered by the stage each task enters at, and the band keeps that order:
+ * drift runs leftwards, so what comes in from the right is what the harness releases later. */
+const MQ = (() => {
+  const PX_PER_SEC = 42;   // drift speed, held constant however many panels there are
+  const still = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  const esc = (v) => String(v == null ? "" : v).replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  /* The harness the task is handed, which is the axis the band exists to show: a stage is
+   * not just a point in a stream, it is a bigger pool of tools, skills or specialists than
+   * the stage before. Stage 1 has nothing before it, so it states the pool it starts from. */
+  const unit = (n, ax) => (n === 1 ? ax.replace(/s$/, "") : ax);
+  /* A gain needs a stage before it to be a gain: at the first stage of a stream the whole
+   * pool is nominally new, and "+45 tools" there would read as growth that has not happened
+   * yet. Nor does every later stage grow -- EOG hands out the same roster of specialists
+   * throughout, and only their tools change underneath -- so a panel with nothing new to
+   * report states the pool it was handed instead of claiming a gain of zero. */
+  const gain = (h) => (h.first ? `${h.pool} ${unit(h.pool, h.ax)} to start`
+    : h.new ? `+${h.new} ${unit(h.new, h.ax)}`
+      : `${h.pool} ${unit(h.pool, h.ax)} in the pool`);
+
+  /* A panel says what the figure is, where the task sits and what the harness holds for it;
+   * the whole of it is one button, since the only thing to do with a panel is go and read
+   * the task. An aria-label on a button silences the text inside it, so it has to carry the
+   * same facts. The second copy of the band is scenery: no place in the tab order or the
+   * a11y tree. */
+  function panel(p, dup) {
+    const where = p.env === "ale" ? "Agentic Last Exam" : "EnterpriseOps-Gym";
+    const h = p.hx;
+    const held = h.first
+      ? `the ${h.ax} harness starts at ${h.pool}`
+      : h.new
+        ? `${gain(h)} ${h.new === 1 ? "arrives" : "arrive"} in the harness here, ${h.pool} in the pool`
+        : `the ${h.ax} harness holds ${h.pool} here, none of them new`;
+    const said = `${where}, stage ${p.st}: ${held}, ${h.need} needed for this task`;
+    return `<button class="mq-panel" type="button" data-env="${esc(p.env)}"
+      data-tid="${esc(p.tid)}"${dup ? ' tabindex="-1" aria-hidden="true"' : ""}
+      title="${esc(p.title)} \u2014 ${esc(said)}"
+      aria-label="Open the task: ${esc(p.title)}. ${esc(said)}">
+      <span class="mq-shot"><img src="${esc(p.src)}" alt="" width="${p.w}" height="${p.h}"
+        loading="lazy" decoding="async"></span>
+      <span class="mq-meta">
+        <span class="mq-lab">${esc(p.lab)}</span>
+        <span class="mq-st">stage ${p.st}</span>
+      </span>
+      <span class="mq-harn" data-ax="${esc(h.ax)}">
+        <span class="mq-gain${!h.first && h.new ? "" : " is-flat"}">${esc(gain(h))}</span>
+        ${h.items.map((x) => `<span class="mq-item">${esc(x)}</span>`).join("")}
+      </span>
+    </button>`;
+  }
+
+  /* Panels are the one place on the overview tab that points into the corpus, so a click
+   * has to land on the task itself rather than just the gallery: open the view, wait for
+   * the payload it fetches on arrival, then search the id through the real control. */
+  function show(tid) {
+    PV.open("tasks");
+    Promise.resolve(TG.load()).then(() => {
+      const q = document.querySelector('[data-pv-view="tasks"] .cs-q');
+      if (!q) return;
+      q.value = tid;
+      q.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+  }
+
+  function init() {
+    const band = document.querySelector("[data-mq]");
+    if (!band) return;
+    /* Opened from disk rather than served, no fetch can reach the manifest, and a blocked
+     * one is a console error the catch below never sees. The band stays out instead. */
+    if (location.protocol === "file:") return;
+    fetch("static/marquee.json")
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`${r.status}`))))
+      .then((panels) => {
+        if (!panels.length) return;
+        const track = band.querySelector("[data-mq-track]");
+        const one = panels.map((p) => panel(p, false)).join("");
+        track.innerHTML = still.matches
+          ? one
+          : one + panels.map((p) => panel(p, true)).join("");
+        band.hidden = false;
+        /* Speed is set from the width the panels actually came out at, so adding or
+         * dropping panels changes how long a lap takes, not how fast things move. */
+        if (!still.matches) {
+          const w = track.scrollWidth / 2;
+          if (w > 0) track.style.animationDuration = `${(w / PX_PER_SEC).toFixed(1)}s`;
+        }
+        band.addEventListener("click", (e) => {
+          const b = e.target.closest(".mq-panel");
+          if (b) show(b.dataset.tid);
+        });
+      })
+      /* The band is scenery: a page served without the manifest simply does without it. */
+      .catch(() => {});
+  }
+  return { init };
+})();
+
 const LP = (() => {
   let page = 1;
   function go(n) {
@@ -31,6 +183,7 @@ const LP = (() => {
     const next = $(".lp-next", root);
     if (prev) prev.disabled = n === 1;
     if (next) next.disabled = n === 3;
+    if (n === 1) alignFwCycle();   // the figure was display:none until now
     if (n === 2) DB.mount();
   }
   function init() {
@@ -123,14 +276,20 @@ const RESULTS = {
         ale: 11.1, aleSd: 1.3, aleScore: 30.4, aleScoreSd: 1.3, aleH: 11.2, aleTok: 107.8,
         overall: 32.3 },
     ],
+    /* Figure 3. Deployment reports no FWT: with no stage-specific adaptation there is no
+     * new-task delta to take a difference against. The dagger is the paper's own and marks
+     * an average its domains disagree on, which is why it only ever lands on EOG -- that
+     * number is a mean over csm, hr and itsm, where ALE is one environment. */
     xfer: {
       eog: [
-        { name: "Deploy", fwt: null, bwt: -0.4 },
+        { name: "Deploy", fwt: null, bwt: -0.7, bwtDag: true },
+        { name: "GEPA", fwt: 2.6, fwtDag: true, bwt: 0.4, bwtDag: true },
+        { name: "Meta-H.", fwt: 1.0, fwtDag: true, bwt: 1.4, bwtDag: true },
       ],
       ale: [
         { name: "Deploy", fwt: null, bwt: -5.3 },
-        { name: "GEPA", fwt: -28.5, bwt: null },
-        { name: "Meta-H.", fwt: -11.1, bwt: null },
+        { name: "GEPA", fwt: -28.5, bwt: 12.6 },
+        { name: "Meta-H.", fwt: -11.1, bwt: 2.1 },
       ],
     },
   },
@@ -216,18 +375,23 @@ const RESULTS = {
       { name: "SkillOpt", cat: "skill", llm: "GPT-5.5", eog: 21.2, eogSd: 3.1,
         eogScore: 61.8, eogScoreSd: 1.6 },
     ],
+    /* Figure 4, in the order the figure reads. Claude Code is here for retention only: its
+     * model and native harness are not comparable to the controlled Codex setting, so the
+     * paper keeps it out of the adaptation half. */
     xfer: {
       eog: [
-        { name: "Deploy", fwt: null, bwt: 2.1 },
-        { name: "GEPA", fwt: 1.1, bwt: 6.6 },
-        { name: "Meta-H.", fwt: 1.4, bwt: 0 },
-        { name: "Codex mem.", fwt: -1.5, bwt: -0.6 },
+        { name: "Deploy", fwt: null, bwt: 2.1, bwtDag: true },
+        { name: "Claude Code", fwt: null, bwt: -2.6 },
+        { name: "Codex mem.", fwt: -1.5, bwt: -0.6, bwtDag: true },
+        { name: "GEPA", fwt: 1.1, fwtDag: true, bwt: 6.6 },
+        { name: "Meta-H.", fwt: 1.4, fwtDag: true, bwt: 0, bwtDag: true },
       ],
       ale: [
         { name: "Deploy", fwt: null, bwt: -4.0 },
+        { name: "Claude Code", fwt: null, bwt: 4.6 },
+        { name: "Codex mem.", fwt: 2.4, bwt: -5.7 },
         { name: "GEPA", fwt: -4.0, bwt: 14.9 },
         { name: "Meta-H.", fwt: -12.2, bwt: 6.6 },
-        { name: "Codex mem.", fwt: 2.4, bwt: -5.7 },
       ],
     },
   },
@@ -285,18 +449,23 @@ const RESULTS = {
         ale: 15.3, aleSd: 3.3, aleScore: 42.3, aleScoreSd: 3.1, aleH: 33.1, aleTok: 255.2,
         overall: 12.0 },
     ],
+    /* Figure 6, in the order the figure reads. Every EOG value here carries the dagger: the
+     * three domains agree on none of them, which is the environment-dependence the section
+     * is about showing up inside EOG as well as against ALE. */
     xfer: {
       eog: [
-        { name: "Deploy", fwt: null, bwt: 9.5 },
-        { name: "GEPA", fwt: 14.3, bwt: 6.4 },
-        { name: "Meta-H.", fwt: 8.8, bwt: 5.5 },
-        { name: "Codex mem.", fwt: -1.5, bwt: -2.8 },
+        { name: "Deploy", fwt: null, bwt: 9.5, bwtDag: true },
+        { name: "Claude Code", fwt: null, bwt: 4.6, bwtDag: true },
+        { name: "Codex mem.", fwt: -1.5, fwtDag: true, bwt: -2.8, bwtDag: true },
+        { name: "GEPA", fwt: 14.3, fwtDag: true, bwt: 6.4, bwtDag: true },
+        { name: "Meta-H.", fwt: 8.8, fwtDag: true, bwt: 5.5, bwtDag: true },
       ],
       ale: [
         { name: "Deploy", fwt: null, bwt: -34.7 },
+        { name: "Claude Code", fwt: null, bwt: 1.8 },
+        { name: "Codex mem.", fwt: -14.1, bwt: -24.1 },
         { name: "GEPA", fwt: 7.9, bwt: -7.9 },
         { name: "Meta-H.", fwt: -0.9, bwt: -21.6 },
-        { name: "Codex mem.", fwt: -14.1, bwt: -24.1 },
       ],
     },
   },
@@ -338,22 +507,73 @@ function renderTable(axis) {
   </table></div>`;
 }
 
+/* Forward and backward transfer, which are signed: losing 34.7 points of retention is the
+ * result this chart exists to show. Sign is read from which side of the axis a bar leaves,
+ * not from its colour -- colour is the series, FWT against BWT, and it cannot carry both.
+ *
+ * The axis sits where the data puts it: the halves are scaled by the range above and below
+ * zero, so a point is the same height on either side and neither half wastes the space it
+ * was given. */
 function renderXfer(axis, envKey) {
   const items = RESULTS[axis].xfer[envKey];
-  const absMax = Math.max(...items.flatMap((d) => [Math.abs(d.fwt || 0), Math.abs(d.bwt || 0)]), 8);
-  const h = (v) => Math.max(4, Math.abs(v) / absMax * 110);
-  const bar = (kind, v) => {
-    if (v == null) return `<div class="xfer-bar ${kind}" style="height:4px;opacity:.2" title="${kind.toUpperCase()} n/a"></div>`;
-    return `<div class="xfer-bar ${kind} ${v < 0 ? "is-neg" : ""}" style="height:${h(v)}px" title="${kind.toUpperCase()} ${fmt(v)}%"></div>`;
+  const H = 120;
+  const vals = items.flatMap((d) => [d.fwt, d.bwt]).filter((v) => v != null);
+  const hi = Math.max(0, ...vals);
+  const lo = Math.min(0, ...vals);
+  /* Points per pixel is capped rather than fitted, or a chart whose largest move is half a
+   * point draws it full height: on EOG the tool harness moves everything by a couple of
+   * points at most, which is the finding, and it has to look like one. Each half is then
+   * only as tall as its own data, so capping the scale leaves a short chart rather than a
+   * tall empty one. */
+  const FLOOR = 8;
+  const ppp = H / Math.max(hi - lo, FLOOR);
+  const px = (v) => Math.max(2, Math.round(Math.abs(v) * ppp));
+  let upH = Math.round(hi * ppp);
+  let dnH = Math.round(-lo * ppp);
+  const MIN_PLOT = 30;
+  if (upH + dnH < MIN_PLOT) {
+    if (dnH >= upH) dnH = MIN_PLOT - upH;
+    else upH = MIN_PLOT - dnH;
+  }
+
+  /* Both halves keep both slots, so FWT stays on the left of its column whichever side of
+   * the axis it happens to leave from. */
+  const slot = (kind, v, up, dag) => {
+    if (v == null) {
+      return up
+        ? `<div class="xfer-bar ${kind} is-na" title="${kind.toUpperCase()} not reported"></div>`
+        : '<div class="xfer-slot"></div>';
+    }
+    if ((v < 0) === up) return '<div class="xfer-slot"></div>';
+    const t = `title="${kind.toUpperCase()} ${fmt(v)}%${
+      dag ? " \u2014 the domains behind this average disagree" : ""}"`;
+    /* Zero is neither direction: a flat mark on the axis rather than a bar of either sign. */
+    return v === 0
+      ? `<div class="xfer-bar ${kind} is-zero" ${t}></div>`
+      : `<div class="xfer-bar ${kind}" style="height:${px(v)}px" ${t}></div>`;
   };
-  return `<div class="xfer-bars">${items.map((d) => {
-    const lab = [
-      d.fwt == null ? "" : "FWT " + fmt(d.fwt),
-      d.bwt == null ? "" : "BWT " + fmt(d.bwt),
-    ].filter(Boolean).join(" · ") || "—";
-    return `<div class="xfer-col"><div class="xfer-stack">${bar("fwt", d.fwt)}${bar("bwt", d.bwt)}</div><div class="xfer-lab">${d.name}<br>${lab}</div></div>`;
-  }).join("")}</div>
-  <p class="chart-cap">Left bar = FWT (new-task adaptation). Right bar = BWT (retention). Red = negative. Faded bars are not reported for that method.</p>`;
+
+  return `<div class="xfer-bars">
+    <div class="xfer-axis" style="top:calc(8px + ${upH}px)"></div>
+    ${items.map((d) => {
+      const dag = (on) => (on ? '<span class="xfer-dag">\u2020</span>' : "");
+      const lab = [
+        d.fwt == null ? "" : "FWT " + fmt(d.fwt) + dag(d.fwtDag),
+        d.bwt == null ? "" : "BWT " + fmt(d.bwt) + dag(d.bwtDag),
+      ].filter(Boolean).join(" \u00b7 ") || "\u2014";
+      return `<div class="xfer-col">
+        <div class="xfer-half is-up" style="height:${upH}px">${
+          slot("fwt", d.fwt, true, d.fwtDag)}${slot("bwt", d.bwt, true, d.bwtDag)}</div>
+        <div class="xfer-half is-dn" style="height:${dnH}px">${
+          slot("fwt", d.fwt, false, d.fwtDag)}${slot("bwt", d.bwt, false, d.bwtDag)}</div>
+        <div class="xfer-lab">${d.name}<br>${lab}</div>
+      </div>`;
+    }).join("")}
+  </div>
+  <p class="chart-cap">Left bar = FWT (new-task adaptation). Right bar = BWT (retention).
+    Bars below the axis are negative. A stub on the axis is a method that does not report
+    that measure.${items.some((d) => d.fwtDag || d.bwtDag)
+      ? ' <span class="xfer-dag">\u2020</span> marks an average its domains disagree on.' : ""}</p>`;
 }
 
 function paintAxis(axis) {
@@ -435,6 +655,7 @@ const FW = (() => {
     const root = $("#fw");
     if (!root) return;
     paint(1);
+    alignFwCycle();
     $$(".fw-mode").forEach((b) => {
       b.addEventListener("click", () => {
         $$(".fw-mode").forEach((x) => x.classList.toggle("is-active", x === b));
@@ -1055,6 +1276,8 @@ const TG = (() => {
   }
 
   const UNIT = { tools: "tools", skills: "skills", agents: "agents" };
+  /* Which documentation an axis's chips resolve against. */
+  const AXIS_KIND = { tools: "tool", skills: "skill", agents: "agent" };
   /* The pools are interned in file order; the paper reads tools, skills, agents. */
   const AXES = ["tools", "skills", "agents"];
   const axisOrder = (list) => AXES.filter((a) => list.includes(a))
@@ -1201,22 +1424,35 @@ const TG = (() => {
         `<span class="tg-chip${cls ? " " + cls : ""}">${esc(x)}</span>`).join("")}</div>`
     : '<p class="tg-sub">none</p>');
 
-  /* What each gym tool is, fetched on first use. A name on its own does not say what
-   * `find_contact_by_portal_user` takes or how it differs from `find_user`, and the corpus
-   * cannot answer that -- the descriptions live in the gyms, so tools/dump_tool_docs.py
-   * asks them. Kept out of the gallery's own load: it is 424 KB that only a reader who
-   * opens a tool needs, on a tab that already fetches four megabytes of corpus. */
-  let docs = null;
-  let docsPending = null;
-  function loadDocs() {
-    if (docs) return Promise.resolve(docs);
-    if (!docsPending) {
-      docsPending = fetch("static/tool_docs.json")
+  /* What each chip on a task actually is, fetched on first use.
+   *
+   * A name on its own does not say what `find_contact_by_portal_user` takes, what
+   * `3-1-registering-a-customer-case` teaches, or which records the `case_knowledge`
+   * specialist is allowed to touch. The corpus rows carry bare name lists, because the
+   * definitions live where the agent reads them: tool descriptions in the gyms, which
+   * tools/dump_tool_docs.py asks over MCP, and skills, agents and ALE software on disk in
+   * the environment repo, which tools/dump_axis_docs.py reads.
+   *
+   * Two payloads rather than one, so opening a piece of software does not drag in 424 KB
+   * of gym schemas. Neither is in the gallery's own load: this tab already fetches four
+   * megabytes of corpus, and only a reader who opens a chip needs either. */
+  const DOCS = {
+    tool: { url: "static/tool_docs.json", data: null, want: null },
+    axis: { url: "static/axis_docs.json", data: null, want: null },
+  };
+  const SRC = { tool: "tool", gym: "tool", skill: "axis", agent: "axis", software: "axis" };
+  const loaded = (kind) => DOCS[SRC[kind]].data;
+
+  function loadDocs(kind) {
+    const src = DOCS[SRC[kind]];
+    if (src.data) return Promise.resolve(src.data);
+    if (!src.want) {
+      src.want = fetch(src.url)
         .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`${r.status}`))))
-        .then((d) => (docs = d))
-        .catch(() => (docs = { servers: {}, gyms: {}, failed: true }));
+        .then((d) => (src.data = d))
+        .catch(() => (src.data = { failed: true }));
     }
-    return docsPending;
+    return src.want;
   }
 
   /* A tool is documented by the gym that serves it, and 29 names are served by more than
@@ -1230,6 +1466,7 @@ const TG = (() => {
    * the panel says whose it is. Where several gyms disagree and the task's own is not
    * among them, the answer is one of theirs and the panel admits the rest exist. */
   function toolDoc(t, name) {
+    const docs = loaded("tool");
     if (!docs) return null;
     for (const server of names(t[T.GYM])) {
       const gym = (docs.servers || {})[server];
@@ -1241,48 +1478,134 @@ const TG = (() => {
     return { gym: others[0], own: false, alts: others.slice(1), ...docs.gyms[others[0]][name] };
   }
 
-  /* Only worth offering where the gyms can answer: an EOG task acts on them, whereas an
-   * ALE task's chips are installed software, which they know nothing about. */
-  const hasGyms = (t) => names(t[T.GYM]).some((s) => (docs?.servers || SERVERS)[s]);
+  /* Skills, agents and ALE software are defined in files, and every name the corpus uses
+   * has one. The two kinds the gyms answer for are the exception: a description exists only
+   * where a gym serves it, so a row that declares no server has nothing to open. */
+  const GYM_BACKED = { tool: 1, gym: 1 };
+  const inspectable = (t, kind) => !GYM_BACKED[kind] || hasGyms(t);
+  const hasGyms = (t) => names(t[T.GYM]).some((s) => (loaded("tool")?.servers || SERVERS)[s]);
   /* Server names as of the harvest, so the chips can be live before the docs arrive. */
   const SERVERS = { "gym-calendar": 1, "gym-email-mcp": 1, "sn-hr-internal": 1,
                     "gym-itsm-mcp": 1, "gym-teams-mcp": 1, "sn-csm-server": 1,
                     "gym-google-drive-mcp": 1 };
 
-  /* Tool chips, each opening its own description. The panel rides with the group so a
-   * long pool does not push its answer off the end of the modal. */
-  const toolChips = (items, t, cls) => {
+  /* Chips that each open their own description, whatever the axis. The panel rides with the
+   * group so a long pool does not push its answer off the end of the modal. */
+  const docChips = (items, t, kind, cls) => {
     if (!items.length) return '<p class="tg-sub">none</p>';
-    if (!hasGyms(t)) return chips(items, cls);
-    return `<div class="tg-toolgrp">
+    if (!inspectable(t, kind)) return chips(items, cls);
+    return `<div class="tg-docgrp" data-kind="${kind}">
       <div class="tg-chips">${items.map((x) =>
         `<button type="button" class="tg-chip is-doc${cls ? " " + cls : ""}"
-          data-tool="${esc(x)}">${esc(x)}</button>`).join("")}</div>
+          data-doc="${esc(x)}">${esc(x)}</button>`).join("")}</div>
       <div class="tg-doc" data-tg-doc hidden></div>
     </div>`;
   };
 
   const GYM_LABEL = { calendar: "Calendar", csm: "CSM", drive: "Drive", email: "Email",
-                      hr: "HR", itsm: "ITSM", teams: "Teams" };
+                      hr: "HR", itsm: "ITSM", teams: "Teams",
+                      enterprise_tri_hybrid: "tri-domain hybrid", hybrid: "tri-domain hybrid" };
+  const libLabel = (d) => esc(GYM_LABEL[d] || label(d));
 
-  function docPanel(t, name) {
-    const d = toolDoc(t, name);
-    if (!d) {
-      return `<p class="tg-doc-none"><code>${esc(name)}</code> &mdash; ${docs && docs.failed
-        ? "the tool descriptions could not be loaded."
-        : `the gym no longer exposes this tool, so it has no description to read. The corpus
-           still offers it at this stage, which is what the chip reflects.`}</p>`;
+  /* The briefs are markdown, and their code spans and emphasis carry meaning: a field name
+   * is not prose about a field. Escape first, then let those two through. */
+  const md = (s) => esc(s)
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>");
+
+  const docHead = (name, title, note) => `<div class="tg-doc-head">
+      <code class="tg-doc-name">${esc(name)}</code>
+      ${title && title !== name ? `<span class="tg-doc-title">${esc(title)}</span>` : ""}
+      ${note ? `<span class="tg-doc-gym">${note}</span>` : ""}
+    </div>`;
+
+  const NOUN = { tool: "tool", gym: "server", skill: "skill", agent: "specialist",
+                 software: "label" };
+  const docMissing = (kind, name) =>
+    `<p class="tg-doc-none"><code>${esc(name)}</code> &mdash; ${(loaded(kind) || {}).failed
+      ? "the descriptions could not be loaded."
+      : kind === "tool"
+        ? `the gym no longer exposes this tool, so it has no description to read. The corpus
+           still offers it at this stage, which is what the chip reflects.`
+        : `the environment carries no definition for this ${NOUN[kind]}, so there is nothing
+           to read beyond the name the corpus uses.`}</p>`;
+
+  /* A brief as tools/dump_axis_docs.py leaves it: paragraphs, lists and tables that each
+   * carry the count of whatever was trimmed off the end, and subheadings between them. */
+  function docBlocks(list) {
+    return (list || []).map((b) => {
+      if (b[0] === "p") return `<p class="tg-doc-p">${md(b[1])}</p>`;
+      if (b[0] === "h") return `<p class="tg-doc-sub">${md(b[1])}</p>`;
+      if (b[0] === "ul" || b[0] === "ol") {
+        return `<${b[0]} class="tg-doc-list">${b[1].map((i) => `<li>${md(i)}</li>`).join("")}${
+          b[2] ? `<li class="tg-doc-more">and ${b[2]} more</li>` : ""}</${b[0]}>`;
+      }
+      if (b[0] === "t") {
+        return `<table class="tg-doc-args"><thead><tr>${
+          b[1].map((h) => `<th>${md(h)}</th>`).join("")}</tr></thead><tbody>${
+          b[2].map((r) => `<tr>${r.map((c) => `<td>${md(c)}</td>`).join("")}</tr>`).join("")
+        }</tbody></table>${b[3] ? `<p class="tg-doc-more">and ${b[3]} more</p>` : ""}`;
+      }
+      return "";
+    }).join("");
+  }
+
+  const docSections = (secs) => (secs || []).map(([head, blocks, abridged]) =>
+    `<h5 class="tg-doc-sec">${esc(head)}${abridged
+      ? ' <span class="tg-doc-abr">(by heading)</span>' : ""}</h5>${docBlocks(blocks)}`).join("");
+
+  const codes = (list) => list.map((x) => `<code>${esc(x)}</code>`).join(" ");
+
+  /* A skill is the same wherever it is staged, so one definition answers for every task
+   * that carries it. */
+  function skillDoc(t, name) {
+    const d = loaded("skill");
+    return d ? ((d.skills || {})[env(t)] || {})[name] || null : null;
+  }
+
+  /* A specialist is not. `user_group` owns four different tool sets across CSM, HR, ITSM
+   * and the hybrid, and `knowledge` reads four different ways, so the task's own domain
+   * answers first -- and where a later stage has offered it a specialist from another
+   * domain, the panel says which library that definition belongs to. */
+  function agentDoc(t, name) {
+    const d = loaded("agent");
+    if (!d) return null;
+    const roster = d.agents || {};
+    if (env(t) === "ale") {
+      const own = (roster.ale || {})[name];
+      return own ? { own: true, ...own } : null;
     }
+    const byDom = roster.eog || {};
+    const dom = domain(t);
+    if ((byDom[dom] || {})[name]) return { dom, own: true, ...byDom[dom][name] };
+    const others = Object.keys(byDom).filter((k) => byDom[k][name]);
+    if (!others.length) return null;
+    /* The union library is the widest reading of a name, so it speaks for the rest. */
+    const pick = others.includes("enterprise_tri_hybrid") ? "enterprise_tri_hybrid" : others[0];
+    return { dom: pick, own: false, alts: others.filter((k) => k !== pick), ...byDom[pick][name] };
+  }
+
+  /* One label reaches a chip in more spellings than one: the tools axis lowercases to
+   * `anndata`, the software list keeps the card's `AnnData`, and a few carry a version or
+   * a wrapper script with them. The harvest recorded every literal, so this is a lookup. */
+  function softDoc(t, name) {
+    const d = loaded("software");
+    if (!d) return null;
+    const sw = d.software || {};
+    const canon = (sw.alias || {})[name] || name.toLowerCase();
+    const entry = (sw.items || {})[canon];
+    return entry ? { canon, ...entry } : null;
+  }
+
+  function toolPanel(t, name) {
+    const d = toolDoc(t, name);
+    if (!d) return docMissing("tool", name);
     const args = d.a || [];
     const rets = d.o || [];
-    const gymName = esc(GYM_LABEL[d.gym] || d.gym);
     const alts = (d.alts || []).map((g) => GYM_LABEL[g] || g);
-    return `<div class="tg-doc-head">
-        <code class="tg-doc-name">${esc(name)}</code>
-        <span class="tg-doc-gym">as the ${gymName} gym describes it${d.own ? ""
-          : `, which serves it into this task's pool${alts.length
-            ? ` &mdash; ${esc(alts.join(" and "))} define a tool of this name differently` : ""}`}</span>
-      </div>
+    return `${docHead(name, "", `as the ${libLabel(d.gym)} gym describes it${d.own ? ""
+        : `, which serves it into this task's pool${alts.length
+          ? ` &mdash; ${esc(alts.join(" and "))} define a tool of this name differently` : ""}`}`)}
       ${d.d ? `<p class="tg-doc-d">${esc(d.d)}</p>` : ""}
       ${args.length ? `<table class="tg-doc-args">
         <thead><tr><th>Argument</th><th>Type</th><th>What it is</th></tr></thead>
@@ -1296,24 +1619,114 @@ const TG = (() => {
         rets.map((f) => `<code>${esc(f)}</code>`).join(" ")}</p>` : ""}`;
   }
 
+  function skillPanel(t, name) {
+    const d = skillDoc(t, name);
+    if (!d) return docMissing("skill", name);
+    const note = env(t) === "ale"
+      ? `a ${esc(d.tr || "capability")} skill mined from the ALE corpus`
+      : `an oracle skill from the ${libLabel(domain(t))} library`;
+    return `${docHead(name, d.t, note)}
+      ${d.d ? `<p class="tg-doc-d">${md(d.d)}</p>` : ""}
+      <dl class="tg-doc-facts">
+        ${d.tb ? `<dt>Records it writes or reads</dt><dd>${codes(d.tb)}</dd>` : ""}
+        ${d.n ? `<dt>Recurs in</dt><dd>${d.n} ALE tasks</dd>` : ""}
+      </dl>
+      ${docSections(d.s)}`;
+  }
+
+  function agentPanel(t, name) {
+    const d = agentDoc(t, name);
+    if (!d) return docMissing("agent", name);
+    const isAle = env(t) === "ale";
+    const alts = (d.alts || []).map((x) => GYM_LABEL[x] || label(x));
+    const note = isAle
+      ? "a specialist on the ALE roster"
+      : `as the ${libLabel(d.dom)} library defines it${d.own ? ""
+        : `, which is where this task's pool takes it from${alts.length
+          ? ` &mdash; ${esc(alts.join(" and "))} define a specialist of this name differently`
+          : ""}`}`;
+    const owns = d.w || [];
+    const unit = isAle
+      ? `piece${owns.length === 1 ? "" : "s"} of software`
+      : `tool${owns.length === 1 ? "" : "s"}`;
+    return `${docHead(name, d.t, note)}
+      ${d.d ? `<p class="tg-doc-d">${md(d.d)}</p>` : ""}
+      ${owns.length ? `<dl class="tg-doc-facts">
+        <dt>Owns ${owns.length} ${unit}</dt><dd>${codes(owns)}</dd>
+      </dl>` : ""}
+      ${docSections(d.s)}`;
+  }
+
+  /* ALE software is off the shelf. Nothing in the environment says what Blender is, and
+   * inventing a sentence would be worse than admitting it -- what the repo does record is
+   * how a run reaches the software and which specialist owns it, so that is what this
+   * shows. */
+  function softPanel(t, name) {
+    const d = softDoc(t, name);
+    if (!d) return docMissing("software", name);
+    const reach = [];
+    if (d.m) reach.push(`imports as ${codes(d.m)}`);
+    if (d.b) reach.push(`runs as ${codes(d.b)}`);
+    if (d.r) reach.push(`loads the R namespace ${codes(d.r)}`);
+    const facts = [
+      d.canon !== name.toLowerCase() ? ["Canonically", `<code>${esc(d.canon)}</code>`] : null,
+      reach.length ? ["In the sandbox", reach.join(", ")] : null,
+      ["Held to the stage", d.e
+        ? "by a guard, which refuses the import or the executable until the stage that grants it"
+        : d.k
+          ? "by the prompt's allowlist alone, which is as far as a guard reaches for this kind"
+          : `by the prompt's allowlist alone: the registry carries no import or executable for
+             this label to guard`],
+      d.ft ? ["Owned by", `the <code>${esc(d.f)}</code> specialist, ${esc(d.ft)}`] : null,
+      d.l ? ["Written in the corpus as", codes(d.l)] : null,
+      d.n ? ["Needed by", `${d.n} task${d.n === 1 ? "" : "s"}${d.q
+        ? `, offered to ${d.q}` : ""}`] : null,
+    ].filter(Boolean);
+    return `${docHead(name, d.k || "", "third-party software, as the harness provisions it")}
+      <dl class="tg-doc-facts">${facts.map(([k, v]) =>
+        `<dt>${k}</dt><dd>${v}</dd>`).join("")}</dl>`;
+  }
+
+  /* The last chips on a task are not tools but the servers behind them, and the same
+   * payload knows which gym answers for each. */
+  function gymPanel(t, name) {
+    const docs = loaded("gym");
+    const gym = docs && (docs.servers || {})[name];
+    if (!gym) return docMissing("gym", name);
+    const served = docs.gyms[gym] || {};
+    const offered = new Set([...names(t[T.ORACLE]), ...names(t[T.CUM]), ...names(t[T.SEL])]);
+    const mine = [...offered].filter((x) => served[x]).length;
+    return `${docHead(name, `${libLabel(gym)} gym`,
+      "the MCP server this task's tools are served from")}
+      <dl class="tg-doc-facts">
+        <dt>Serves</dt><dd>${Object.keys(served).length} tools that tasks in this corpus
+          reach for</dd>
+        ${mine ? `<dt>Offered to this task</dt><dd>${mine} of them</dd>` : ""}
+      </dl>`;
+  }
+
+  const PANEL = { tool: toolPanel, gym: gymPanel, skill: skillPanel, agent: agentPanel,
+                  software: softPanel };
+
   /* Fill the panel that belongs to the clicked chip's own group, and let a second click on
    * the same chip close it again. */
   function openDoc(btn) {
-    const grp = btn.closest(".tg-toolgrp");
+    const grp = btn.closest(".tg-docgrp");
     const panel = grp && grp.querySelector("[data-tg-doc]");
     if (!panel) return;
+    const kind = grp.dataset.kind in PANEL ? grp.dataset.kind : "tool";
     const was = btn.classList.contains("is-open");
     grp.querySelectorAll(".tg-chip.is-open").forEach((c) => c.classList.remove("is-open"));
     if (was) { panel.hidden = true; return; }
     btn.classList.add("is-open");
     panel.hidden = false;
-    const name = btn.dataset.tool;
-    if (docs) { panel.innerHTML = docPanel(S.open, name); return; }
-    panel.innerHTML = '<p class="tg-sub">Reading the tool description\u2026</p>';
-    loadDocs().then(() => {
+    const name = btn.dataset.doc;
+    if (loaded(kind)) { panel.innerHTML = PANEL[kind](S.open, name); return; }
+    panel.innerHTML = '<p class="tg-sub">Reading the description\u2026</p>';
+    loadDocs(kind).then(() => {
       /* The reader may have moved on, or closed the modal, while this was in flight. */
-      if (btn.classList.contains("is-open") && btn.dataset.tool === name) {
-        panel.innerHTML = docPanel(S.open, name);
+      if (btn.classList.contains("is-open") && btn.dataset.doc === name) {
+        panel.innerHTML = PANEL[kind](S.open, name);
       }
     });
   }
@@ -1346,6 +1759,9 @@ const TG = (() => {
   function detail(t) {
     const tr = track(t);
     const isAle = env(t) === "ale";
+    /* An ALE row's tools axis is installed software, not a gym's function tools, so it
+     * reads from the other payload. */
+    const kind = isAle && tr === "tools" ? "software" : AXIS_KIND[tr];
     const oracle = names(t[T.ORACLE]);
     const cum = names(t[T.CUM]);
     const extra = cum.filter((x) => !oracle.includes(x));
@@ -1381,17 +1797,18 @@ const TG = (() => {
     <pre class="tg-pre">${esc(prompt(t))}</pre>
 
     <h4 class="tg-h4">Oracle ${esc(UNIT[tr])} &middot; what this task needs</h4>
-    ${tr === "tools" ? toolChips(oracle, t) : chips(oracle)}
+    ${inspectable(t, kind)
+      ? '<p class="tg-sub">Open any chip for what it is, and what it expects.</p>' : ""}
+    ${docChips(oracle, t, kind)}
     <h4 class="tg-h4">Also in the pool at this stage${extra.length ? ` &middot; ${extra.length} more` : ""}</h4>
     ${extra.length
-      ? `<p class="tg-sub">Offered alongside the oracle set, and not needed here.${
-        tr === "tools" && hasGyms(t) ? " Open any of them to read what it does." : ""}</p>${
-        tr === "tools" ? toolChips(extra, t, "is-extra") : chips(extra, "is-extra")}`
+      ? `<p class="tg-sub">Offered alongside the oracle set, and not needed here.</p>${
+        docChips(extra, t, kind, "is-extra")}`
       : '<p class="tg-sub">Nothing beyond the oracle set.</p>'}
 
     ${sel.length ? `<h4 class="tg-h4">Tools mounted for it (${sel.length})</h4>${
-      toolChips(sel, t, "is-extra")}` : ""}
-    ${soft.length ? `<h4 class="tg-h4">Software</h4>${chips(soft, "is-extra")}` : ""}
+      docChips(sel, t, "tool", "is-extra")}` : ""}
+    ${soft.length ? `<h4 class="tg-h4">Software</h4>${docChips(soft, t, "software", "is-extra")}` : ""}
 
     ${vs.length ? `<h4 class="tg-h4">Graded on ${vs.length} check${vs.length === 1 ? "" : "s"}</h4>
       <p class="tg-sub">Each reads the environment after the run. The agent never sees these.</p>
@@ -1417,7 +1834,8 @@ const TG = (() => {
     ${must.length ? `<h4 class="tg-h4">Required steps (${must.length})</h4>
       <ol class="tg-steps">${must.map((m) => `<li>${esc(m)}</li>`).join("")}</ol>` : ""}
 
-    ${gym.length ? `<h4 class="tg-h4">Gym servers</h4>${chips(gym, "is-extra")}` : ""}
+    ${gym.length ? `<h4 class="tg-h4">Gym servers</h4>${
+      docChips(gym, t, "gym", "is-extra")}` : ""}
 
     ${t[T.SYS] >= 0 ? `<h4 class="tg-h4">Operating policy given to the agent</h4>
       <pre class="tg-pre">${esc(S.d.sys[t[T.SYS]])}</pre>` : ""}`;
@@ -2200,6 +2618,7 @@ const PV = (() => {
     if (slim) slim.hidden = !sub;
 
     alignFeedbackLoop();   // was unmeasurable while the view was display:none
+    alignFwCycle();
     return true;
   }
 
@@ -2255,6 +2674,7 @@ const PV = (() => {
   return { init, open };
 })();
 
+MQ.init();
 LP.init();
 initResults();
 initNav();

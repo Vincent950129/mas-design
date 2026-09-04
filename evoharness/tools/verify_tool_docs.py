@@ -153,7 +153,7 @@ def main() -> int:
                          req: d.querySelectorAll('.tg-doc-req').length }; }""")
             check(panel is not None, "a panel opens with the answer")
             if panel:
-                chip = pg.eval_on_selector("[data-tg-detail] .tg-chip.is-doc", "n => n.dataset.tool")
+                chip = pg.eval_on_selector("[data-tg-detail] .tg-chip.is-doc", "n => n.dataset.doc")
                 check(panel["name"] == chip, "the panel answers about the chip that was clicked",
                       f"{panel['name']} vs {chip}")
                 check(len(panel["desc"]) > 20, "it reads as a description, not a name echoed back",
@@ -169,6 +169,23 @@ def main() -> int:
             check(pg.eval_on_selector_all("[data-tg-detail] .tg-doc:not([hidden])", "ns => ns.length") == 0,
                   "clicking the open chip again closes it")
 
+            print("\nThe servers behind them")
+            server = pg.evaluate("""() => { const c = document.querySelector(
+                '[data-tg-detail] [data-kind="gym"] .tg-chip.is-doc');
+                if (!c) return null; c.click(); return c.dataset.doc; }""")
+            check(bool(server), "the gym server chips open as well", str(server))
+            if server:
+                pg.wait_for_timeout(300)
+                srv_panel = pg.evaluate("""() => { const d = document.querySelector(
+                    '[data-tg-detail] .tg-doc:not([hidden])');
+                    return { title: d.querySelector('.tg-doc-title')?.textContent.trim() || '',
+                             facts: [...d.querySelectorAll('.tg-doc-facts dd')].map(
+                               (x) => x.textContent.replace(/\\s+/g, ' ').trim()) }; }""")
+                check(srv_panel["title"].endswith("gym"),
+                      f"`{server}` names the gym behind it", srv_panel["title"])
+                check(any("tools that tasks" in f for f in srv_panel["facts"]),
+                      "and how much of the corpus it serves", str(srv_panel["facts"]))
+
             print("\nProvenance")
             seen = {}
             for domain in ("teams", "itsm", "csm", "hr"):
@@ -179,7 +196,7 @@ def main() -> int:
                     pg.eval_on_selector_all(".tg-card", f"ns => ns[{i}] && ns[{i}].click()")
                     pg.wait_for_timeout(250)
                     hit = pg.evaluate("""(n) => { const c = [...document.querySelectorAll(
-                        '[data-tg-detail] .tg-chip.is-doc')].find(x => x.dataset.tool === n);
+                        '[data-tg-detail] .tg-chip.is-doc')].find(x => x.dataset.doc === n);
                         if (!c) return false; c.click(); return true; }""", "list_users")
                     if hit:
                         pg.wait_for_timeout(500)
@@ -223,8 +240,8 @@ def main() -> int:
             pg.eval_on_selector_all(".tg-card", "ns => ns[0] && ns[0].click()")
             pg.wait_for_timeout(350)
             foreign = pg.evaluate("""(n) => { const c = [...document.querySelectorAll(
-                '[data-tg-detail] .tg-chip.is-doc')].find(x => x.dataset.tool === n);
-                if (!c) return null; c.click(); return c.dataset.tool; }""", target[1])
+                '[data-tg-detail] .tg-chip.is-doc')].find(x => x.dataset.doc === n);
+                if (!c) return null; c.click(); return c.dataset.doc; }""", target[1])
             print(f"       (a {'/'.join(target[2])} task offered `{target[1]}`)")
             if foreign:
                 pg.wait_for_timeout(700)
@@ -240,13 +257,19 @@ def main() -> int:
             else:
                 check(False, f"the chip for `{target[1]}` was there to open")
 
-            print("\nWhere the gyms cannot answer")
+            print("\nWhere the gyms are not the source")
             pg.evaluate("() => document.querySelector('[data-tg-close]')?.click()")
             pg.fill('#tasks input[data-f="q"]', "")     # the id search above still narrows to one
             pg.select_option("#tg-domain", "")
-            for env, track, lab in (("ale", "tools", "ALE software"),
-                                    ("eog", "skills", "EOG skills"),
-                                    ("eog", "agents", "EOG agents")):
+            # Every chip on every axis opens now, but only some of them are gym tools. A
+            # group that resolves against this payload declares itself kind="tool", and an
+            # ALE row must never do that: its chips are installed software, which the gyms
+            # know nothing about. Getting this wrong is not a crash, it is a Blender chip
+            # quietly claiming to be an MCP function.
+            for env, track, lab, want in (("ale", "tools", "ALE software", set()),
+                                          ("ale", "agents", "ALE agents", set()),
+                                          ("eog", "skills", "EOG skills", {"Tools mounted for it"}),
+                                          ("eog", "agents", "EOG agents", {"Tools mounted for it"})):
                 pg.select_option("#tg-env", env)
                 pg.select_option("#tg-track", track)
                 pg.wait_for_timeout(400)
@@ -255,20 +278,19 @@ def main() -> int:
                 groups = pg.evaluate("""() => {
                     const out = [];
                     document.querySelectorAll('[data-tg-detail] .tg-h4').forEach(h => {
-                      let n = h.nextElementSibling, chips = [];
+                      let n = h.nextElementSibling, chips = [], kind = "";
                       while (n && !n.classList.contains('tg-h4')) {
+                        if (n.dataset.kind) kind = n.dataset.kind;
                         chips.push(...n.querySelectorAll('.tg-chip')); n = n.nextElementSibling; }
-                      if (chips.length) out.push([h.textContent.trim(),
+                      if (chips.length) out.push([h.textContent.trim(), kind,
                         chips.filter(c => c.classList.contains('is-doc')).length, chips.length]);
                     });
                     return out; }""")
-                # Only tool groups may be openable. On a skills or agents task that is the
-                # mounted-tools group: those are gym tools whoever the task is about, while
-                # the skills and agents themselves are documented nowhere the page can read.
-                wrong = [g for g in groups if g[1] and "ools mounted" not in g[0]
-                         and not g[0].startswith("Oracle tools")]
-                check(not wrong, f"{lab}: nothing but tools is openable",
-                      str([g[0] for g in wrong]))
+                gym_backed = {g[0].split(" (")[0] for g in groups if g[1] == "tool"}
+                check(gym_backed == want, f"{lab}: the gyms answer for {want or 'nothing here'}",
+                      str(sorted(gym_backed)))
+                shut = [g[0] for g in groups if g[2] != g[3]]
+                check(not shut, f"{lab}: every chip in every group opens", str(shut))
                 pg.evaluate("() => document.querySelector('[data-tg-close]')?.click()")
                 pg.wait_for_timeout(150)
 

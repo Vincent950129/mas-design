@@ -118,9 +118,12 @@ def main() -> int:
                  and p.stat().st_size > 400 * 1024]
         check(not heavy, "no hero avatar ships as a full-size master", str(heavy))
 
-        badges = pg.eval_on_selector_all(".meta-badges span", "ns => ns.map(n => n.innerText)")
-        check("Under submission" not in badges, "the submission-status chip is gone", str(badges))
-        check(len(badges) == 4, "the remaining chips are the four topical ones", str(badges))
+        # The chip row is gone too: those four differences are named in #different instead,
+        # under a heading that says what they are.
+        check(not pg.query_selector("#hero .meta-badges"), "the hero carries no chip row")
+        claims = pg.eval_on_selector_all("#different .diff-pill",
+                                         "ns => ns.map(n => n.innerText.trim())")
+        check(len(claims) == 4, "the four differences are named in #different", str(claims))
         # The pill leaves the page, so it must not be wired into the view switcher.
         pg.click('.pv-tab[data-pv="results"]')
         pg.wait_for_timeout(700)
@@ -132,6 +135,7 @@ def main() -> int:
         pg.click('.pv-tab[data-pv="overview"]')
         pg.wait_for_timeout(500)
         pg.locator("#hero").screenshot(path=str(OUT / "rv-hero.png"))
+        pg.locator("#different").screenshot(path=str(OUT / "rv-different.png"))
 
         print("\nDemo banner")
         msg = pg.eval_on_selector(".demo-banner-msg", "n => n.innerText")

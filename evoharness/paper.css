@@ -14,7 +14,7 @@ body {
   font-family: 'Noto Sans', sans-serif;
   font-size: 16px;
   line-height: 1.6;
-  background: #f7f8fc;
+  background: var(--bg);
   color: #1f2a44;
 }
 
@@ -139,11 +139,15 @@ body {
 }
 
 /* ---------- Hero ---------- */
+/* Bulma's hero padding is sized for a hero that carries a byline and a row of buttons.
+   This one is a title, a question and three lines of prose, so it is set to the space
+   those need and no more. */
 .hero.hero-gradient {
   background: linear-gradient(130deg, var(--gradient-start), var(--gradient-end));
   color: #fff;
-  padding: 2rem 0 3rem;
+  padding: 0;
 }
+.hero.hero-gradient .hero-body { padding: 2rem 1.5rem; }
 .hero.hero-gradient .publication-title {
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -205,6 +209,163 @@ body {
   .demo-banner { flex-wrap: wrap; font-size: 1.02rem; padding: 0.95rem 1.1rem; }
 }
 
+/* =====================================================================
+   The corpus, drifting. A benchmark whose subject is a harness that keeps
+   moving can afford a band that moves, but only because every panel in it
+   is a real figure from a real task: the artifact an ALE task hands over,
+   or the sandbox an EOG task starts in.
+   ===================================================================== */
+.mq-sec { padding: 1.6rem 0 0; }
+.mq {
+  overflow: hidden;
+  padding: 14px 0 18px;
+  /* Panels arrive and leave rather than stopping at an edge. */
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+}
+.mq-track {
+  display: flex;
+  align-items: flex-start;
+  width: max-content;
+  animation: mqDrift 120s linear infinite;
+}
+/* Half the track is exactly one copy of the panels, which is only true while the
+   spacing lives on the panels themselves: a flex `gap` would leave half a gap
+   unaccounted for and the wrap would jump by that much once a cycle. */
+@keyframes mqDrift {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
+}
+.mq:hover .mq-track,
+.mq:focus-within .mq-track { animation-play-state: paused; }
+
+.mq-panel {
+  --mq-tilt: -13deg;
+  flex: none;
+  margin-right: 20px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  transform: perspective(1100px) rotateY(var(--mq-tilt)) rotateX(3deg);
+  transition: transform 0.35s ease, filter 0.35s ease;
+}
+/* Staggered, so the band reads as a scattered row of screens rather than a ruler. */
+.mq-panel:nth-child(even) { margin-top: 26px; }
+.mq-panel:nth-child(3n) { margin-top: 12px; }
+.mq-panel:hover, .mq-panel:focus-visible {
+  transform: perspective(1100px) rotateY(-4deg) translateY(-5px) scale(1.03);
+  filter: none;
+  outline: none;
+}
+.mq-shot {
+  display: block;
+  height: 152px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  overflow: hidden;
+  box-shadow: 0 14px 30px -18px rgba(15, 23, 42, 0.55);
+}
+.mq-panel:hover .mq-shot { box-shadow: 0 20px 38px -16px rgba(15, 23, 42, 0.6); }
+.mq-shot img {
+  display: block;
+  height: 100%;
+  width: auto;
+  min-width: 108px;
+  max-width: 300px;
+  object-fit: cover;
+  /* Screenshots carry their subject at the top: crop from the bottom, not the middle. */
+  object-position: top center;
+}
+.mq-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  margin-top: 8px;
+  max-width: 300px;
+}
+.mq-lab {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  line-height: 1.3;
+}
+.mq-st {
+  flex: none;
+  white-space: nowrap;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #c2410c;
+  background: #fff7ed;
+  border: 1px solid #f3d3ae;
+  border-radius: 999px;
+  padding: 1px 6px;
+}
+.mq-panel[data-env="ale"] .mq-st { color: #4338ca; background: #eef2ff; border-color: #c7d2fe; }
+
+/* The second dimension: what the harness hands this task at this stage. Without it a panel
+   says only what the task is, which is every task gallery; the point of this corpus is that
+   the pool behind the task keeps growing, so the panel names some of what just arrived. */
+.mq-harn {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 5px;
+  max-width: 300px;
+  /* One row's worth: a name that does not fit wraps out of sight rather than being
+     sliced down the middle, which on a narrow panel is what clipping would do. */
+  max-height: 18px;
+  overflow: hidden;
+}
+.mq-gain {
+  flex: none;
+  white-space: nowrap;
+  font-size: 10px;
+  font-weight: 800;
+  color: #047857;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  border-radius: 999px;
+  padding: 1px 6px;
+}
+/* Nothing new to report -- stage 1, or a roster that does not grow -- reads as a plain count. */
+.mq-gain.is-flat {
+  color: #475569;
+  background: #f1f5f9;
+  border: 1px solid #dde3ea;
+}
+.mq-item {
+  min-width: 0;
+  /* A long name on a panel as narrow as its picture ends in an ellipsis rather than
+     running out past the edge of the strip. */
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 9.5px;
+  color: #64748b;
+  background: #fff;
+  border: 1px solid #e6e9f5;
+  border-radius: 5px;
+  padding: 1px 5px;
+}
+@media (max-width: 640px) {
+  .mq-shot { height: 104px; }
+  .mq-panel:nth-child(even) { margin-top: 16px; }
+  /* One name, so the strip does not wrap the panel wider than its own picture. */
+  .mq-item:nth-of-type(2) { display: none; }
+}
+/* Asked not to animate: one copy of the panels, browsable by hand. */
+@media (prefers-reduced-motion: reduce) {
+  .mq { overflow-x: auto; }
+  .mq-track { animation: none; }
+}
+
 .author-grid {
   margin-top: 2.5rem;
   display: flex;
@@ -246,6 +407,115 @@ body {
   margin-top: 1.5rem;
   opacity: 0.92;
   font-size: 0.95rem;
+}
+
+/* The byline, at the end of the page rather than in the hero: twelve portraits above the
+   fold cost more room than they were worth. The cards were built for the hero's dark
+   gradient, so on this background they have to carry their own contrast. */
+.authors-sec {
+  padding: 2.4rem 1.5rem 0.6rem;
+  border-top: 1px solid var(--border);
+}
+/* Bulma's footer grey is a cool one, and against the paper tone it reads as a seam
+   across the bottom of the page rather than as the end of it. */
+footer.footer { background: none; }
+.authors-h {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.authors-heart {
+  color: #e11d48;
+  font-size: 14px;
+  letter-spacing: 0;
+  vertical-align: -1px;
+}
+.authors-sec .author-grid { margin-top: 1.3rem; }
+.authors-sec .author-card {
+  background: #fff;
+  border-color: #e6e9f5;
+  box-shadow: 0 10px 20px -14px rgba(15, 23, 42, 0.45);
+}
+.authors-sec .author-card img { border-color: #e6e9f5; }
+.authors-sec .author-card a,
+.authors-sec .author-card .author-name { color: #1f2a44; }
+.authors-sec .hero-affil {
+  color: var(--muted);
+  opacity: 1;
+  font-size: 0.88rem;
+  line-height: 1.7;
+}
+
+/* =====================================================================
+   What sets this corpus apart, before the abstract that argues it. Claims only,
+   named and left at that: a paragraph under each one repeated the abstract two
+   screens early, and the reader who wants the argument is on their way to it.
+   ===================================================================== */
+.diff-sec { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+/* The heading holds one side and the claims fill the other, so the block costs two
+   lines of height instead of a screen. Below 900px there is no second side to fill. */
+.diff-top {
+  display: flex;
+  align-items: center;
+  gap: 1.6rem;
+}
+.diff-h {
+  flex: 0 0 17.2rem;
+  font-family: 'Google Sans', 'Noto Sans', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: #1f2a44;
+  margin: 0;
+}
+.diff-h b { font-weight: 700; color: var(--accent); }
+.diff-pills {
+  flex: 1 1 auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  list-style: none;
+  margin: 0;
+}
+.diff-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.95rem 0.5rem 0.7rem;
+  background: #fff;
+  border: 1px solid #eceff8;
+  border-radius: 999px;
+  font-family: 'Google Sans', 'Noto Sans', sans-serif;
+  font-size: 0.86rem;
+  font-weight: 650;
+  line-height: 1.3;
+  color: #1f2a44;
+  box-shadow: 0 10px 22px -18px rgba(15, 23, 42, 0.55);
+}
+.diff-ico {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  color: var(--accent);
+  background: #eef0fb;
+}
+.diff-ico svg { width: 15px; height: 15px; }
+@media (max-width: 900px) {
+  .diff-top { flex-direction: column; align-items: stretch; gap: 1rem; }
+  .diff-h { flex: none; text-align: center; }
+  .diff-pills { justify-content: center; }
+}
+@media (max-width: 640px) {
+  .diff-h { font-size: 1.25rem; }
+  .diff-pill { font-size: 0.8rem; }
 }
 
 /* ---------- Cards used by MAS-Zero / MAS-Orchestra ---------- */
@@ -461,7 +731,7 @@ body {
 }
 
 /* --- Outer / inner framework (P1), original visual ---------- */
-.fw { display: grid; gap: 14px; }
+.fw { display: grid; gap: 14px; position: relative; }
 .fw-figure {
   max-width: 1080px;
   margin: 0 auto;
@@ -630,6 +900,50 @@ figure.cd-figure {
 .fw.is-adapt .fw-band--inner { box-shadow: 0 0 0 3px rgba(99,102,241,0.12); }
 .fw.is-adapt .fw-band--across { box-shadow: 0 0 0 3px rgba(99,102,241,0.12); }
 
+/* The legs that close the loop, drawn over the bands so they can cross out of the stage box
+   into z_t. Shown only once alignFwCycle() has measured endpoints it trusts, so a wrapped
+   loop row leaves the .fw-fb line to say the same thing in words. */
+.fw-cycle { position: absolute; inset: 0; pointer-events: none; display: none; }
+.fw.is-looped .fw-cycle { display: block; }
+.fw.is-looped .fw-fb { display: none; }
+.fw.is-deploy .fw-cycle { opacity: 0.3; }
+/* The line is the box rather than a border on it, so the arrowhead and the label can be
+   centred on it without an off-by-one correction for border width. */
+.fw-riser {
+  position: absolute;
+  width: 2px;
+  background: repeating-linear-gradient(to bottom, #a5b4fc 0 4px, transparent 4px 8px);
+}
+.fw-riser::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0; height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+}
+.fw-riser--w::after { bottom: -9px; border-top: 9px solid #6366f1; }
+.fw-riser--r::after { top: -9px; border-bottom: 9px solid #6366f1; }
+/* Only the return leg is labelled: an arrow from the environment into z_t says what it does.
+   The label sits beside its leg and turns inward, toward the middle of the figure the legs
+   enclose -- with ~50px of gap to cross, a chip on the line leaves too little dash either
+   side of it to read as one. */
+.fw-riser-lab {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 700;
+  color: #4f46e5;
+  background: #fff;
+  border: 1px solid #c7d2fe;
+  border-radius: 999px;
+  padding: 2px 9px;
+}
+
 .fw-z { display: flex; gap: 8px; flex-wrap: wrap; }
 .fw-z span {
   font-size: 0.88rem;
@@ -770,18 +1084,28 @@ a.dbt-cta { text-decoration: none; color: inherit; }
   gap: 14px;
 }
 .xfer-cell { min-width: 0; }
-.xfer-bars { display: flex; align-items: flex-end; gap: 10px; height: 150px; padding: 8px 4px 0; }
-.xfer-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
-.xfer-stack { width: 100%; display: flex; gap: 3px; align-items: flex-end; height: 120px; }
-.xfer-bar {
-  flex: 1;
-  border-radius: 4px 4px 0 0;
-  min-height: 2px;
-}
+.xfer-bars { position: relative; display: flex; gap: 10px; padding: 8px 4px 0; }
+/* One line across the whole chart, gaps included: per-column rules read as ticks rather
+   than as the zero these bars are measured from. */
+.xfer-axis { position: absolute; left: 4px; right: 4px; height: 1px; background: #94a3b8; }
+.xfer-col { flex: 1; display: flex; flex-direction: column; align-items: center; }
+.xfer-half { width: 100%; display: flex; gap: 3px; }
+.xfer-half.is-up { align-items: flex-end; }
+.xfer-half.is-dn { align-items: flex-start; }
+.xfer-slot { flex: 1; }
+.xfer-bar { flex: 1; min-height: 2px; }
+/* Rounded on the end away from the axis, so a bar looks anchored to it either way up. */
+.is-up .xfer-bar { border-radius: 4px 4px 0 0; }
+.is-dn .xfer-bar { border-radius: 0 0 4px 4px; }
 .xfer-bar.fwt { background: var(--accent); }
 .xfer-bar.bwt { background: #36d1dc; }
-.xfer-bar.is-neg { background: var(--bad); }
-.xfer-lab { font-size: 10px; font-weight: 700; color: var(--muted); text-align: center; line-height: 1.2; }
+/* Neither direction: no transfer measured, and not reported at all. */
+.xfer-bar.is-zero { height: 3px; border-radius: 2px; }
+.xfer-bar.is-na { height: 3px; border-radius: 2px; opacity: .22; }
+.xfer-lab { margin-top: 6px; font-size: 10px; font-weight: 700; color: var(--muted); text-align: center; line-height: 1.2; }
+/* The paper's dagger: an average whose domains disagree. It qualifies the number it trails,
+ * so it stays quiet enough not to read as part of it. */
+.xfer-dag { color: #a5b4fc; font-weight: 700; }
 
 .table-scroll { overflow-x: auto; }
 table.res {
@@ -1586,7 +1910,7 @@ table.cs-tbl tbody tr:hover { background: #fbfcff; }
 .tg-chip.is-extra { background: #f8fafc; color: #64748b; border-color: #e2e8f0; }
 .tg-sub { margin: 0 0 7px; font-size: 0.78rem; color: var(--muted); }
 
-/* A tool chip that can be opened. Only the cursor and a hover lift say so: a pool runs to
+/* A chip that can be opened. Only the cursor and a hover lift say so: a pool runs to
    seventy-odd of these, and anything louder would turn the list into a wall of buttons. */
 .tg-chip.is-doc { font-family: inherit; cursor: pointer; transition: background .12s, border-color .12s; }
 .tg-chip.is-doc:hover { background: #e0e7ff; border-color: #a5b4fc; }
@@ -1594,7 +1918,7 @@ table.cs-tbl tbody tr:hover { background: #fbfcff; }
 .tg-chip.is-doc:focus-visible { outline: 2px solid #4e54c8; outline-offset: 1px; }
 .tg-chip.is-doc.is-open { background: #4e54c8; border-color: #4e54c8; color: #fff; }
 
-.tg-toolgrp { margin: 0 0 7px; }
+.tg-docgrp { margin: 0 0 7px; }
 .tg-doc {
   margin: 7px 0 0;
   padding: 11px 13px;
@@ -1604,6 +1928,7 @@ table.cs-tbl tbody tr:hover { background: #fbfcff; }
 }
 .tg-doc-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; }
 .tg-doc-name { font-size: 0.8rem; font-weight: 750; color: #312e81; }
+.tg-doc-title { font-size: 0.75rem; font-weight: 700; color: #4338ca; }
 .tg-doc-gym { font-size: 0.7rem; font-weight: 650; color: var(--muted); }
 .tg-doc-d { margin: 6px 0 0; font-size: 0.79rem; line-height: 1.6; color: #1f2a44; }
 .tg-doc-none { margin: 0; font-size: 0.78rem; line-height: 1.6; color: var(--muted); }
@@ -1631,6 +1956,51 @@ table.cs-tbl tbody tr:hover { background: #fbfcff; }
 .tg-doc-ty { color: var(--muted); font-family: var(--mono, ui-monospace, monospace); }
 .tg-doc-o { margin: 9px 0 0; font-size: 0.74rem; line-height: 1.9; color: var(--muted); }
 .tg-doc-o code { font-size: 0.72rem; color: #475569; background: #eef2ff; padding: 1px 5px; border-radius: 4px; }
+
+/* A skill's or specialist's own brief, rendered from the sections it was written in. The
+   panel is nested two levels deep inside the modal already, so the type stays quiet and
+   the section headings carry the structure. */
+.tg-doc-sec {
+  margin: 12px 0 0;
+  font-size: 0.66rem;
+  font-weight: 750;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: #6366f1;
+}
+.tg-doc-abr { font-weight: 600; letter-spacing: .02em; text-transform: none; color: var(--muted); }
+.tg-doc-p { margin: 5px 0 0; font-size: 0.76rem; line-height: 1.65; color: #334155; }
+.tg-doc-sub { margin: 8px 0 0; font-size: 0.72rem; font-weight: 700; color: #475569; }
+/* Bulma clears list markers page-wide; a procedure without its steps numbered, or a set of
+   caveats without bullets, reads as one run-on paragraph. */
+ul.tg-doc-list { list-style: disc outside; }
+ol.tg-doc-list { list-style: decimal outside; }
+.tg-doc-list { margin: 5px 0 0; padding-left: 18px; font-size: 0.76rem; line-height: 1.6; color: #334155; }
+.tg-doc-list::marker, .tg-doc-list li::marker { color: #a5b4fc; }
+.tg-doc-list li { margin: 2px 0; }
+.tg-doc-more { color: var(--muted); font-style: italic; }
+p.tg-doc-more { margin: 4px 0 0; font-size: 0.72rem; }
+
+/* What the environment knows about a chip beyond its prose: the records a skill writes,
+   the tools a specialist owns, how a run reaches a piece of software. */
+.tg-doc-facts { margin: 8px 0 0; font-size: 0.74rem; line-height: 1.6; }
+.tg-doc-facts:empty { display: none; }
+.tg-doc-facts dt {
+  margin: 6px 0 0;
+  font-size: 0.63rem;
+  font-weight: 750;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.tg-doc-facts dd { margin: 2px 0 0; color: #334155; }
+.tg-doc-facts code, .tg-doc-p code, .tg-doc-list code, .tg-doc-d code {
+  font-size: 0.71rem;
+  color: #3730a3;
+  background: #eef2ff;
+  padding: 1px 5px;
+  border-radius: 4px;
+}
 
 .tg-vf {
   border: 1px solid var(--border);
