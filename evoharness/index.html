@@ -1578,7 +1578,7 @@
     <p class="sv-lead">
       You can score your own agent on these same executable tasks in two environments. The
       <b>hosted service</b> runs today: it holds the environment and the grader, so there is nothing
-      to stand up and you supply only an <code>act(task)</code> callable. Running <b>locally</b> is
+      to stand up and you supply only an <code>f(task)</code> callable. Running <b>locally</b> is
       where the corpus itself lives &mdash; the task data is already public on Hugging Face, and the
       runner that executes and grades it against your own machine is on the way.
     </p>
@@ -1609,6 +1609,11 @@
       <li><b>grade</b><i>hidden verifiers read the environment</i></li>
       <li><b>session freed</b><i>automatically, on scope exit</i></li>
     </ol>
+    <p class="sv-cap sv-cap--mid">
+      <code>run_benchmark</code> does all four, once per task in the scope, so the only step you
+      write is the second. A leaderboard row covers both benchmarks below, and they hand your agent
+      different affordances.
+    </p>
 
     <div class="sv-cards">
       <article class="sv-card sv-card--eog">
@@ -1616,8 +1621,10 @@
         <h3>Dockerized enterprise apps</h3>
         <p>
           The agent acts by calling <b>MCP tools</b> bound to a fresh per-session database, and hidden
-          <b>SQL verifiers</b> grade the state it leaves behind. Eight domains plus a hybrid one: HR, CSM,
-          ITSM, calendar, email, drive, teams.
+          <b>SQL verifiers</b> grade the state it leaves behind. You get <code>task.mcp_servers</code>
+          and <code>task.mcp_session(s)</code>. Eight published streams &mdash; calendar, CSM, drive,
+          email, HR, hybrid, ITSM, teams &mdash; plus <code>enterprise_tri_hybrid</code>, a cross-gym
+          stress domain no published table counts.
         </p>
       </article>
       <article class="sv-card sv-card--ale">
@@ -1625,8 +1632,10 @@
         <h3>A file sandbox</h3>
         <p>
           The task stages <b>input files</b>; the agent works however it likes and <b>submits a
-          deliverable</b>, scored by the task&rsquo;s own <code>evaluate()</code>. ALE is a flat layout, so
-          pass <code>domain=None</code>.
+          deliverable</b>, scored by the task&rsquo;s own <code>evaluate()</code>. You get
+          <code>task.inputs()</code>, <code>task.fetch_input(p)</code> and
+          <code>task.submit_text(p, s)</code>. ALE is a flat layout, so pass <code>domain=None</code>,
+          and its tasks are deliberately hard &mdash; a low score is the norm.
         </p>
       </article>
     </div>
@@ -1634,10 +1643,10 @@
     <div class="sv-tabs" role="tablist" aria-label="Quickstart steps">
       <button class="sv-tab is-active" type="button" role="tab" data-sv="key">Get the API key</button>
       <button class="sv-tab" type="button" role="tab" data-sv="install">Install</button>
-      <button class="sv-tab" type="button" role="tab" data-sv="task">One task</button>
-      <button class="sv-tab" type="button" role="tab" data-sv="agent">Swap the agent</button>
-      <button class="sv-tab" type="button" role="tab" data-sv="slice">Score a slice</button>
-      <button class="sv-tab" type="button" role="tab" data-sv="ale">ALE</button>
+      <button class="sv-tab" type="button" role="tab" data-sv="health">Health check</button>
+      <button class="sv-tab" type="button" role="tab" data-sv="agent">Wrap your method</button>
+      <button class="sv-tab" type="button" role="tab" data-sv="ports">Connect any stack</button>
+      <button class="sv-tab" type="button" role="tab" data-sv="score">Score and leaderboard</button>
       <button class="sv-tab" type="button" role="tab" data-sv="continual">Continual learning</button>
     </div>
 
@@ -1662,26 +1671,38 @@
            target="_blank" rel="noopener">Log in to get a key</a>
       </div>
       <p class="sv-cap">
-        Export it once and nothing downstream has to mention it again &mdash; <code>EvalClient()</code>
-        reads <code>$EVAL_SERVICE_API_KEY</code> and sends it as a bearer token.
+        <b>Two different keys are in play, and confusing them is the most common setup failure.</b>
+        <code>EVAL_SERVICE_API_KEY</code> opens this service and comes from MyAuthtoken.
+        <code>OPENAI_API_KEY</code> is whatever <em>your</em> method thinks with, and it comes from
+        your own account: the service hosts the environment and the grader, but it does not pay for
+        your inference. Export them once and nothing downstream has to mention either again &mdash;
+        <code>EvalClient()</code> reads the first and sends it as a bearer token.
       </p>
       <div class="sv-codewrap">
         <span class="sv-lang">bash</span>
         <button class="sv-copy" type="button">Copy</button>
-        <pre class="sv-code" data-lang="bash"><code>export EVAL_SERVICE_API_KEY="&lt;paste the key from MyAuthtoken&gt;"</code></pre>
+        <pre class="sv-code" data-lang="bash"><code>export EVAL_SERVICE_API_KEY="&lt;paste the key from MyAuthtoken&gt;"   # this service
+export OPENAI_API_KEY="sk-..."                                  # what YOUR method thinks with</code></pre>
       </div>
       <p class="sv-cap">
-        Passing it explicitly works too, which is the easier route in a notebook where you would
-        rather prompt for it than leave it in the environment.
+        Prompting works too, and is the easier route in a notebook where you would rather not leave
+        either key in a cell that might get committed.
       </p>
       <div class="sv-codewrap">
         <span class="sv-lang">python</span>
         <button class="sv-copy" type="button">Copy</button>
-        <pre class="sv-code" data-lang="python"><code>from getpass import getpass
-from simple_agentic_evals import EvalClient
+        <pre class="sv-code" data-lang="python"><code>import getpass, os
 
-client = EvalClient(api_key=getpass("service API key: "))</code></pre>
+os.environ["EVAL_SERVICE_API_KEY"] = getpass.getpass("Eval service key (MyAuthtoken): ")
+os.environ["OPENAI_API_KEY"]       = getpass.getpass("OpenAI API key: ")</code></pre>
       </div>
+      <p class="sv-cap">
+        Your OpenAI key is only ever seen by the agent you hand it to. The one deliberate exception
+        is the two provided harnesses, <code>"react"</code> and <code>"codex"</code> &mdash; they
+        execute <em>on the service</em>, so the key travels with that request, and they require it.
+        Omit it and the SDK raises <code>MissingAPIKey</code> before anything is sent, rather than
+        letting a forgotten key score a clean-looking <code>0.0</code> across a whole sweep.
+      </p>
     </div>
 
     <div class="sv-panel" data-sv-panel="install">
@@ -1697,280 +1718,398 @@ client = EvalClient(api_key=getpass("service API key: "))</code></pre>
         <pre class="sv-code" data-lang="bash"><code>WHEEL=$(curl -s "$EVAL_SERVICE_URL/sdk" | python -c 'import json,sys; print(json.load(sys.stdin)["path"])')
 pip install "$EVAL_SERVICE_URL$WHEEL"</code></pre>
       </div>
-      <p class="sv-cap">Six lines then define the slice; everything after them follows.</p>
-      <div class="sv-codewrap">
-        <span class="sv-lang">python</span>
-        <button class="sv-copy" type="button">Copy</button>
-        <pre class="sv-code" data-lang="python"><code>from simple_agentic_evals import EvalClient, react_agent, to_openai_tools, ContinualMetrics
-
-client = EvalClient()          # endpoint and auth resolved for you
-
-DATASET   = "evovling_tools"   # evovling_tools | evovling_skills | evovling_agents
-BENCHMARK = "eog"              # eog (MCP tools, SQL-graded) | ale (sandbox, artifact-graded)
-DOMAIN    = "hr"               # eog only: hr | csm | itsm | calendar | email | drive | ...
-VERSION   = 1                  # an int pins one stage; "full" pools every stage
-SPLIT     = "test"             # train | test
-RESOURCE_MODE = None           # None = standard evaluation; "oracle" | "accumulative" evolve</code></pre>
-      </div>
-    </div>
-
-    <div class="sv-panel" data-sv-panel="task">
       <p class="sv-cap">
-        <code>with task:</code> provisions a fresh database and frees it on exit.
-        <code>task.mcp_session(server)</code> opens a pre-authed MCP client against the gym, and
-        <code>to_openai_tools</code> rewrites its schemas into OpenAI function specs. Then it is an
-        ordinary reason/act loop, and <code>task.grade()</code> scores the database state it left behind.
+        Install the wheel the deployment is <em>currently</em> serving, not merely <em>a</em> wheel: a
+        stale pre-installed copy shadows it and then drifts from the API silently. The notebooks check
+        <code>simple_agentic_evals.__version__</code> against <code>GET /sdk</code> and reinstall when
+        the two disagree.
       </p>
       <div class="sv-codewrap">
         <span class="sv-lang">python</span>
         <button class="sv-copy" type="button">Copy</button>
-        <pre class="sv-code" data-lang="python"><code>def my_agent(task, max_steps=8):
-    """Bring your own agent: a plain OpenAI tool loop over the gym's MCP tools."""
+        <pre class="sv-code" data-lang="python"><code>from simple_agentic_evals import (EvalClient, ServiceError, run_benchmark,
+                                  react_agent, acp_codex_agent, to_openai_tools)
+
+client    = EvalClient()      # endpoint and auth resolved for you -- no URL to paste
+LLM_MODEL = "gpt-4o-mini"     # whatever YOUR method thinks with
+
+# Every /v1/* route needs the key, health included, so this one call both connects
+# and proves the key -- a bad one fails HERE rather than three sections later.
+print("connected ->", client.health())</code></pre>
+      </div>
+    </div>
+
+    <div class="sv-panel" data-sv-panel="health">
+      <p class="sv-cap">
+        The service is a <b>deployment</b>, not a library. The environments, the graders and the two
+        provided harnesses all execute on <em>that host</em>, so what actually works depends on what
+        it has installed &mdash; and the failure mode is quiet. An unavailable harness can return
+        <strong>without acting</strong>, and grading then reports the do-nothing floor: a
+        plausible-looking bad score rather than an error. Every notebook therefore opens with a
+        check, one row per capability, before it trusts a number.
+      </p>
+      <div class="sv-codewrap">
+        <span class="sv-lang">python</span>
+        <button class="sv-copy" type="button">Copy</button>
+        <pre class="sv-code" data-lang="python"><code>h = client.health()
+print(h["ok"], h["active_sessions"], "live session(s), ttl", h["ttl_sec"], "s")
+
+# The ALE denominator. Only the tasks a published number can count are served, so this
+# is what an ALE score is divided by -- if the manifest disagrees with the catalog, the
+# score is not comparable to anyone else's.
+m = h["ale_tasks"]
+print(f"ale {m['n_runnable']}/{m['n_suite']} runnable, agrees={m['manifest_agrees']}")
+
+# The rows that matter most: the harnesses that run ON the service. `stopped == "error"`
+# means the harness failed -- treat that as no result, never as a zero.
+t = next(client.tasks("evovling_tools", "eog", 1, "test", "hr", limit=1))
+with t:
+    run = react_agent(t, api_key=os.environ["OPENAI_API_KEY"],
+                      model=LLM_MODEL, max_steps=1)
+    print("react ->", run.stopped, run.n_calls, "tool calls")</code></pre>
+      </div>
+      <p class="sv-cap">
+        The ALE row is about a subtler kind of wrong. ALE ships 152 tasks, but many need a non-Linux
+        VM and a few die in their own loader on any given host &mdash; and a task that provisions and
+        returns <code>0.0</code> for an environmental reason is indistinguishable from an agent that
+        tried and failed. The service serves only what its exclusion manifest calls measurable, and
+        the check re-derives that count from the catalog and fails if the two have drifted.
+      </p>
+    </div>
+
+    <div class="sv-panel" data-sv-panel="agent">
+      <p class="sv-cap">
+        <code>run_benchmark</code> takes <b>anything callable that accepts a task</b>. There is no
+        base class to subclass and nothing to register, so if your method already exists you are
+        writing an adapter, not a port. You never write <code>with task:</code> either &mdash; a
+        fresh environment is provisioned before each call and torn down after it.
+      </p>
+      <div class="sv-knobs">
+        <article class="sv-knob">
+          <span class="sv-kn">return nothing it needs</span>
+          <p>
+            The grader never reads your return value; it reads the environment you acted on. What
+            you leave in the gym database or in the sandbox filesystem <em>is</em> your answer.
+          </p>
+        </article>
+        <article class="sv-knob">
+          <span class="sv-kn">close what you open</span>
+          <p>
+            <code>mcp.close()</code> before returning, from a <code>finally:</code> &mdash; a crash
+            mid-task should still release the session.
+          </p>
+        </article>
+        <article class="sv-knob">
+          <span class="sv-kn">report your tokens</span>
+          <p>
+            Your model calls never touch the service, so it cannot count them.
+            <code>return {"total_tokens": n}</code> fills the cost column; omit it and the row reads
+            <code>not measured</code> rather than a misleading <code>0</code>.
+          </p>
+        </article>
+      </div>
+      <div class="sv-codewrap">
+        <span class="sv-lang">python</span>
+        <button class="sv-copy" type="button">Copy</button>
+        <pre class="sv-code" data-lang="python"><code>def solve_eog(task, max_steps=6):
+    """EOG: act on the gym through MCP tools. Replace the loop with your method."""
+    used = 0
     mcp = task.mcp_session(task.mcp_servers[0])
     try:
         tools = to_openai_tools(mcp.list_tools())      # MCP schemas -> OpenAI specs
         msgs = [{"role": "system", "content": task.system_prompt or ""},
                 {"role": "user",   "content": task.user_prompt or ""}]
         for _ in range(max_steps):
-            m = oai.chat.completions.create(model=LLM_MODEL, messages=msgs,
-                                            tools=tools).choices[0].message
+            r = oai.chat.completions.create(model=LLM_MODEL, messages=msgs, tools=tools)
+            used += r.usage.total_tokens
+            m = r.choices[0].message
             msgs.append(m.model_dump(exclude_none=True))
-            if not m.tool_calls:
-                return
+            if not m.tool_calls:                       # no call -> the agent is done
+                break
             for tc in m.tool_calls:
-                out = mcp.call_tool(tc.function.name, json.loads(tc.function.arguments or "{}"))
+                out = mcp.call_tool(tc.function.name,
+                                    json.loads(tc.function.arguments or "{}"))
                 msgs.append({"role": "tool", "tool_call_id": tc.id,
                              "content": json.dumps(out)[:4000]})
     finally:
-        mcp.close()                                    # close MCP before grading
+        mcp.close()                                    # rule 2 -- even if we raised
+    return {"total_tokens": used}
 
 
-task = next(client.tasks(DATASET, BENCHMARK, VERSION, SPLIT, DOMAIN, limit=1))
-with task:                                   # fresh database, freed on exit
-    my_agent(task)
-    res = task.grade()                       # hidden SQL verifiers over the final state
+def solve_ale(task):
+    """ALE: read the staged inputs, write the deliverable. One shot, no tools."""
+    files = task.inputs()
+    head = task.fetch_input(files[0]["path"])[:4000] if files else ""
+    r = oai.chat.completions.create(model=LLM_MODEL, messages=[
+        {"role": "system", "content": task.system_prompt or ""},
+        {"role": "user", "content": f"{task.user_prompt}\n\n{head}"}])
+    task.submit_text(task.output_path, r.choices[0].message.content or "")
+    return {"total_tokens": r.usage.total_tokens}
 
-print(f"pass_rate {res.pass_rate:.2f}  ({res.n_passed}/{res.n_total})")
-for v in res.per_verifier:                   # read this before assuming a broken pipeline
-    print(v["name"], v["passed"], v.get("expected"), v.get("actual"))</code></pre>
+
+def my_agent(task):
+    """One entry point, both benchmarks. This is the function you swap out."""
+    return solve_eog(task) if task.mcp_servers else solve_ale(task)</code></pre>
       </div>
       <p class="sv-cap">
-        Swap the body of <code>my_agent</code> for LangGraph, your own planner, or another provider &mdash;
-        the grade neither knows nor cares.
+        One entry point covers both benchmarks by branching on <code>task.mcp_servers</code>, which
+        is empty on ALE. Swap the bodies for LangGraph, your own planner, a memory scheme or another
+        provider &mdash; the grade neither knows nor cares.
       </p>
     </div>
 
-    <div class="sv-panel" data-sv-panel="agent">
+    <div class="sv-panel" data-sv-panel="ports">
       <p class="sv-cap">
-        <code>my_agent</code> was just a function taking a task and acting on it, and anything with that
-        shape works. A plan of subagents is how you evaluate a <em>system</em> rather than a model: a
-        planner emits a plan, an executor walks it node by node.
+        Whatever you already have &mdash; a prompt optimizer, a memory, a multi-agent scaffold, a
+        container, a CLI &mdash; connects through one wrapper and one of two ports. Your policy runs
+        in <em>your</em> process and calls the service, so its language, framework and runtime stay
+        yours; anything reachable from inside a Python function can be scored.
+      </p>
+      <p class="sv-cap">
+        <b>Port A &mdash; tools.</b> <code>task.mcp_url(server)</code> with a bearer header is a
+        standard <b>MCP endpoint over streamable HTTP</b>, so any conformant client connects to it,
+        the official MCP SDK included. Underneath, the contract every agent framework consumes is
+        just <em>a list of JSON-Schema tool declarations plus a <code>call(name, args)</code>
+        function</em> &mdash; which is why a policy we have never seen still plugs in.
       </p>
       <div class="sv-codewrap">
         <span class="sv-lang">python</span>
         <button class="sv-copy" type="button">Copy</button>
-        <pre class="sv-code" data-lang="python"><code>from functools import partial
+        <pre class="sv-code" data-lang="python"><code>server  = task.mcp_servers[0]
+url     = task.mcp_url(server)          # hand these two to your own MCP client
+headers = {"Authorization": f"Bearer {EVAL_SERVICE_API_KEY}", **server.headers}
 
-# (a) The reference ReAct agent, running on the service. One line.
-harness_agent = partial(react_agent, api_key=OPENAI_API_KEY, model=LLM_MODEL)
-
-# (b) A plan of subagents. The roster comes from the benchmark, so the tool
-#     allowlists cannot drift out of sync with it.
-ROSTER = {it["name"]: it for it in client.resources(
-    DATASET, BENCHMARK, VERSION, task_id=TASK_ID, mode="oracle",
-    split=SPLIT, domain=DOMAIN, include_content=True)["items"]}
-
-# (node_id, roster agent, optional narrowing of its tools, instruction).
-# ${node_id} interpolates an upstream node's report.
-PLAN = [
-    ("find_group", "user_group", ["list_user_groups"],
-     "Several groups have type 'IT Support'; pick the ONE also named as the level 1 "
-     "support team. Return its group_id and name."),
-    ("escalate", "incident", ["get_incidents_assigned_to", "update_incident"],
-     "Using ${find_group}, take the OLDEST unresolved incident by the created_at "
-     "TIMESTAMP and set impact=high, urgency=high, priority=critical."),
-]</code></pre>
+# Or use the bundled minimal client. These two calls are the entire seam --
+# everything else in the SDK is a convenience on top of them.
+mcp   = task.mcp_session(server)
+tools = mcp.list_tools()                # 1. WHAT YOUR POLICY CAN DO   (plain JSON Schema)
+mcp.call_tool(tools[0]["name"], {})     # 2. HOW YOUR POLICY ACTS      (a plain function)
+mcp.close()</code></pre>
       </div>
       <p class="sv-cap">
-        Two details decide whether the grade is reproducible. Nodes run <strong>strictly
-        sequentially</strong>, because they share one database. And the allowlist is enforced
-        <strong>client-side</strong>, by only ever showing the model those schemas &mdash; the gym itself
-        would accept any of its ~90 tools.
-      </p>
-    </div>
-
-    <div class="sv-panel" data-sv-panel="slice">
-      <p class="sv-cap">
-        That is the entire standard evaluation: run <code>act</code> on each task, average the grades.
-        Drop <code>limit=</code> to take the whole slice, or pass <code>version="full"</code> to pool every
-        stage. Mean <code>pass_rate</code> is the accuracy you report.
+        <b>Port B &mdash; artifacts.</b> <code>fetch_inputs_to(dir)</code> stages the task&rsquo;s files
+        on your disk and <code>submit_dir(dir)</code> ships back whatever your policy wrote. The
+        contract is a filesystem, so a container, a CLI, a remote job or another language all sit
+        behind it equally well. Submitted paths are normalized under the task&rsquo;s
+        <code>output/</code>, and non-UTF-8 files are base64-encoded automatically so binaries survive.
       </p>
       <div class="sv-codewrap">
         <span class="sv-lang">python</span>
         <button class="sv-copy" type="button">Copy</button>
-        <pre class="sv-code" data-lang="python"><code>def evaluate_slice(act, n=3, **overrides):
-    """Run `act` on each task of the slice and average the grades."""
-    sel = dict(version=VERSION, split=SPLIT, domain=DOMAIN, resource_mode=RESOURCE_MODE)
-    sel.update(overrides)
-    scores = []
-    for task in client.tasks(DATASET, BENCHMARK, limit=n, **sel):
-        with task:                                # fresh DB per task, freed on exit
-            act(task)
-            scores.append(task.grade().pass_rate)
-    return sum(scores) / len(scores) if scores else 0.0
+        <pre class="sv-code" data-lang="python"><code>import subprocess, tempfile
+from pathlib import Path
 
 
-print("your own loop:", round(evaluate_slice(my_agent), 3))
-print("the harness  :", round(evaluate_slice(harness_agent), 3))   # same loop, different act</code></pre>
+def containerized_agent(task):
+    """An existing container, unchanged, scored on an ALE task.
+
+    It never talks to the service: it reads one directory and writes another,
+    exactly as it does on your laptop. We fill the first, we collect the second.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        work   = Path(tmp)
+        indir  = work / "input"                       # we fill this one
+        outdir = work / "output"                      # your system fills this one
+        outdir.mkdir()
+
+        task.fetch_inputs_to(indir)                   # 1. service -> your disk
+        subprocess.run([                              # 2. your system runs, however it likes
+            "docker", "run", "--rm", "-v", f"{work}:/work", "my-system:latest",
+            "--input", "/work/input", "--output", "/work/output",
+        ], check=True, timeout=1800)
+        task.submit_dir(outdir)                       # 3. your disk -> service, then grading
+
+    # Returning 0 would be worse than saying nothing: it reports a measurement of zero.
+    return None
+
+
+# Nothing to do with Docker, really. For a plain CLI, steps 1 and 3 are identical and
+# step 2 becomes: subprocess.run(["my-system", "--in", indir, "--out", outdir])</code></pre>
       </div>
-      <p class="sv-cap">
-        A low score is often correct rather than a broken pipeline &mdash; these tasks hide traps. One ITSM
-        task orders incidents by creation time while the incident <em>numbering</em> disagrees, so a model
-        that sorts by the obvious key escalates the wrong record and fails all three verifiers. Read
-        <code>per_verifier</code> first.
-      </p>
     </div>
 
-    <div class="sv-panel" data-sv-panel="ale">
+    <div class="sv-panel" data-sv-panel="score">
       <p class="sv-cap">
-        Same loop, no MCP. The task stages input files, your agent works wherever it likes, and it submits
-        a deliverable that the task&rsquo;s own <code>evaluate()</code> scores.
+        That is the whole evaluation. <code>run_benchmark</code> walks the scope, calls your agent
+        once per task, grades what it left behind, and hands back a report.
+        <code>.success_rate</code> is <b>Pass&nbsp;%</b> &mdash; strict, every verifier on the task
+        passed &mdash; and <code>.accuracy</code> is <b>Score</b>, the mean verifier pass rate. The
+        distance between them is partial credit, and reporting only one of them hides which kind of
+        method you built.
       </p>
       <div class="sv-codewrap">
         <span class="sv-lang">python</span>
         <button class="sv-copy" type="button">Copy</button>
-        <pre class="sv-code" data-lang="python"><code>from simple_agentic_evals import ServiceError
+        <pre class="sv-code" data-lang="python"><code>report = run_benchmark(my_agent, mode="deployment_eval", client=client,
+                       benchmark="eog", limit=2, progress=True)
+print(report)                                # the paper-style block
 
-try:
-    t = client.task("evovling_tools", "ale", 1,
-                    "legal/agora_governance_classify_instance_1", domain=None)
-    with t:
-        files = t.inputs()                        # staged inputs for the task
-        context = t.fetch_input(files[0]["path"]).decode("utf-8", "replace")[:6000]
-        artifact = my_llm(t.system_prompt, t.user_prompt, context)
-        t.submit_text(t.output_path, artifact)    # the deliverable
-        r = t.grade()                             # runs the task's real evaluate()
-    print("pass_rate", r.pass_rate)
-except ServiceError as e:
-    print("unavailable:", e.status_code, "needs_sandbox" if e.needs_sandbox else e.detail)</code></pre>
+print(report.success_rate, report.accuracy)  # Pass % (strict), Score (partial credit)
+print(report.agent_s, report.total_tokens)   # agent time, not wall clock; None if unmeasured
+print(report.n_errors, report.complete)      # a non-zero n_errors did not measure what you think
+
+
+def floor_agent(task):
+    """Acts on nothing. Whatever this scores, the environment was giving away."""
+    return {"total_tokens": 0}
+
+
+floor = run_benchmark(floor_agent, "deployment_eval", client=client,
+                      benchmark="eog", limit=2, progress=False)
+print(f"floor {floor.accuracy:.3f}   mine {report.accuracy:.3f}")
+# ^ if these two match, your agent is not acting -- check that it reaches mcp.call_tool</code></pre>
       </div>
       <p class="sv-cap">
-        ALE (&ldquo;Agents&rsquo; Last Exam&rdquo;) tasks are deliberately hard, so a low score is the norm.
-        A few need an environment a given deployment cannot host; those return HTTP <b>501</b>, which the
-        <code>except</code> catches.
+        <code>limit=</code> is for rehearsal only. It proves the adapter runs and the grader sees what
+        you left behind, and the report stamps the run <code>SUBSAMPLED</code> so a debug number can
+        never be mistaken for a result. Drop it for anything comparable.
       </p>
+      <p class="sv-cap">
+        A leaderboard row is both benchmarks, repeated so it carries a spread. Three details make the
+        numbers comparable rather than merely plausible. <b>Hours are summed agent duration, not wall
+        clock</b> &mdash; provisioning and grading are ours, so they do not count against you, which
+        is why the row reads <code>agent_s</code> and not <code>latency_s</code>. <b>&plusmn; is the
+        population standard deviation</b> over repeated runs, not a standard error and not a
+        confidence interval; the published rows use three. And <b>Overall pools tasks, not
+        percentages</b>: total solved over total attempted, so EOG&rsquo;s 454 tasks outweigh
+        ALE&rsquo;s 63, and a macro-average of the two rates would be a different, larger number.
+      </p>
+      <div class="sv-codewrap">
+        <span class="sv-lang">python</span>
+        <button class="sv-copy" type="button">Copy</button>
+        <pre class="sv-code" data-lang="python"><code># `leaderboard_row` and `show` are ~40 lines defined in the Level 1 notebook, not in the
+# SDK. They run both benchmarks `seeds` times and return exactly the record the
+# leaderboard stores. A row built with `limit` is stamped `partial` -- do not submit it.
+row = leaderboard_row(my_agent, "My Method", cat="memory", seeds=3)   # hours, real money
+show(row)
+
+# Underneath it is nothing but repeats of the call above, without the `limit`:
+#
+#     run_benchmark(my_agent, "deployment_eval", client=client, benchmark=bench)
+#
+#   Pass %    mean(r.success_rate)          strict -- every verifier on the task passed
+#   Score     mean(r.accuracy)              partial credit -- mean verifier pass rate
+#   h         mean(r.agent_s) / 3600        agent time; r.latency_s is wall clock, not this
+#   Tok M     mean(r.total_tokens) / 1e6    None rather than 0 when nothing reported usage
+#   Overall   sum(n_success) / sum(n_tasks) pooled across both, over tasks not percentages
+#   +/-       pstdev over the `seeds` repeats
+
+# Two switches worth knowing before you commit:
+#   dataset=  the evolving axis -- "evovling_tools" | "evovling_skills" | "evovling_agents",
+#             each a separate leaderboard.
+#   mode=     the question. "deployment_eval" is a fixed method under a growing harness and
+#             is the right default; a method that LEARNS between stages belongs in
+#             "self_evolving_adapt_eval" -- the next tab.</code></pre>
+      </div>
     </div>
 
     <div class="sv-panel" data-sv-panel="continual">
       <p class="sv-cap">
-        <code>VERSION</code> was never an arbitrary shard. Every domain is staged into versions whose
-        harness <strong>grows each stage</strong> &mdash; more MCP tools, more <code>SKILL.md</code>
-        bundles, a bigger agent roster, depending on the dataset. So the evolving study is just the
-        previous loop with <code>version</code> swept and <code>resource_mode</code> attached.
+        <code>version</code> was never an arbitrary shard. Every domain arrives in <b>stages</b>, and
+        each stage adds tools, <code>SKILL.md</code> bundles or roster specialists <em>and</em> brings
+        its own cohort of tasks. Two populations move at once, and crossing them gives the object the
+        whole evolving study is built on: a <b>lower-triangular performance matrix</b>, cohort
+        &tau; evaluated under harness stage <i>t</i>, defined only for &tau;&nbsp;&le;&nbsp;<i>t</i>
+        because a cohort does not exist until its stage is reached. One flag fills it.
       </p>
       <div class="sv-codewrap">
         <span class="sv-lang">python</span>
         <button class="sv-copy" type="button">Copy</button>
-        <pre class="sv-code" data-lang="python"><code>from simple_agentic_evals import ContinualMetrics, StageResult
+        <pre class="sv-code" data-lang="python"><code>report = run_benchmark(my_agent, "deployment_eval", client=client,
+                       domain="calendar", matrix=True)    # costs roughly T x the last row
 
-STAGES = [1, 2, 3]
+#                  cohort v1   cohort v2   cohort v3
+#   under H_v1          0.31           .           .    &lt;- adaptation: v1 tasks, v1 tools
+#   under H_v2          0.28        0.40           .    &lt;- retention:  v1 tasks, v2 tools exist
+#   under H_v3          0.25        0.36        0.22    &lt;- the last row is what ACC pools
+#
+# Down a column is one cohort's story as the world grows around it. 0.31 -> 0.28 -> 0.25 is
+# FORGETTING: nothing about those tasks changed, only the harness did. That column delta is
+# what BWT summarizes.
 
-# What each mode actually hands the agent, for one task at the last stage.
-probe_id = client.task_ids(DATASET, BENCHMARK, STAGES[-1], SPLIT, DOMAIN)[0]
-for mode in ("none", "oracle", "accumulative"):
-    r = client.resources(DATASET, BENCHMARK, STAGES[-1], task_id=probe_id,
-                         split=SPLIT, domain=DOMAIN, mode=mode)
-    print(f"resource_mode={mode:14} -> {r['count']:3d} {r['kind']}")
-
-metrics = ContinualMetrics(num_stages=len(STAGES))
-for k, v in enumerate(STAGES):
-    acc = evaluate_slice(my_agent, n=2, version=v, resource_mode="accumulative")
-    metrics.record(StageResult(eval_stage=k, adapt_stage=k, num_tasks=2, success_rate=acc))
-
-print(metrics.print_report())          # ACC / BWT / FWT</code></pre>
+print(report.bwt, report.fwt)     # cohort-size-weighted means, exactly as the appendix defines
+print(report.per_stage_acc)       # the diagonal, by stage</code></pre>
       </div>
       <p class="sv-cap">
-        What comes out of that loop is the learning-curve <strong>diagonal</strong>
-        R[k][k]. The full-detail notebook below fills the whole R[k][j] matrix using the service&rsquo;s
-        memory API (<code>memory_key</code>, <code>consolidate_memory</code>), which is what makes the
-        BWT and FWT reported above mean anything.
+        <code>deployment_eval</code> isolates the harness&rsquo;s effect by holding the method fixed.
+        <code>self_evolving_adapt_eval</code> asks the other question &mdash; whether learning keeps
+        up with growth &mdash; by handing your method each stage&rsquo;s <b>training</b> split before
+        that stage is evaluated. BWT is meaningful in both; <b>FWT only exists in self-evolving</b>,
+        because it measures adaptation, and omitting <code>adapt</code> there is an error rather than
+        a silent fallback.
       </p>
+      <div class="sv-codewrap">
+        <span class="sv-lang">python</span>
+        <button class="sv-copy" type="button">Copy</button>
+        <pre class="sv-code" data-lang="python"><code>class EvolvingAgent:
+    """A policy with state: `adapt` writes it, `__call__` reads it.
+
+    run_benchmark picks up `.adapt` automatically, so this object is the whole
+    integration -- no registration, no adapt= argument needed.
+    """
+
+    def __init__(self):
+        self.notes = []
+
+    def adapt(self, stage, tasks):      # once per stage, with that stage's TRAIN split
+        for t in tasks:
+            with t:                     # prompts exist only once a task is provisioned
+                self.notes.append(f"[v{stage}] {(t.user_prompt or '')[:140]}")
+
+    def __call__(self, task):
+        # `act` is the loop from "Wrap your method", with room in the system prompt
+        # for whatever the policy has learned so far.
+        return act(task, notes="\n".join(self.notes[-8:]))
+
+
+evolve = run_benchmark(EvolvingAgent(), "self_evolving_adapt_eval", client=client,
+                       domain="calendar", matrix=True)
+print(evolve.bwt, evolve.fwt)           # FWT is None in deployment mode; here it is real</code></pre>
+      </div>
     </div>
 
-    <!-- The recap earns its place here rather than up top: it names the axes the reader has
-         just watched vary in the snippets. -->
-    <h3 class="sv-h3">The three things you change</h3>
-    <p class="sv-cap sv-cap--mid">
-      Every call above is the same call. What moved between them was one of three things, and nothing
-      else in the service is yours to set.
-    </p>
-    <div class="sv-knobs">
-      <article class="sv-knob">
-        <span class="sv-kn">who acts</span>
-        <p>
-          Any <code>act(task)</code> callable: the benchmark&rsquo;s reference harness, your own reason/act
-          loop, or a plan of subagents each restricted to its own tools.
-        </p>
-      </article>
-      <article class="sv-knob">
-        <span class="sv-kn">what you evaluate</span>
-        <p>
-          <code>(dataset, benchmark, domain, version, split)</code>. An int pins one harness stage;
-          <code>version="full"</code> pools every stage.
-        </p>
-      </article>
-      <article class="sv-knob">
-        <span class="sv-kn">what the agent is given</span>
-        <p>
-          <code>resource_mode</code>: <code>None</code> attaches nothing (a standard evaluation),
-          <code>"oracle"</code> the gold set for the task, <code>"accumulative"</code> everything up to
-          this stage &mdash; distractors included.
-        </p>
-      </article>
-    </div>
-
-    <h3 class="sv-h3">Run it yourself, at three depths</h3>
+    <h3 class="sv-h3">Run it yourself, at three levels</h3>
     <p class="sv-cap sv-cap--mid">
       All three notebooks talk to the same live deployment and carry the current service endpoint, so
-      none of them needs anything stood up. They differ only in how much of the surface they walk
-      through &mdash; pick by how far you intend to go.
+      none of them needs anything stood up. They share a Setup cell and a health check, and then each
+      answers one question &mdash; pick by how far you intend to go.
     </p>
     <div class="sv-tuts">
       <a class="sv-tut is-first" href="https://colab.research.google.com/drive/1xJEpRf_s0zG-M9QynS3MBk7Nkr-xB11r"
          target="_blank" rel="noopener">
         <span class="sv-tut-h"><span class="sv-tut-n">1</span>
-          <span class="sv-tut-t">Quick start</span>
+          <span class="sv-tut-t">Leaderboard your agent</span>
           <span class="sv-tut-b">start here</span></span>
         <span class="sv-tut-d">
-          Health-check the deployment, score in one line, drop in your own agent, switch the
-          self-evolving mode on, and finish by reproducing published numbers. Six code cells and a
-          cheat sheet.
+          Your method &rarr; one comparable row. Wrap whatever you already have in a single
+          <code>f(task)</code>, connect it through either port, smoke-test it, check it against the
+          do-nothing floor, then produce the eight columns the leaderboard stores.
         </span>
-        <span class="sv-tut-f">6 code cells &middot; <code>&hellip;_quick_start.ipynb</code></span>
+        <span class="sv-tut-f">8 code cells &middot; <code>&hellip;_quick_start.ipynb</code></span>
         <span class="sv-tut-go" aria-hidden="true">Open in Colab &rarr;</span>
       </a>
       <a class="sv-tut" href="https://colab.research.google.com/drive/1vrcGelN9GmwiCK25c6qZNG3Z0sHWxE5o"
          target="_blank" rel="noopener">
         <span class="sv-tut-h"><span class="sv-tut-n">2</span>
-          <span class="sv-tut-t">More details</span></span>
+          <span class="sv-tut-t">Continual learning</span></span>
         <span class="sv-tut-d">
-          The walkthrough above, one step per idea: pick what to evaluate, run one task end to end,
-          swap the agent, score a whole slice, cross to ALE, then the single knob that turns it into
-          continual learning.
+          What that single number cannot say. The lower-triangular performance matrix behind it:
+          adaptation on the diagonal, retention below it, BWT and FWT weighted as the appendix
+          defines them, and the <code>adapt(stage, tasks)</code> hook for methods that learn.
         </span>
-        <span class="sv-tut-f">8 code cells &middot; <code>&hellip;_quick_start_detail.ipynb</code></span>
+        <span class="sv-tut-f">9 code cells &middot; <code>&hellip;_quick_start_detail.ipynb</code></span>
         <span class="sv-tut-go" aria-hidden="true">Open in Colab &rarr;</span>
       </a>
       <a class="sv-tut" href="https://colab.research.google.com/drive/1mYQEDCVFStXMRWYI2hpEGBXwyRx1NSFj"
          target="_blank" rel="noopener">
         <span class="sv-tut-h"><span class="sv-tut-n">3</span>
-          <span class="sv-tut-t">Full detail</span></span>
+          <span class="sv-tut-t">Supported harnesses &amp; modes</span></span>
         <span class="sv-tut-d">
-          Both provided harnesses and how they fail, <code>task.evaluate</code> traces, plan-driven
-          runs where you own the orchestration and can ask why a score came out that way, the full
-          R[k][j] matrix, and an API reference for the SDK.
+          The one you come back to. Standard non-evolving evaluation, the <code>react</code> and
+          <code>codex</code> harnesses with their real costs and failure modes, all three modes, ALE
+          in depth, persistent memory, raw HTTP, and the complete API dictionary.
         </span>
-        <span class="sv-tut-f">25 code cells &middot; <code>&hellip;_full.ipynb</code></span>
+        <span class="sv-tut-f">10 code cells &middot; <code>&hellip;_full.ipynb</code></span>
         <span class="sv-tut-go" aria-hidden="true">Open in Colab &rarr;</span>
       </a>
     </div>
