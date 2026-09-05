@@ -21,19 +21,12 @@
         rel="stylesheet">
 
   <link rel="stylesheet" href="./static/css/bulma.min.css">
-  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
-  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
-  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
   <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
   <link rel="stylesheet" href="./static/css/index.css">
   <link rel="icon" href="./static/images/favicon.svg">
 
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script defer src="./static/js/fontawesome.all.min.js"></script>
-  <script src="./static/js/bulma-carousel.min.js"></script>
-  <script src="./static/js/bulma-slider.min.js"></script>
-  <script src="./static/js/index.js"></script>
 </head>
 <body>
 
@@ -46,7 +39,7 @@
   }
 
   body {
-    background: #f7f8fc;
+    background: #f7f5f2;
     color: #1f2a44;
   }
 
@@ -128,7 +121,7 @@
   }
 
   .feature-card {
-    background: #f9fafc;
+    background: #fbfaf7;
     border-radius: 14px;
     padding: 1.8rem;
     border: 1px solid #e0e7ff;
@@ -158,7 +151,7 @@
   .figure-card figcaption {
     padding: 1.2rem 1.5rem;
     font-size: 0.95rem;
-    background: #f7f8fc;
+    background: #faf8f5;
   }
 
   .process-steps {
@@ -203,6 +196,39 @@
   .takeaway-card.is-info { background: linear-gradient(135deg, #36d1dc, #5b86e5); }
   .takeaway-card.is-primary { background: linear-gradient(135deg, #6a11cb, #2575fc); }
   .takeaway-card.is-warning { background: linear-gradient(135deg, #f7971e, #ffd200); color: #3f2b05; }
+
+  /* The gradient cards above summarise on the overview; these quieter ones sit beside the
+     figure that earned each claim, on the tab where that figure lives. */
+  .insight-card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 1.5rem;
+    border: 1px solid #e0e7ff;
+    box-shadow: 0 8px 18px rgba(30, 64, 175, 0.06);
+  }
+
+  .insight-card h4 {
+    font-weight: 650;
+    margin-bottom: 0.8rem;
+    color: #3a3f73;
+  }
+
+  .insight-card p {
+    line-height: 1.75;
+    color: #1f2a44;
+  }
+
+  .insight-card.is-takeaway {
+    background: #fff4e6;
+    border-left: 4px solid #f7971e;
+  }
+
+  .takeaway-where {
+    margin-top: 1.5rem;
+    text-align: center;
+    color: #64748b;
+    font-size: 0.9rem;
+  }
 
   .bibtex-card {
     background: #0f172a;
@@ -469,6 +495,185 @@
       min-width: 240px;
     }
   }
+  /* The hub dropdown hangs out of the navbar and over the tab bar below it, so the navbar
+     has to outrank the bar rather than take Bulma's default. */
+  .navbar {
+    position: relative;
+    z-index: 40;
+    background: #fff;
+  }
+
+  /* ---------- Page-level tabs, as on the EvoHarnessBench page ----------
+     The sections of this paper are grouped into views and the bar switches between them.
+     It sticks to the top of the window, so the navigation is never something a reader
+     has to scroll back up to find. */
+  .pv-bar {
+    position: sticky;
+    top: 0;
+    z-index: 35;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: saturate(180%) blur(10px);
+    border-bottom: 1px solid #e0e7ff;
+    box-shadow: 0 1px 10px -6px rgba(15, 23, 42, 0.28);
+  }
+  .pv-bar-inner {
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    gap: 26px;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 16px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .pv-bar-inner::-webkit-scrollbar { display: none; }
+  .pv-tab {
+    flex: 0 0 auto;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    background: none;
+    padding: 14px 2px 12px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 650;
+    color: #64748b;
+    cursor: pointer;
+    transition: color .15s, border-color .15s;
+  }
+  .pv-tab:hover { color: #1f2a44; }
+  .pv-tab.is-active {
+    color: var(--gradient-start);
+    border-bottom-color: var(--gradient-start);
+  }
+
+  /* Whatever in this bar leaves the page is a pill rather than a tab, so the two kinds of
+     destination never look alike. */
+  .pv-go {
+    flex: 0 0 auto;
+    align-self: center;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 15px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 800;
+    text-decoration: none;
+    white-space: nowrap;
+    box-shadow: 0 6px 16px -7px rgba(78, 84, 200, 0.9);
+    transition: transform .15s, box-shadow .15s, filter .15s;
+  }
+  .pv-go.is-demo {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24, #f7971e);
+    box-shadow: 0 6px 16px -7px rgba(238, 90, 36, 0.9);
+  }
+  .pv-go:hover,
+  .pv-go:focus {
+    color: #fff;
+    transform: translateY(-1px);
+    filter: saturate(1.1);
+  }
+
+  .pv-view { display: none; }
+  .pv-view.is-active { display: block; }
+  /* The first section of a view sits under the sticky bar, so it needs less air. */
+  .pv-view > .section:first-child { padding-top: 2.2rem; }
+
+  /* On any view but the first the hero stands down, and this says which paper the
+     reader is in. */
+  .pv-slim[hidden] { display: none; }
+  .pv-slim {
+    display: block;
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+    padding: 15px 0;
+    color: #fff;
+  }
+  .pv-slim .container { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .pv-slim b {
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .pv-slim span { font-size: 0.9rem; opacity: 0.88; }
+
+  /* The hero's own links: the places that leave the page, quiet enough that they do not
+     compete with the title. The sections they used to sit beside are tabs now. */
+  .hero-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.55rem;
+    margin-top: 1.4rem;
+  }
+  .hero-links a {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1.05rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.34);
+    color: #fff;
+    font-size: 0.92rem;
+    font-weight: 650;
+    text-decoration: none;
+    transition: background .15s, transform .15s;
+  }
+  .hero-links a:hover {
+    background: rgba(255, 255, 255, 0.24);
+    color: #fff;
+    transform: translateY(-1px);
+  }
+
+  /* The byline, at the end of the overview rather than in the hero: ten portraits above
+     the fold cost more room than they were worth. The cards were built for the hero's
+     gradient, so on paper they have to carry their own contrast. */
+  .authors-sec {
+    padding: 2.4rem 1.5rem 0.6rem;
+    border-top: 1px solid #e0e7ff;
+  }
+  .authors-h {
+    text-align: center;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #64748b;
+  }
+  .authors-heart {
+    color: #e11d48;
+    font-size: 14px;
+    letter-spacing: 0;
+    vertical-align: -1px;
+  }
+  .authors-sec .author-grid { margin-top: 1.3rem; }
+  .authors-sec .author-card {
+    background: #fff;
+    border-color: #e6e9f5;
+    box-shadow: 0 10px 20px -14px rgba(15, 23, 42, 0.45);
+  }
+  .authors-sec .author-card img { border-color: #e6e9f5; }
+  .authors-sec .author-card a { color: #1f2a44; }
+  .authors-affil {
+    margin-top: 1.4rem;
+    text-align: center;
+    color: #64748b;
+    font-size: 0.88rem;
+    line-height: 1.7;
+  }
+  /* Bulma's footer grey is a cool one, and against the paper tone it reads as a seam
+     across the bottom of the page rather than as the end of it. */
+  footer.footer { background: none; }
+
+  @media (max-width: 768px) {
+    .pv-bar-inner { justify-content: flex-start; gap: 18px; }
+    .pv-tab { font-size: 0.9rem; }
+    .pv-go { font-size: 0.84rem; padding: 6px 12px; }
+    .pv-slim b { font-size: 1.1rem; }
+    .pv-slim span { font-size: 0.82rem; }
+  }
 </style>
 
 <nav class="navbar" role="navigation" aria-label="main navigation" style="border-bottom: 1px solid #eef0fb;">
@@ -492,6 +697,10 @@
         <a href="../mas_r1/">
           <span class="dropdown-icon paper">🔬</span>
           <span class="dropdown-label">MAS-Orchestra <small>Holistic Orchestration &amp; Controlled Benchmarks</small></span>
+        </a>
+        <a href="../evoharness/">
+          <span class="dropdown-icon paper">🔬</span>
+          <span class="dropdown-label">EvoHarnessBench <small>Agents Under an Evolving Harness</small></span>
         </a>
         <a href="https://llm-reasoning-ai.github.io/" target="_blank">
           <span class="dropdown-icon ext">📊</span>
@@ -519,6 +728,10 @@
       <span class="dropdown-icon paper">🔬</span>
       <span class="dropdown-label">MAS-Orchestra <small>Holistic Orchestration &amp; Controlled Benchmarks</small></span>
     </a>
+      <a href="../evoharness/">
+        <span class="dropdown-icon paper">🔬</span>
+        <span class="dropdown-label">EvoHarnessBench <small>Agents Under an Evolving Harness</small></span>
+      </a>
     <a href="https://llm-reasoning-ai.github.io/" target="_blank">
       <span class="dropdown-icon ext">📊</span>
       <span class="dropdown-label">Reasoning Survey <small>Inference Scaling, Learning to Reason &amp; Agents</small></span>
@@ -535,7 +748,25 @@
   </button>
 </div>
 
-<section class="hero hero-gradient">
+<!-- The paper's own sections, as tabs rather than as a row of boxes: the page is long
+     enough that a reader arriving for the results should not have to scroll past the rest. -->
+<nav class="pv-bar" aria-label="Paper sections and the MAS collection">
+  <div class="pv-bar-inner" role="tablist">
+    <button class="pv-tab is-active" type="button" data-pv="overview">Overview</button>
+    <button class="pv-tab" type="button" data-pv="approach">Approach</button>
+    <button class="pv-tab" type="button" data-pv="results">Results</button>
+    <a class="pv-go" href="mas_collection.html">MAS Collection<span aria-hidden="true">&#8599;</span></a>
+  </div>
+</nav>
+
+<div class="pv-slim" data-pv-slim hidden>
+  <div class="container is-max-desktop">
+    <b>MAS-Zero</b>
+    <span>Designing Multi-Agent Systems with Zero Supervision</span>
+  </div>
+</div>
+
+<section class="hero hero-gradient" id="hero">
   <div class="hero-body">
     <div class="container is-max-desktop">
       <div class="columns is-centered">
@@ -553,49 +784,22 @@
             <span>No Training &amp; Validation Set</span>
             <span>Dynamic Agent Composition</span>
           </div>
-          <div class="cta-buttons" style="margin-top: 1.4rem;">
-            <a class="button is-light is-medium" href="https://arxiv.org/abs/2505.14996">Read the Paper</a>
-            <a class="button is-primary is-medium" href="https://github.com/SalesforceAIResearch/MAS-Zero">GitHub</a>
-            <a class="button is-link is-medium" href="mas_collection.html">MAS Collection</a>
-            <a class="button is-dark is-medium" href="https://zixuanke.substack.com/p/dont-reason-alone-structured-reasoning">Blog</a>
+          <div class="hero-links">
+            <a href="https://arxiv.org/abs/2505.14996">Read the Paper</a>
+            <a href="https://github.com/SalesforceAIResearch/MAS-Zero">GitHub</a>
+            <a href="https://zixuanke.substack.com/p/dont-reason-alone-structured-reasoning">Blog</a>
           </div>
           <div class="notification is-light" style="margin-top: 1.5rem; text-align: left; display: inline-block; max-width: 640px;">
-            <p style="margin-bottom: 0.4rem;"><strong>📍 Lightning talk - Salesforce Booth #1129</strong><br>Wed Dec. 3, 4:20–4:45 PM PST · San Diego Convention Center</p>
-            <p><strong>📍 Lightning talk - SEA Workshop</strong><br>Sun Dec. 7, Upper Level Room 23ABC · San Diego Convention Center</p>
+            <p style="margin-bottom: 0.4rem;"><strong>📍 Lightning talk - Salesforce Booth #1129</strong><br>Wed Dec. 3, 2025, 4:20–4:45 PM PST · San Diego Convention Center</p>
+            <p><strong>📍 Lightning talk - SEA Workshop</strong><br>Sun Dec. 7, 2025, Upper Level Room 23ABC · San Diego Convention Center</p>
           </div>
-
-          <div class="author-grid">
-            <div class="author-card has-text-centered">
-              <img src="../profile/zixuan.jpg" alt="Zixuan Ke">
-              <a href="https://vincent950129.github.io/">Zixuan Ke</a>
-            </div>
-            <div class="author-card has-text-centered">
-              <img src="../profile/austin.jpg" alt="Austin Xu">
-              <a href="https://austinxu87.github.io/">Austin Xu</a>
-            </div>
-            <div class="author-card has-text-centered">
-              <img src="../profile/yifei.jpg" alt="Yifei Ming">
-              <a href="https://alvinmingsf.github.io/">Yifei Ming</a>
-            </div>
-            <div class="author-card has-text-centered">
-              <img src="../profile/phi.png" alt="Xuan-Phi Nguyen">
-              <a href="https://nxphi47.github.io/">Xuan-Phi Nguyen</a>
-            </div>
-            <div class="author-card has-text-centered">
-              <img src="../profile/caiming.jpg" alt="Caiming Xiong">
-              <a href="http://cmxiong.com/">Caiming Xiong</a>
-            </div>
-            <div class="author-card has-text-centered">
-              <img src="../profile/shafiq.jpg" alt="Shafiq Joty">
-              <a href="https://raihanjoty.github.io/">Shafiq Joty</a>
-            </div>
-          </div>
-          <p class="is-size-6" style="margin-top: 1.5rem;">Salesforce AI Research</p>
         </div>
       </div>
     </div>
   </div>
 </section>
+
+<div class="pv-view is-active" data-pv-view="overview">
 
 <section class="section">
   <div class="container is-max-desktop">
@@ -671,6 +875,92 @@
 
 <section class="section">
   <div class="container is-max-desktop">
+    <h2 class="title is-3 section-heading has-text-centered">Key Takeaways</h2>
+    <div class="takeaway-grid">
+      <div class="takeaway-card is-info">
+        <h4>1. MAS-Zero is effective Across Domains & Agents</h4>
+        <p>
+          MAS-Zero consistently improves reasoning, coding, and agentic benchmarks while adapting to both open- and closed-source LLMs, indicating robustness across domains and backbone choices.
+        </p>
+      </div>
+      <div class="takeaway-card is-primary">
+        <h4>2. When to use MAS is important</h4>
+        <p>
+          Surprisingly strong single-agent (CoT, CoT-SC) and lightweight manual MAS (Debate, Self-Refine) highlight that MAS-Verify is the critical stage—an oracle verifier unlocks the largest performance jump.
+        </p>
+      </div>
+      <div class="takeaway-card is-danger">
+        <h4>3. Sub-Agent Capability Is the Bottleneck</h4>
+        <p>
+          Better meta-agents yield gains, but sub-agent strength ultimately caps improvements; enhancing solver tools and base models is key to further progress.
+        </p>
+      </div>
+    </div>
+    <p class="takeaway-where">
+      The evidence for these sits with the figures that produced it, on the
+      <a href="#results">Results</a> tab.
+    </p>
+  </div>
+</section>
+
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop">
+    <div class="bibtex-card">
+      <h2 class="title is-4" style="color: #f8fafc;">BibTeX</h2>
+      <pre><code>@misc{ke2025maszero,
+  title={MAS-Zero: Designing Multi-Agent Systems with Zero Supervision},
+  author={Zixuan Ke and Austin Xu and Yifei Ming and Xuan-Phi Nguyen and Caiming Xiong and Shafiq Joty},
+  year={2025},
+  eprint={2505.14996},
+  archivePrefix={arXiv},
+  primaryClass={cs.CL},
+  url={https://arxiv.org/abs/2505.14996},
+}</code></pre>
+    </div>
+  </div>
+</section>
+
+<!-- Last thing on the overview, and only on the overview: the other views are the work
+     itself, and a byline under each of them would be a byline several times over. -->
+<section class="authors-sec" id="authors" aria-label="Authors">
+  <div class="container is-max-desktop">
+    <h2 class="authors-h">Made with <span class="authors-heart">&hearts;</span> by</h2>
+    <div class="author-grid">
+      <div class="author-card has-text-centered">
+        <img src="../profile/zixuan.jpg" alt="Zixuan Ke">
+        <a href="https://vincent950129.github.io/">Zixuan Ke</a>
+      </div>
+      <div class="author-card has-text-centered">
+        <img src="../profile/austin.jpg" alt="Austin Xu">
+        <a href="https://austinxu87.github.io/">Austin Xu</a>
+      </div>
+      <div class="author-card has-text-centered">
+        <img src="../profile/yifei.jpg" alt="Yifei Ming">
+        <a href="https://alvinmingsf.github.io/">Yifei Ming</a>
+      </div>
+      <div class="author-card has-text-centered">
+        <img src="../profile/phi.png" alt="Xuan-Phi Nguyen">
+        <a href="https://nxphi47.github.io/">Xuan-Phi Nguyen</a>
+      </div>
+      <div class="author-card has-text-centered">
+        <img src="../profile/caiming.jpg" alt="Caiming Xiong">
+        <a href="http://cmxiong.com/">Caiming Xiong</a>
+      </div>
+      <div class="author-card has-text-centered">
+        <img src="../profile/shafiq.jpg" alt="Shafiq Joty">
+        <a href="https://raihanjoty.github.io/">Shafiq Joty</a>
+      </div>
+    </div>
+    <p class="authors-affil">Salesforce AI Research</p>
+  </div>
+</section>
+
+</div><!-- /overview -->
+
+<div class="pv-view" data-pv-view="approach">
+
+<section class="section">
+  <div class="container is-max-desktop">
     <div class="highlight-card">
       <h2 class="title is-3 section-heading">Approach at a Glance</h2>
       <p style="margin-bottom: 1.5rem;">
@@ -717,6 +1007,10 @@
   </div>
 </section>
 
+</div><!-- /approach -->
+
+<div class="pv-view" data-pv-view="results">
+
 <section class="section">
   <div class="container is-max-desktop">
     <h2 class="title is-3 section-heading has-text-centered">Main Results</h2>
@@ -736,6 +1030,15 @@
         MAS-Zero’s improvement over that baseline.
       </figcaption>
     </figure>
+    <div class="insight-card is-takeaway" style="margin-top: 1.75rem;">
+      <h4>Takeaway</h4>
+      <p>
+        <strong>MAS-Zero is effective across domains and backbones.</strong> It improves reasoning,
+        coding and agentic benchmarks over both manual and automatic MAS baselines, with open- and
+        closed-source LLMs alike, and it reaches that without a validation set — on the same 80%
+        test split the validation-based baselines needed their other 20% to prepare for.
+      </p>
+    </div>
   </div>
 </section>
 
@@ -795,51 +1098,21 @@
         </figure>
       </div>
     </div>
-  </div>
-</section>
 
-<section class="section">
-  <div class="container is-max-desktop">
-    <h2 class="title is-3 section-heading has-text-centered">Key Takeaways</h2>
-    <div class="takeaway-grid">
-      <div class="takeaway-card is-info">
-        <h4>1. MAS-Zero is effective Across Domains & Agents</h4>
-        <p>
-          MAS-Zero consistently improves reasoning, coding, and agentic benchmarks while adapting to both open- and closed-source LLMs, indicating robustness across domains and backbone choices.
-        </p>
-      </div>
-      <div class="takeaway-card is-primary">
-        <h4>2. When to use MAS is important</h4>
-        <p>
-          Surprisingly strong single-agent (CoT, CoT-SC) and lightweight manual MAS (Debate, Self-Refine) highlight that MAS-Verify is the critical stage—an oracle verifier unlocks the largest performance jump.
-        </p>
-      </div>
-      <div class="takeaway-card is-danger">
-        <h4>3. Sub-Agent Capability Is the Bottleneck</h4>
-        <p>
-          Better meta-agents yield gains, but sub-agent strength ultimately caps improvements; enhancing solver tools and base models is key to further progress.
-        </p>
-      </div>
+    <div class="insight-card is-takeaway" style="margin-top: 1.5rem;">
+      <h4>Takeaway</h4>
+      <p>
+        <strong>Verification carries the gains, and sub-agent strength is the ceiling.</strong>
+        Of the three stages, removing MAS-Verify costs the most; accuracy keeps climbing with more
+        meta-iterations; and an oracle verifier opens headroom the automatic baselines cannot
+        capitalize on. What no meta-agent gets past is what its sub-agents can solve.
+      </p>
     </div>
   </div>
 </section>
 
-<section class="section" id="BibTeX">
-  <div class="container is-max-desktop">
-    <div class="bibtex-card">
-      <h2 class="title is-4" style="color: #f8fafc;">BibTeX</h2>
-      <pre><code>@misc{ke2025maszero,
-  title={MAS-Zero: Designing Multi-Agent Systems with Zero Supervision},
-  author={Zixuan Ke and Austin Xu and Yifei Ming and Xuan-Phi Nguyen and Caiming Xiong and Shafiq Joty},
-  year={2025},
-  eprint={2505.14996},
-  archivePrefix={arXiv},
-  primaryClass={cs.CL},
-  url={https://arxiv.org/abs/2505.14996},
-}</code></pre>
-    </div>
-  </div>
-</section>
+
+</div><!-- /results -->
 
 <footer class="footer">
   <div class="container">
@@ -878,6 +1151,84 @@
       }
     });
   });
+</script>
+
+<script>
+  /* Page-level tabs. Each .pv-view owns the sections inside it, so an in-page link like
+     #Examples keeps working: it opens the owning view first, then scrolls. */
+  (function () {
+    var views = [].slice.call(document.querySelectorAll('.pv-view'));
+    if (!views.length) return;
+    var tabs = [].slice.call(document.querySelectorAll('.pv-tab'));
+    var hero = document.getElementById('hero');
+    var slim = document.querySelector('[data-pv-slim]');
+    var owner = {}, keys = [], cur = '';
+
+    views.forEach(function (v) {
+      var key = v.getAttribute('data-pv-view');
+      keys.push(key);
+      owner[key] = key;
+      [].forEach.call(v.querySelectorAll('section[id]'), function (s) { owner[s.id] = key; });
+    });
+
+    function activate(key) {
+      if (!owner[key] || key === cur) return key === cur;
+      cur = key;
+      views.forEach(function (v) {
+        v.classList.toggle('is-active', v.getAttribute('data-pv-view') === key);
+      });
+      tabs.forEach(function (t) {
+        var on = t.getAttribute('data-pv') === key;
+        t.classList.toggle('is-active', on);
+        t.setAttribute('aria-selected', String(on));
+      });
+      /* The full hero belongs to the first view; the rest get the slim bar. */
+      var sub = key !== keys[0];
+      if (hero) hero.classList.toggle('is-hidden', sub);
+      if (slim) slim.hidden = !sub;
+      return true;
+    }
+
+    /* Keep the sticky bar in view, but never scroll away from the hero. */
+    function settle() {
+      var bar = document.querySelector('.pv-bar');
+      if (bar && window.scrollY > bar.offsetTop) {
+        window.scrollTo({ top: bar.offsetTop, behavior: 'instant' });
+      }
+    }
+
+    function open(id, push) {
+      var key = owner[id];
+      if (!key) return false;
+      activate(key);
+      if (push !== false) {
+        history.replaceState(null, '', key === id && key === keys[0] ? location.pathname : '#' + id);
+      }
+      if (key === id) settle();
+      else requestAnimationFrame(function () {
+        var el = document.getElementById(id);
+        if (el) el.scrollIntoView({ block: 'start' });
+      });
+      return true;
+    }
+
+    tabs.forEach(function (t) {
+      t.setAttribute('role', 'tab');
+      t.addEventListener('click', function () { open(t.getAttribute('data-pv')); });
+    });
+
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest && e.target.closest('a[href^="#"]');
+      if (!a) return;
+      var id = a.getAttribute('href').slice(1);
+      if (!owner[id]) return;
+      e.preventDefault();
+      open(id);
+    });
+
+    window.addEventListener('hashchange', function () { open(location.hash.slice(1), false); });
+    if (!open(location.hash.slice(1), false)) activate(keys[0]);
+  })();
 </script>
 
 </body>

@@ -21,19 +21,12 @@
         rel="stylesheet">
 
   <link rel="stylesheet" href="./static/css/bulma.min.css">
-  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
-  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
-  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
   <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
   <link rel="stylesheet" href="./static/css/index.css">
   <link rel="icon" href="./static/images/favicon.svg">
 
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script defer src="./static/js/fontawesome.all.min.js"></script>
-  <script src="./static/js/bulma-carousel.min.js"></script>
-  <script src="./static/js/bulma-slider.min.js"></script>
-  <script src="./static/js/index.js"></script>
 </head>
 <body>
 
@@ -46,7 +39,7 @@
   }
 
   body {
-    background: #f7f8fc;
+    background: #f7f5f2;
     color: #1f2a44;
   }
 
@@ -140,7 +133,7 @@
   }
 
   .feature-card {
-    background: #f9fafc;
+    background: #fbfaf7;
     border-radius: 14px;
     padding: 1.6rem;
     border: 1px solid #e0e7ff;
@@ -271,7 +264,7 @@
   }
 
   .examples-item:hover {
-    background: #f8fafc;
+    background: #faf8f5;
   }
 
   .examples-item.is-active {
@@ -305,7 +298,7 @@
     align-items: center;
     gap: 0.75rem;
     padding: 0.85rem 1rem;
-    background: #f7f8fc;
+    background: #faf8f5;
     border-bottom: 1px solid #eef0fb;
   }
 
@@ -351,7 +344,7 @@
   .figure-card figcaption {
     padding: 1.2rem 1.5rem;
     font-size: 0.95rem;
-    background: #f7f8fc;
+    background: #faf8f5;
     line-height: 1.6;
   }
 
@@ -384,6 +377,18 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 1.5rem;
+  }
+
+  /* Four of them read better two up than as a row of three with one left over. */
+  .takeaway-grid.is-two {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
+  }
+
+  .takeaway-where {
+    margin-top: 1.5rem;
+    text-align: center;
+    color: #64748b;
+    font-size: 0.9rem;
   }
 
   .takeaway-card {
@@ -672,6 +677,185 @@
       min-width: 240px;
     }
   }
+  /* The hub dropdown hangs out of the navbar and over the tab bar below it, so the navbar
+     has to outrank the bar rather than take Bulma's default. */
+  .navbar {
+    position: relative;
+    z-index: 40;
+    background: #fff;
+  }
+
+  /* ---------- Page-level tabs, as on the EvoHarnessBench page ----------
+     The sections of this paper are grouped into views and the bar switches between them.
+     It sticks to the top of the window, so the navigation is never something a reader
+     has to scroll back up to find. */
+  .pv-bar {
+    position: sticky;
+    top: 0;
+    z-index: 35;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: saturate(180%) blur(10px);
+    border-bottom: 1px solid #e0e7ff;
+    box-shadow: 0 1px 10px -6px rgba(15, 23, 42, 0.28);
+  }
+  .pv-bar-inner {
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    gap: 26px;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 16px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .pv-bar-inner::-webkit-scrollbar { display: none; }
+  .pv-tab {
+    flex: 0 0 auto;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    background: none;
+    padding: 14px 2px 12px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 650;
+    color: #64748b;
+    cursor: pointer;
+    transition: color .15s, border-color .15s;
+  }
+  .pv-tab:hover { color: #1f2a44; }
+  .pv-tab.is-active {
+    color: var(--gradient-start);
+    border-bottom-color: var(--gradient-start);
+  }
+
+  /* Whatever in this bar leaves the page is a pill rather than a tab, so the two kinds of
+     destination never look alike. */
+  .pv-go {
+    flex: 0 0 auto;
+    align-self: center;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 15px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 800;
+    text-decoration: none;
+    white-space: nowrap;
+    box-shadow: 0 6px 16px -7px rgba(78, 84, 200, 0.9);
+    transition: transform .15s, box-shadow .15s, filter .15s;
+  }
+  .pv-go.is-demo {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24, #f7971e);
+    box-shadow: 0 6px 16px -7px rgba(238, 90, 36, 0.9);
+  }
+  .pv-go:hover,
+  .pv-go:focus {
+    color: #fff;
+    transform: translateY(-1px);
+    filter: saturate(1.1);
+  }
+
+  .pv-view { display: none; }
+  .pv-view.is-active { display: block; }
+  /* The first section of a view sits under the sticky bar, so it needs less air. */
+  .pv-view > .section:first-child { padding-top: 2.2rem; }
+
+  /* On any view but the first the hero stands down, and this says which paper the
+     reader is in. */
+  .pv-slim[hidden] { display: none; }
+  .pv-slim {
+    display: block;
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+    padding: 15px 0;
+    color: #fff;
+  }
+  .pv-slim .container { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .pv-slim b {
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .pv-slim span { font-size: 0.9rem; opacity: 0.88; }
+
+  /* The hero's own links: the places that leave the page, quiet enough that they do not
+     compete with the title. The sections they used to sit beside are tabs now. */
+  .hero-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.55rem;
+    margin-top: 1.4rem;
+  }
+  .hero-links a {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1.05rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.34);
+    color: #fff;
+    font-size: 0.92rem;
+    font-weight: 650;
+    text-decoration: none;
+    transition: background .15s, transform .15s;
+  }
+  .hero-links a:hover {
+    background: rgba(255, 255, 255, 0.24);
+    color: #fff;
+    transform: translateY(-1px);
+  }
+
+  /* The byline, at the end of the overview rather than in the hero: ten portraits above
+     the fold cost more room than they were worth. The cards were built for the hero's
+     gradient, so on paper they have to carry their own contrast. */
+  .authors-sec {
+    padding: 2.4rem 1.5rem 0.6rem;
+    border-top: 1px solid #e0e7ff;
+  }
+  .authors-h {
+    text-align: center;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #64748b;
+  }
+  .authors-heart {
+    color: #e11d48;
+    font-size: 14px;
+    letter-spacing: 0;
+    vertical-align: -1px;
+  }
+  .authors-sec .author-grid { margin-top: 1.3rem; }
+  .authors-sec .author-card {
+    background: #fff;
+    border-color: #e6e9f5;
+    box-shadow: 0 10px 20px -14px rgba(15, 23, 42, 0.45);
+  }
+  .authors-sec .author-card img { border-color: #e6e9f5; }
+  .authors-sec .author-card a { color: #1f2a44; }
+  .authors-affil {
+    margin-top: 1.4rem;
+    text-align: center;
+    color: #64748b;
+    font-size: 0.88rem;
+    line-height: 1.7;
+  }
+  /* Bulma's footer grey is a cool one, and against the paper tone it reads as a seam
+     across the bottom of the page rather than as the end of it. */
+  footer.footer { background: none; }
+
+  @media (max-width: 768px) {
+    .pv-bar-inner { justify-content: flex-start; gap: 18px; }
+    .pv-tab { font-size: 0.9rem; }
+    .pv-go { font-size: 0.84rem; padding: 6px 12px; }
+    .pv-slim b { font-size: 1.1rem; }
+    .pv-slim span { font-size: 0.82rem; }
+  }
 </style>
 
 <nav class="navbar" role="navigation" aria-label="main navigation" style="border-bottom: 1px solid #eef0fb;">
@@ -695,6 +879,10 @@
         <a href="../mas_zero/">
           <span class="dropdown-icon paper">🔬</span>
           <span class="dropdown-label">MAS-Zero <small>Designing MAS with Zero Supervision</small></span>
+        </a>
+        <a href="../evoharness/">
+          <span class="dropdown-icon paper">🔬</span>
+          <span class="dropdown-label">EvoHarnessBench <small>Agents Under an Evolving Harness</small></span>
         </a>
         <a href="https://llm-reasoning-ai.github.io/" target="_blank">
           <span class="dropdown-icon ext">📊</span>
@@ -722,6 +910,10 @@
       <span class="dropdown-icon paper">🔬</span>
       <span class="dropdown-label">MAS-Zero <small>Designing MAS with Zero Supervision</small></span>
     </a>
+      <a href="../evoharness/">
+        <span class="dropdown-icon paper">🔬</span>
+        <span class="dropdown-label">EvoHarnessBench <small>Agents Under an Evolving Harness</small></span>
+      </a>
     <a href="https://llm-reasoning-ai.github.io/" target="_blank">
       <span class="dropdown-icon ext">📊</span>
       <span class="dropdown-label">Reasoning Survey <small>Inference Scaling, Learning to Reason &amp; Agents</small></span>
@@ -738,7 +930,27 @@
   </button>
 </div>
 
-<section class="hero hero-gradient">
+<!-- The paper's own sections, as tabs rather than as a row of boxes: the page is long
+     enough that a reader arriving for the results should not have to scroll past the rest. -->
+<nav class="pv-bar" aria-label="Paper sections and live demo">
+  <div class="pv-bar-inner" role="tablist">
+    <button class="pv-tab is-active" type="button" data-pv="overview">Overview</button>
+    <button class="pv-tab" type="button" data-pv="approach">Approach</button>
+    <button class="pv-tab" type="button" data-pv="factors">Factors</button>
+    <button class="pv-tab" type="button" data-pv="results">Results</button>
+    <button class="pv-tab" type="button" data-pv="cases">Cases</button>
+    <a class="pv-go is-demo" href="https://vincent950129.github.io/mas-design/mas_r1/demo" target="_blank" rel="noopener">Live Demo<span aria-hidden="true">&#8599;</span></a>
+  </div>
+</nav>
+
+<div class="pv-slim" data-pv-slim hidden>
+  <div class="container is-max-desktop">
+    <b>MAS-Orchestra</b>
+    <span>Understanding and Improving Multi-Agent Reasoning</span>
+  </div>
+</div>
+
+<section class="hero hero-gradient" id="hero">
   <div class="hero-body">
     <div class="container is-max-desktop">
       <div class="columns is-centered">
@@ -756,67 +968,19 @@
             <span>Degree of MAS</span>
             <span>Rigorous analysis on MAS benefits and limitations</span>
           </div>
-          <div class="cta-buttons" style="margin-top: 1.4rem;">
-            <div class="buttons is-centered">
-              <a class="button is-light is-medium" href="https://arxiv.org/abs/2601.14652">Read the Paper</a>
-              <a class="button is-primary is-medium" href="https://github.com/SalesforceAIResearch/MAS-Orchestra">GitHub</a>
-              <a class="button is-link is-medium" href="https://huggingface.co/datasets/Salesforce/MASBench">MASBench</a>
-            </div>
-            <div class="buttons is-centered">
-              <a class="button is-info is-medium" href="https://huggingface.co/collections/ZixuanKe/mas-orchestra-checkpoints">Orchestrator checkpoints</a>
-              <a class="button is-success is-medium" href="#Demo">Demo</a>
-              <a class="button is-warning is-medium" href="#Examples">Examples</a>
-            </div>
+          <div class="hero-links">
+            <a href="https://arxiv.org/abs/2601.14652">Read the Paper</a>
+            <a href="https://github.com/SalesforceAIResearch/MAS-Orchestra">GitHub</a>
+            <a href="https://huggingface.co/datasets/Salesforce/MASBench">MASBench</a>
+            <a href="https://huggingface.co/collections/ZixuanKe/mas-orchestra-checkpoints">Orchestrator checkpoints</a>
           </div>
-
-          <div class="author-grid">
-            <div class="author-card has-text-centered">
-              <img src="../profile/zixuan.jpg" alt="Zixuan Ke">
-              <a href="https://vincent950129.github.io/">Zixuan Ke</a>
-            </div>
-            <div class="author-card has-text-centered">
-              <img src="../profile/yifei.jpg" alt="Yifei Ming">
-              <a href="https://alvinmingsf.github.io/">Yifei Ming</a>
-            </div>
-            <div class="author-card has-text-centered">
-              <img src="../profile/austin.jpg" alt="Austin Xu">
-              <a href="https://austinxu87.github.io/">Austin Xu</a>
-            </div>
-            <div class="author-card has-text-centered">
-              <img src="../profile/ryan.png" alt="Ryan Chin">
-              <a href="https://rychin.com/">Ryan Chin</a>
-            </div>
-            <div class="author-card has-text-centered">
-              <img src="../profile/phi.png" alt="Xuan-Phi Nguyen">
-              <a href="https://nxphi47.github.io/">Xuan-Phi Nguyen</a>
-            </div>
-            <div class="author-card has-text-centered">
-              <img src="../profile/jwala.jpg" alt="Prathyusha Jwalapuram">
-              <a href="https://pjwalapuram.com/">Prathyusha Jwalapuram</a>
-            </div>
-            <div class="author-card has-text-centered">
-              <img src="../profile/jiayu.jpg" alt="Jiayu Wang">
-              <a href="https://jiayuww.github.io/">Jiayu Wang</a>
-            </div>
-            <div class="author-card has-text-centered">
-              <img src="../profile/semih.jpg" alt="Semih Yavuz">
-              <a href="https://www.linkedin.com/in/semih-yavuz-4303518b">Semih Yavuz</a>
-            </div>
-            <div class="author-card has-text-centered">
-              <img src="../profile/caiming.jpg" alt="Caiming Xiong">
-              <a href="http://cmxiong.com/">Caiming Xiong</a>
-            </div>
-            <div class="author-card has-text-centered">
-              <img src="../profile/shafiq.jpg" alt="Shafiq Joty">
-              <a href="https://raihanjoty.github.io/">Shafiq Joty</a>
-            </div>
-          </div>
-          <p class="is-size-6" style="margin-top: 1.5rem;">Salesforce AI Research</p>
         </div>
       </div>
     </div>
   </div>
 </section>
+
+<div class="pv-view is-active" data-pv-view="overview">
 
 <section style="padding: 1.5rem 1.5rem 0;">
   <div class="container is-max-desktop">
@@ -946,6 +1110,159 @@
   </div>
 </section>
 
+<!-- What the study concluded, on the overview, so a reader who stops here still leaves with
+     it. Each one is argued where it came from: the Factors and Results tabs keep their own
+     observation and takeaway cards beside the figures that earned them. -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 section-heading has-text-centered">Key Takeaways</h2>
+    <div class="takeaway-grid is-two">
+      <div class="takeaway-card is-info">
+        <h4>1. MAS pay off at the edge of sub-agent competence</h4>
+        <p>
+          Multi-agent systems beat single-agent ones when the sub-agent is capable but not yet
+          strong enough to internalize a task's structure on its own. Give it a stronger
+          sub-agent and the gains along depth, horizon, breadth and parallelism fade.
+        </p>
+      </div>
+      <div class="takeaway-card is-primary">
+        <h4>2. Orchestrating is not the same skill as solving</h4>
+        <p>
+          An instruction-tuned LLM makes a better orchestrator initialization than a reasoning
+          model: the RLM solves the task itself and then hands one simple piece to a sub-agent
+          that is better at it, because its training rewards end-to-end answers rather than
+          decomposition, delegation and coordination.
+        </p>
+      </div>
+      <div class="takeaway-card is-danger">
+        <h4>3. Robustness is the regime that holds</h4>
+        <p>
+          Adversarial sub-tasks are where multi-agent systems gain consistently, and they keep
+          that edge when sub-agents run at high reasoning effort. Context length is a different
+          problem: more reasoning effort makes hitting the limit likelier, and managing it takes
+          dedicated training instead.
+        </p>
+      </div>
+      <div class="takeaway-card is-success">
+        <h4>4. MAS-Orchestra fits the design to the task</h4>
+        <p>
+          It outperforms its own sub-agents and both inference-time and training-time
+          orchestration systems across every benchmark evaluated, and generalizes
+          out of distribution on GPQA, by proposing designs that match the sub-task structure
+          and delegating to the configuration that suits them.
+        </p>
+      </div>
+    </div>
+    <p class="takeaway-where">
+      The evidence for these sits with the figures that produced it, on the
+      <a href="#factors">Factors</a> and <a href="#results">Results</a> tabs.
+    </p>
+  </div>
+</section>
+
+<section class="section" id="Demo">
+  <div class="container is-max-desktop">
+    <!-- Live Demo -->
+    <div style="background: linear-gradient(135deg, #4e54c8, #8f94fb); border-radius: 16px; padding: 2.5rem 2rem; margin-bottom: 2rem; box-shadow: 0 12px 32px rgba(78, 84, 200, 0.3); text-align: center;">
+      <h2 class="title is-3" style="color: #fff; margin-bottom: 0.5rem;">Live Demo</h2>
+      <p style="color: rgba(255,255,255,0.9); line-height: 1.7; max-width: 700px; margin: 0 auto 1.5rem;">
+        Try MAS-Orchestra directly in your browser — enter a question and watch the orchestrator decompose it, select sub-agents, and aggregate their outputs in real time.
+      </p>
+      <a href="https://vincent950129.github.io/mas-design/mas_r1/demo" target="_blank" rel="noopener"
+         style="display: inline-block; text-decoration: none;">
+        <img src="./figure/demo_teaser.png" alt="MAS-Orchestra Live Demo"
+             style="max-width: 100%; border-radius: 12px; border: 2px solid rgba(255,255,255,0.3); box-shadow: 0 8px 24px rgba(0,0,0,0.2); transition: transform 0.2s, box-shadow 0.2s;"
+             onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 32px rgba(0,0,0,0.3)'"
+             onmouseout="this.style.transform='';this.style.boxShadow='0 8px 24px rgba(0,0,0,0.2)'">
+      </a>
+      <div style="margin-top: 1.5rem;">
+        <a class="button is-large" href="https://vincent950129.github.io/mas-design/mas_r1/demo" target="_blank" rel="noopener"
+           style="font-weight: 700; background: #fff; color: #4e54c8; border: none; border-radius: 10px; padding: 0.8rem 2.5rem; font-size: 1.15rem; box-shadow: 0 4px 14px rgba(0,0,0,0.15); transition: transform 0.2s, box-shadow 0.2s;"
+           onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 20px rgba(0,0,0,0.2)'"
+           onmouseout="this.style.transform='';this.style.boxShadow='0 4px 14px rgba(0,0,0,0.15)'">
+          Launch Live Demo &rarr;
+        </a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop">
+    <div class="bibtex-card">
+      <h2 class="title is-4" style="color: #f8fafc;">BibTeX</h2>
+      <pre><code>@misc{Ke2026MASOrchestra,
+        title        = {MAS-Orchestra: Understanding and Improving Multi-Agent Reasoning Through Holistic Orchestration and Controlled Benchmarks},
+        author       = {Zixuan Ke and Yifei Ming and Austin Xu and Ryan Chin and Xuan-Phi Nguyen and Prathyusha Jwalapuram and Semih Yavuz and Caiming Xiong and Shafiq Joty},
+        year         = {2026},
+        eprint       = {2601.14652},
+        archivePrefix= {arXiv},
+        primaryClass = {cs.AI},
+        note         = {Preprint; Work in Progress},
+      }
+</code></pre>
+  <!-- eprint={2505.14996}, -->
+  <!-- url={https://arxiv.org/abs/2505.14996}, -->
+    </div>
+  </div>
+</section>
+
+<!-- Last thing on the overview, and only on the overview: the other views are the work
+     itself, and a byline under each of them would be a byline several times over. -->
+<section class="authors-sec" id="authors" aria-label="Authors">
+  <div class="container is-max-desktop">
+    <h2 class="authors-h">Made with <span class="authors-heart">&hearts;</span> by</h2>
+    <div class="author-grid">
+      <div class="author-card has-text-centered">
+        <img src="../profile/zixuan.jpg" alt="Zixuan Ke">
+        <a href="https://vincent950129.github.io/">Zixuan Ke</a>
+      </div>
+      <div class="author-card has-text-centered">
+        <img src="../profile/yifei.jpg" alt="Yifei Ming">
+        <a href="https://alvinmingsf.github.io/">Yifei Ming</a>
+      </div>
+      <div class="author-card has-text-centered">
+        <img src="../profile/austin.jpg" alt="Austin Xu">
+        <a href="https://austinxu87.github.io/">Austin Xu</a>
+      </div>
+      <div class="author-card has-text-centered">
+        <img src="../profile/ryan.png" alt="Ryan Chin">
+        <a href="https://rychin.com/">Ryan Chin</a>
+      </div>
+      <div class="author-card has-text-centered">
+        <img src="../profile/phi.png" alt="Xuan-Phi Nguyen">
+        <a href="https://nxphi47.github.io/">Xuan-Phi Nguyen</a>
+      </div>
+      <div class="author-card has-text-centered">
+        <img src="../profile/jwala.jpg" alt="Prathyusha Jwalapuram">
+        <a href="https://pjwalapuram.com/">Prathyusha Jwalapuram</a>
+      </div>
+      <div class="author-card has-text-centered">
+        <img src="../profile/jiayu.jpg" alt="Jiayu Wang">
+        <a href="https://jiayuww.github.io/">Jiayu Wang</a>
+      </div>
+      <div class="author-card has-text-centered">
+        <img src="../profile/semih.jpg" alt="Semih Yavuz">
+        <a href="https://www.linkedin.com/in/semih-yavuz-4303518b">Semih Yavuz</a>
+      </div>
+      <div class="author-card has-text-centered">
+        <img src="../profile/caiming.jpg" alt="Caiming Xiong">
+        <a href="http://cmxiong.com/">Caiming Xiong</a>
+      </div>
+      <div class="author-card has-text-centered">
+        <img src="../profile/shafiq.jpg" alt="Shafiq Joty">
+        <a href="https://raihanjoty.github.io/">Shafiq Joty</a>
+      </div>
+    </div>
+    <p class="authors-affil">Salesforce AI Research</p>
+  </div>
+</section>
+
+</div><!-- /overview -->
+
+<div class="pv-view" data-pv-view="approach">
+
 <section class="section">
   <div class="container is-max-desktop">
     <div class="highlight-card">
@@ -978,6 +1295,10 @@ the number of agents is unconstrained
     </div>
   </div>
 </section>
+
+</div><!-- /approach -->
+
+<div class="pv-view" data-pv-view="factors">
 
 <section class="section">
   <div class="container is-max-desktop">
@@ -1230,6 +1551,10 @@ with Qwen-7b as orchestrator and GPT-120b as sub-agent
   </div>
 </section>
 
+</div><!-- /factors -->
+
+<div class="pv-view" data-pv-view="results">
+
 <section class="section">
   <div class="container is-max-desktop">
     <h2 class="title is-3 section-heading has-text-centered">Evaluation on Public Benchmarks</h2>
@@ -1315,33 +1640,9 @@ typically using 3 to 4 parallel searches per question.
   </div>
 </section>
 
-<section class="section" id="Demo">
-  <div class="container is-max-desktop">
-    <!-- Live Demo -->
-    <div style="background: linear-gradient(135deg, #4e54c8, #8f94fb); border-radius: 16px; padding: 2.5rem 2rem; margin-bottom: 2rem; box-shadow: 0 12px 32px rgba(78, 84, 200, 0.3); text-align: center;">
-      <h2 class="title is-3" style="color: #fff; margin-bottom: 0.5rem;">Live Demo</h2>
-      <p style="color: rgba(255,255,255,0.9); line-height: 1.7; max-width: 700px; margin: 0 auto 1.5rem;">
-        Try MAS-Orchestra directly in your browser — enter a question and watch the orchestrator decompose it, select sub-agents, and aggregate their outputs in real time.
-      </p>
-      <a href="https://vincent950129.github.io/mas-design/mas_r1/demo" target="_blank" rel="noopener"
-         style="display: inline-block; text-decoration: none;">
-        <img src="./figure/demo_teaser.png" alt="MAS-Orchestra Live Demo"
-             style="max-width: 100%; border-radius: 12px; border: 2px solid rgba(255,255,255,0.3); box-shadow: 0 8px 24px rgba(0,0,0,0.2); transition: transform 0.2s, box-shadow 0.2s;"
-             onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 32px rgba(0,0,0,0.3)'"
-             onmouseout="this.style.transform='';this.style.boxShadow='0 8px 24px rgba(0,0,0,0.2)'">
-      </a>
-      <div style="margin-top: 1.5rem;">
-        <a class="button is-large" href="https://vincent950129.github.io/mas-design/mas_r1/demo" target="_blank" rel="noopener"
-           style="font-weight: 700; background: #fff; color: #4e54c8; border: none; border-radius: 10px; padding: 0.8rem 2.5rem; font-size: 1.15rem; box-shadow: 0 4px 14px rgba(0,0,0,0.15); transition: transform 0.2s, box-shadow 0.2s;"
-           onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 20px rgba(0,0,0,0.2)'"
-           onmouseout="this.style.transform='';this.style.boxShadow='0 4px 14px rgba(0,0,0,0.15)'">
-          Launch Live Demo &rarr;
-        </a>
-      </div>
-    </div>
+</div><!-- /results -->
 
-  </div>
-</section>
+<div class="pv-view" data-pv-view="cases">
 
 <section class="section" id="Examples">
   <div class="container is-max-widescreen">
@@ -1380,26 +1681,7 @@ typically using 3 to 4 parallel searches per question.
   </div>
 </section>
 
-
-<section class="section" id="BibTeX">
-  <div class="container is-max-desktop">
-    <div class="bibtex-card">
-      <h2 class="title is-4" style="color: #f8fafc;">BibTeX</h2>
-      <pre><code>@misc{Ke2026MASOrchestra,
-        title        = {MAS-Orchestra: Understanding and Improving Multi-Agent Reasoning Through Holistic Orchestration and Controlled Benchmarks},
-        author       = {Zixuan Ke and Yifei Ming and Austin Xu and Ryan Chin and Xuan-Phi Nguyen and Prathyusha Jwalapuram and Semih Yavuz and Caiming Xiong and Shafiq Joty},
-        year         = {2026},
-        eprint       = {2601.14652},
-        archivePrefix= {arXiv},
-        primaryClass = {cs.AI},
-        note         = {Preprint; Work in Progress},
-      }
-</code></pre>
-  <!-- eprint={2505.14996}, -->
-  <!-- url={https://arxiv.org/abs/2505.14996}, -->
-    </div>
-  </div>
-</section>
+</div><!-- /cases -->
 
 <footer class="footer">
   <div class="container">
@@ -1609,6 +1891,84 @@ typically using 3 to 4 parallel searches per question.
       }
     });
   });
+</script>
+
+<script>
+  /* Page-level tabs. Each .pv-view owns the sections inside it, so an in-page link like
+     #Examples keeps working: it opens the owning view first, then scrolls. */
+  (function () {
+    var views = [].slice.call(document.querySelectorAll('.pv-view'));
+    if (!views.length) return;
+    var tabs = [].slice.call(document.querySelectorAll('.pv-tab'));
+    var hero = document.getElementById('hero');
+    var slim = document.querySelector('[data-pv-slim]');
+    var owner = {}, keys = [], cur = '';
+
+    views.forEach(function (v) {
+      var key = v.getAttribute('data-pv-view');
+      keys.push(key);
+      owner[key] = key;
+      [].forEach.call(v.querySelectorAll('section[id]'), function (s) { owner[s.id] = key; });
+    });
+
+    function activate(key) {
+      if (!owner[key] || key === cur) return key === cur;
+      cur = key;
+      views.forEach(function (v) {
+        v.classList.toggle('is-active', v.getAttribute('data-pv-view') === key);
+      });
+      tabs.forEach(function (t) {
+        var on = t.getAttribute('data-pv') === key;
+        t.classList.toggle('is-active', on);
+        t.setAttribute('aria-selected', String(on));
+      });
+      /* The full hero belongs to the first view; the rest get the slim bar. */
+      var sub = key !== keys[0];
+      if (hero) hero.classList.toggle('is-hidden', sub);
+      if (slim) slim.hidden = !sub;
+      return true;
+    }
+
+    /* Keep the sticky bar in view, but never scroll away from the hero. */
+    function settle() {
+      var bar = document.querySelector('.pv-bar');
+      if (bar && window.scrollY > bar.offsetTop) {
+        window.scrollTo({ top: bar.offsetTop, behavior: 'instant' });
+      }
+    }
+
+    function open(id, push) {
+      var key = owner[id];
+      if (!key) return false;
+      activate(key);
+      if (push !== false) {
+        history.replaceState(null, '', key === id && key === keys[0] ? location.pathname : '#' + id);
+      }
+      if (key === id) settle();
+      else requestAnimationFrame(function () {
+        var el = document.getElementById(id);
+        if (el) el.scrollIntoView({ block: 'start' });
+      });
+      return true;
+    }
+
+    tabs.forEach(function (t) {
+      t.setAttribute('role', 'tab');
+      t.addEventListener('click', function () { open(t.getAttribute('data-pv')); });
+    });
+
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest && e.target.closest('a[href^="#"]');
+      if (!a) return;
+      var id = a.getAttribute('href').slice(1);
+      if (!owner[id]) return;
+      e.preventDefault();
+      open(id);
+    });
+
+    window.addEventListener('hashchange', function () { open(location.hash.slice(1), false); });
+    if (!open(location.hash.slice(1), false)) activate(keys[0]);
+  })();
 </script>
 
 </body>
