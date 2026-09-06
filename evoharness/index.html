@@ -225,8 +225,7 @@
               <path d="M15.4 3.7c2.5 0 2 7.3 4.5 8.3-2.5 1-2 8.3-4.5 8.3"/>
               <path d="M10.4 12.2l1.7 1.7 3.3-3.6"/>
             </svg>
-          </span>Deterministic and widely applicable construction, with no LLM in the loop<a
-            class="diff-go" href="#construction">the recipe &rarr;</a>
+          </span>Deterministic and widely applicable construction, with no LLM in the loop
         </li>
       </ul>
     </div>
@@ -2280,15 +2279,9 @@ row["gym_servers_config"]  # JSON: which gym to seed, and from which snapshot</c
   <div class="container is-max-desktop">
     <h2 class="title is-3 section-heading has-text-centered">Construct Your Own Evolving Benchmark</h2>
     <p class="sv-lead">
-      The 17 streams on this page came out of two seed benchmarks, and the procedure that built them
-      knows nothing about either one. It turns a <em>static</em> suite into an evolving harness without
-      writing a single new task: the capabilities your tasks already need are ranked by how many tasks
-      need them, released core-first over a handful of stages, accumulated, and each task is dated to
-      the first stage that can solve it. Nothing in that is generative &mdash; no LLM in the loop, no
-      human labelling pass &mdash; so one seed always yields the same stream. Bring your own seed:
-      a public suite like <a href="https://www.tbench.ai/" target="_blank" rel="noopener">Terminal-Bench</a>
-      or <a href="https://huggingface.co/datasets/mercor/apex-agents" target="_blank" rel="noopener">APEX-Agents</a>,
-      or the internal one nobody else has.
+      EvoHarnessBench ships 17 streams constructed from two seed benchmarks, EnterpriseOps-Gym and
+      Agentic Last Exam. The construction recipe itself is general: point it at a seed of your own and
+      it gives you an evolving benchmark on the same terms.
     </p>
 
     <h3 class="sv-h3">What your seed has to have</h3>
@@ -2942,12 +2935,6 @@ write(rows, Path("data/apex_agents"), manifest(ann, release, rows, judge=JUDGE))
     </p>
     </div><!-- /apex-agents -->
     </div><!-- /seeds -->
-
-    <p class="sv-cap sv-cap--mid">
-      The code on this page is the whole of what stands between a static suite and a stream. What it
-      writes is what the <a href="#service">Evaluation</a> tab reads, and <a href="#stats">Benchmark</a>
-      is what 17 streams built this way look like once they have been scored.
-    </p>
   </div>
 </section>
 

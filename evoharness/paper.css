@@ -938,17 +938,6 @@ footer.footer { background: none; }
   color: #1f2a44;
   box-shadow: 0 10px 22px -18px rgba(15, 23, 42, 0.55);
 }
-/* Of the four, this is the claim a reader can act on rather than only read, so it is the
-   one that says where to go. */
-.diff-pill .diff-go {
-  flex: 0 0 auto;
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: var(--accent);
-  border-bottom: 1px solid rgba(78, 84, 200, 0.32);
-  padding-bottom: 1px;
-}
-.diff-pill .diff-go:hover { border-bottom-color: var(--accent); }
 .diff-ico {
   display: flex;
   align-items: center;

@@ -414,7 +414,7 @@ def main() -> int:
         missing = [f for f in FIGURES if f not in body]
         check(not missing, "the figures it quotes from the paper are all still there",
               str(missing))
-        check("no LLM in the loop" in body and "GPU" in body,
+        check("an LLM" in body and "a human pass" in body and "GPU" in body,
               "and it says what construction does not need")
 
         print("\nThe seeds it points at")
