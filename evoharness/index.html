@@ -2786,12 +2786,10 @@ def induce_agents(tool_ann):
     </div>
     </div><!-- /axes -->
 
-    <h3 class="sv-h3">Two public seeds, run end to end</h3>
+    <h3 class="sv-h3">Two popular benchmarks, as examples</h3>
     <p class="sv-cap sv-cap--mid">
-      Neither suite is ours and neither has been staged by us. They are here because they fail in
-      opposite directions against the requirements above: Terminal-Bench already has the grader and
-      needs its annotation derived, and APEX-Agents already has the namespace and needs its grader
-      settled. Both scripts below are complete, and both import the module above unchanged.
+      Below we take Terminal-Bench and APEX-Agents and construct the EvoHarnessBench version of each:
+      a complete script per seed, importing the module above unchanged.
     </p>
 
     <div class="sv-group" data-sv-group="seeds">
@@ -2876,8 +2874,8 @@ write(rows, Path("data/terminal_bench"),
     <p class="sv-cap">
       <b>The capability is the application.</b>
       <a href="https://huggingface.co/datasets/mercor/apex-agents" target="_blank" rel="noopener">APEX-Agents</a>
-      is the opposite case: the namespace is already there and the grader is the part you have to
-      settle. 480 long-horizon professional tasks across 33 worlds of files and applications &mdash;
+      arrives with the namespace already given, and with the grader as the part you have to settle:
+      480 long-horizon professional tasks across 33 worlds of files and applications &mdash;
       mail, spreadsheets, documents, calendar, chat, code execution &mdash; and applications are the
       shape both the tool axis and the ownership partition want, with 33 worlds supplying the
       repetition a frequency ranking needs to mean anything.
