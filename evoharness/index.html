@@ -2361,7 +2361,20 @@ row["gym_servers_config"]  # JSON: which gym to seed, and from which snapshot</c
       dependency outside the standard library &mdash; and then the two public seeds run through it.
     </p>
 
-    <h3 class="sv-h3">Step 1 &mdash; the annotation, and the only contract there is</h3>
+    <h3 class="sv-h3">The four steps, as one small module</h3>
+    <p class="sv-cap sv-cap--mid">
+      Three panels, one file: <code>evolve.py</code>, standard library only, and every axis and every
+      seed goes through it unchanged. Pick a step.
+    </p>
+
+    <div class="sv-group" data-sv-group="steps">
+    <div class="sv-tabs" role="tablist" aria-label="The four steps, as code">
+      <button class="sv-tab is-active" type="button" role="tab" data-sv="annotate">Step 1 &middot; annotate</button>
+      <button class="sv-tab" type="button" role="tab" data-sv="release">Step 2 &middot; rank and release</button>
+      <button class="sv-tab" type="button" role="tab" data-sv="package">Steps 3 and 4 &middot; accumulate and write</button>
+    </div>
+
+    <div class="sv-panel is-active" data-sv-panel="annotate">
     <p class="sv-cap">
       Everything downstream reads one dictionary: <code>{task_id: capabilities it needs}</code>. Where
       that comes from is the only part specific to your seed &mdash; the axis panels below and the two
@@ -2392,8 +2405,9 @@ def annotate(tasks, capabilities_of, canonical=lambda c: c.strip().lower()):
             ann[str(task["task_id"])] = caps
     return ann</code></pre>
     </div>
+    </div><!-- /step 1 -->
 
-    <h3 class="sv-h3">Step 2 &mdash; rank by frequency, release the core first</h3>
+    <div class="sv-panel" data-sv-panel="release">
     <p class="sv-cap">
       Equal buckets over the ranking are the obvious schedule and the wrong one. Two things go wrong on
       a real frequency distribution, and both are cheaper to handle here than to discover later: a
@@ -2454,8 +2468,9 @@ def _merge_thin(ann, release, min_new):
     renumber = {r: t for t, r in enumerate(sorted(set(release.values())), 1)}
     return {c: renumber[r] for c, r in release.items()}</code></pre>
     </div>
+    </div><!-- /step 2 -->
 
-    <h3 class="sv-h3">Steps 3 and 4 &mdash; accumulate, date, split, write</h3>
+    <div class="sv-panel" data-sv-panel="package">
     <p class="sv-cap">
       The rest is arithmetic. A stage offers everything released up to it, a task is dated to the first
       stage that covers it, and the two invariants above are asserted where each row is made rather
@@ -2520,6 +2535,8 @@ def write(rows, out: Path, meta=None):
     if meta:
         (out / "manifest.json").write_text(json.dumps(meta, indent=2, default=list))</code></pre>
     </div>
+    </div><!-- /steps 3 and 4 -->
+    </div><!-- /steps -->
 
     <h3 class="sv-h3">What that leaves you holding</h3>
     <div class="sv-knobs">
@@ -2556,6 +2573,7 @@ def write(rows, out: Path, meta=None):
       induced from the tool namespace.
     </p>
 
+    <div class="sv-group" data-sv-group="axes">
     <div class="sv-tabs" role="tablist" aria-label="Construction by axis">
       <button class="sv-tab is-active" type="button" role="tab" data-sv="tools">Tools &middot; annotation exists</button>
       <button class="sv-tab" type="button" role="tab" data-sv="skills">Skills &middot; mine the prompts</button>
@@ -2766,9 +2784,25 @@ def induce_agents(tool_ann):
         rather than from anything we wrote.
       </p>
     </div>
+    </div><!-- /axes -->
 
-    <h3 class="sv-h3">Worked example 1 &mdash; Terminal-Bench, where the capability is the software</h3>
+    <h3 class="sv-h3">Two public seeds, run end to end</h3>
+    <p class="sv-cap sv-cap--mid">
+      Neither suite is ours and neither has been staged by us. They are here because they fail in
+      opposite directions against the requirements above: Terminal-Bench already has the grader and
+      needs its annotation derived, and APEX-Agents already has the namespace and needs its grader
+      settled. Both scripts below are complete, and both import the module above unchanged.
+    </p>
+
+    <div class="sv-group" data-sv-group="seeds">
+    <div class="sv-tabs" role="tablist" aria-label="Worked examples">
+      <button class="sv-tab is-active" type="button" role="tab" data-sv="tbench">Terminal-Bench &middot; derive the annotation</button>
+      <button class="sv-tab" type="button" role="tab" data-sv="apex">APEX-Agents &middot; settle the grader</button>
+    </div>
+
+    <div class="sv-panel is-active" data-sv-panel="tbench">
     <p class="sv-cap">
+      <b>The capability is the software.</b>
       <a href="https://www.tbench.ai/" target="_blank" rel="noopener">Terminal-Bench</a> meets the
       requirement seeds most often fail: a task carries its own tests and is scored by running them,
       so pass and fail are settled by execution. What it has no field for is the capability, so that
@@ -2836,9 +2870,11 @@ write(rows, Path("data/terminal_bench"),
       cheaper and is what our own enterprise track does. Both are defensible. Mixing them across
       stages is not.
     </p>
+    </div><!-- /terminal-bench -->
 
-    <h3 class="sv-h3">Worked example 2 &mdash; APEX-Agents, where the capability is the application</h3>
+    <div class="sv-panel" data-sv-panel="apex">
     <p class="sv-cap">
+      <b>The capability is the application.</b>
       <a href="https://huggingface.co/datasets/mercor/apex-agents" target="_blank" rel="noopener">APEX-Agents</a>
       is the opposite case: the namespace is already there and the grader is the part you have to
       settle. 480 long-horizon professional tasks across 33 worlds of files and applications &mdash;
@@ -2906,12 +2942,13 @@ write(rows, Path("data/apex_agents"), manifest(ann, release, rows, judge=JUDGE))
       exactly what a tool-level namespace hands you for nothing. Their terms also restrict the data to
       evaluation, so read them before building adaptation splits out of it.
     </p>
+    </div><!-- /apex-agents -->
+    </div><!-- /seeds -->
 
     <p class="sv-cap sv-cap--mid">
-      Neither suite is ours and neither has been staged by us; both are read here as seeds, and the code
-      on this page is the whole of what stands between one and a stream. What it writes is what the
-      <a href="#service">Evaluation</a> tab reads, and <a href="#stats">Benchmark</a> is what 17 streams
-      built this way look like once they have been scored.
+      The code on this page is the whole of what stands between a static suite and a stream. What it
+      writes is what the <a href="#service">Evaluation</a> tab reads, and <a href="#stats">Benchmark</a>
+      is what 17 streams built this way look like once they have been scored.
     </p>
   </div>
 </section>

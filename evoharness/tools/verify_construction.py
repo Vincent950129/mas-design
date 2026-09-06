@@ -38,7 +38,13 @@ BASE = "http://127.0.0.1:8777/evoharness/index.html"
 TABS = [("overview", "Overview"), ("benchmark", "Benchmark"), ("tasks", "Tasks"),
         ("results", "Results"), ("cases", "Cases"), ("evaluate", "Evaluation"),
         ("leaderboard", "Leaderboard"), ("construction", "Create Your Benchmark")]
-AXES = ["tools", "skills", "agents"]        # the construction strip
+# The construction view is three independent strips now, because printed whole it was a
+# page nobody would scroll: a step, an axis and a seed are each read one at a time. Every
+# group's keys in the order its chips appear, and the panel it has to open on.
+GROUPS = {"steps": ["annotate", "release", "package"],
+          "axes": ["tools", "skills", "agents"],
+          "seeds": ["tbench", "apex"],
+          "evaluate": None}                 # the service quickstart, ungrouped, untouched
 # Figures the prose quotes from the paper. Every one of them is a number a reader could
 # repeat in a review, so a silent edit here should fail rather than ship.
 FIGURES = ["17 streams", "76.6%", "85.2%", "62 specialists", "42 skills",
@@ -63,19 +69,29 @@ def check(ok: bool, label: str, detail: str = "") -> None:
 
 
 def strips(pg) -> dict:
-    """Which panel is active in each of the page's .sv-tab strips, by owning view."""
+    """Which panel is open in each of the page's tab strips, keyed by the group that owns
+    it -- a group where a view runs more than one strip, and the view itself otherwise."""
     return pg.evaluate("""() => {
       const out = {};
-      document.querySelectorAll('.pv-view').forEach((v) => {
-        const tabs = [...v.querySelectorAll('.sv-tab')];
+      const mine = (el, s) => el.closest('[data-sv-group], .pv-view') === s;
+      document.querySelectorAll('[data-sv-group], .pv-view').forEach((s) => {
+        const tabs = [...s.querySelectorAll('.sv-tab')].filter((t) => mine(t, s));
         if (!tabs.length) return;
-        out[v.dataset.pvView] = {
+        out[s.dataset.svGroup || s.dataset.pvView] = {
           tab: tabs.filter((t) => t.classList.contains('is-active')).map((t) => t.dataset.sv),
-          panel: [...v.querySelectorAll('.sv-panel.is-active')].map((p) => p.dataset.svPanel),
+          panel: [...s.querySelectorAll('.sv-panel.is-active')].filter((p) => mine(p, s))
+            .map((p) => p.dataset.svPanel),
         };
       });
       return out;
     }""")
+
+
+def open_panels(pg) -> list[str]:
+    """The panels a reader can actually see in the construction view right now."""
+    return pg.evaluate("""() => [...document.querySelectorAll(
+      '[data-pv-view="construction"] .sv-panel')].filter((p) => p.offsetParent !== null)
+      .map((p) => p.dataset.svPanel)""")
 
 
 def blocks(pg) -> list[tuple[str, str]]:
@@ -377,8 +393,8 @@ def main() -> int:
 
         print("\nOpening it")
         st = strips(pg)
-        check(set(st) == {"evaluate", "construction"},
-              "two views own a tab strip", " ".join(sorted(st)))
+        check(set(st) == set(GROUPS), "four tab strips, each scoped to its own group",
+              " ".join(sorted(st)))
         check(all(len(s["tab"]) == 1 and s["panel"] == s["tab"] for s in st.values()),
               "and each opens on exactly one of its own panels", str(st))
 
@@ -417,20 +433,34 @@ def main() -> int:
             a["href"].rstrip("/") == u.rstrip("/") for u in SEEDS)]
         check(not stray, "and nothing else leaves the page from here", str(stray))
 
-        print("\nThe axis strip switches on its own")
-        for ax in AXES:
-            pg.click(f'[data-pv-view="construction"] .sv-tab[data-sv="{ax}"]')
-            pg.wait_for_timeout(220)
-            st = strips(pg)
-            check(st["construction"]["panel"] == [ax],
-                  f"{ax}: one panel open, and it is the one asked for",
-                  str(st["construction"]))
-            check(len(st["evaluate"]["panel"]) == 1,
-                  f"{ax}: the service quickstart keeps its own panel",
-                  str(st["evaluate"]["panel"]))
+        print("\nOne step, one axis and one seed at a time")
+        st = strips(pg)
+        firsts = {g: st[g]["panel"] for g in ("steps", "axes", "seeds")}
+        check(all(firsts[g] == [keys[0]] for g, keys in GROUPS.items() if keys),
+              "each group opens on its first chip, not on all of them", str(firsts))
+        check(sorted(open_panels(pg)) == sorted(k[0] for k in GROUPS.values() if k),
+              "so three panels are showing out of eight", str(open_panels(pg)))
+
+        for group, keys in GROUPS.items():
+            if not keys:
+                continue
+            for key in keys:
+                pg.click(f'[data-sv-group="{group}"] .sv-tab[data-sv="{key}"]')
+                pg.wait_for_timeout(200)
+                st = strips(pg)
+                check(st[group]["panel"] == [key] and st[group]["tab"] == [key],
+                      f"{group}/{key}: the chip opens its own panel and only that one",
+                      str(st[group]))
+                others = {g: st[g]["panel"] for g in st if g != group}
+                check(all(len(v) == 1 for v in others.values()),
+                      f"{group}/{key}: every other strip keeps exactly one panel", str(others))
+            pg.click(f'[data-sv-group="{group}"] .sv-tab[data-sv="{keys[0]}"]')
+            pg.wait_for_timeout(150)
         pg.screenshot(path=str(OUT / "construction.png"), full_page=True)
 
-        print("\nAnd the service strip is still independent of it")
+        print("\nAnd the service strip is still independent of all three")
+        pg.click(f'[data-sv-group="axes"] .sv-tab[data-sv="{GROUPS["axes"][-1]}"]')
+        pg.wait_for_timeout(200)
         pg.click('.pv-tab[data-pv="evaluate"]')
         pg.wait_for_timeout(300)
         pg.click('[data-pv-view="evaluate"] .sv-tab[data-sv="ports"]')
@@ -438,9 +468,9 @@ def main() -> int:
         st = strips(pg)
         check(st["evaluate"]["panel"] == ["ports"], "clicking one moves that strip",
               str(st["evaluate"]))
-        check(st["construction"]["panel"] == [AXES[-1]],
-              "and leaves the construction strip where the reader left it",
-              str(st["construction"]))
+        check(st["axes"]["panel"] == [GROUPS["axes"][-1]],
+              "and leaves the construction strips where the reader left them",
+              str({g: st[g]["panel"] for g in GROUPS if GROUPS[g]}))
 
         print("\nWhere it sends the reader")
         pg.click('.pv-tab[data-pv="construction"]')
@@ -451,7 +481,14 @@ def main() -> int:
         for h in dict.fromkeys(hrefs):
             pg.click('.pv-tab[data-pv="construction"]')
             pg.wait_for_timeout(200)
-            pg.click(f'[data-pv-view="construction"] a[href="{h}"]')
+            # Some of these sit inside closed panels now, and a link nobody can see is a
+            # link nobody follows: every target has to be reachable from the open spine.
+            link = next((a for a in pg.query_selector_all(
+                f'[data-pv-view="construction"] a[href="{h}"]') if a.is_visible()), None)
+            check(link is not None, f"{h} is reachable without opening a panel first")
+            if link is None:
+                continue
+            link.click()
             pg.wait_for_timeout(350)
             got = pg.evaluate("""() => {
               const v = document.querySelector('.pv-view.is-active');

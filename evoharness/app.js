@@ -1688,9 +1688,11 @@ const SV = (() => {
     return out + esc(src.slice(last));
   }
 
-  /* Two views carry a strip of these now -- the service quickstart and the construction
-   * recipe -- and they switch independently, so a strip is scoped to the view that owns it.
-   * Unscoped, opening one view's first panel would leave the other view with none. */
+  /* Several strips of these are on the page now -- the service quickstart, and the steps,
+   * axes and seeds of the construction recipe -- and they switch independently, so a strip
+   * is scoped to the container that owns it. Unscoped, a click in one would blank another's
+   * panels, which is invisible on the strip you are looking at and obvious on the one you
+   * are not. */
   function show(key, scope) {
     $$(".sv-tab", scope).forEach((t) => {
       const on = t.dataset.sv === key;
@@ -1731,16 +1733,24 @@ const SV = (() => {
       showEnv($$(".ev-tab")[0]?.dataset.ev || "api");
     }
 
-    const strips = $$(".pv-view").filter((v) => $$(".sv-tab", v).length);
-    strips.forEach((scope) => {
+    /* A strip's scope is the nearest container that owns it: an explicit [data-sv-group]
+     * where one view runs more than one strip, and otherwise the view itself. */
+    const scopes = [];
+    tabs.forEach((t) => {
+      const scope = t.closest("[data-sv-group], .pv-view");
+      if (scope && !scopes.includes(scope)) scopes.push(scope);
+    });
+    scopes.forEach((scope) => {
+      /* Panel keys repeat across groups, so the ARIA ids are namespaced by the group. */
+      const ns = scope.dataset.svGroup || scope.dataset.pvView || "sv";
       $$(".sv-panel", scope).forEach((p) => {
-        p.id = `sv-panel-${p.dataset.svPanel}`;
+        p.id = `${ns}-panel-${p.dataset.svPanel}`;
         p.setAttribute("role", "tabpanel");
-        p.setAttribute("aria-labelledby", `sv-tab-${p.dataset.svPanel}`);
+        p.setAttribute("aria-labelledby", `${ns}-tab-${p.dataset.svPanel}`);
       });
       $$(".sv-tab", scope).forEach((t) => {
-        t.id = `sv-tab-${t.dataset.sv}`;
-        t.setAttribute("aria-controls", `sv-panel-${t.dataset.sv}`);
+        t.id = `${ns}-tab-${t.dataset.sv}`;
+        t.setAttribute("aria-controls", `${ns}-panel-${t.dataset.sv}`);
         t.addEventListener("click", () => show(t.dataset.sv, scope));
       });
       show($$(".sv-tab", scope)[0].dataset.sv, scope);
