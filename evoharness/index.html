@@ -101,8 +101,14 @@
     <button class="pv-tab" type="button" data-pv="tasks">Tasks</button>
     <button class="pv-tab" type="button" data-pv="results">Results</button>
     <button class="pv-tab" type="button" data-pv="cases">Cases</button>
-    <button class="pv-tab" type="button" data-pv="evaluate">Evaluate</button>
+    <!-- The view key stays "evaluate": #evaluate is what the floor's CTA and any shared link
+         point at. Only the label is a noun, to sit with the six around it. -->
+    <button class="pv-tab" type="button" data-pv="evaluate">Evaluation</button>
     <button class="pv-tab" type="button" data-pv="leaderboard">Leaderboard</button>
+    <!-- The one tab that asks for something rather than showing something: the Benchmark tab is
+         ours, this is the reader making their own out of a seed we have never seen. The view key
+         stays `construction`, which is what the section is and what the paper calls it. -->
+    <button class="pv-tab" type="button" data-pv="construction">Create Your Benchmark</button>
     <!-- An anchor rather than a .pv-tab: the demo is a deployment elsewhere, not a view of
          this page, so it must not go through PV.open. It keeps the hero CTA's emphasis. -->
     <a class="pv-demo" href="https://fails-scotland-diagnostic-joy.trycloudflare.com/?mode=enterprise&amp;gym=csm&amp;evolving=1"
@@ -219,7 +225,8 @@
               <path d="M15.4 3.7c2.5 0 2 7.3 4.5 8.3-2.5 1-2 8.3-4.5 8.3"/>
               <path d="M10.4 12.2l1.7 1.7 3.3-3.6"/>
             </svg>
-          </span>Deterministic and widely applicable construction, with no LLM in the loop
+          </span>Deterministic and widely applicable construction, with no LLM in the loop<a
+            class="diff-go" href="#construction">the recipe &rarr;</a>
         </li>
       </ul>
     </div>
@@ -2266,6 +2273,650 @@ row["gym_servers_config"]  # JSON: which gym to seed, and from which snapshot</c
 </section>
 
 </div><!-- /leaderboard -->
+
+<div class="pv-view" data-pv-view="construction">
+
+<section class="section" id="construction">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 section-heading has-text-centered">Construct Your Own Evolving Benchmark</h2>
+    <p class="sv-lead">
+      The 17 streams on this page came out of two seed benchmarks, and the procedure that built them
+      knows nothing about either one. It turns a <em>static</em> suite into an evolving harness without
+      writing a single new task: the capabilities your tasks already need are ranked by how many tasks
+      need them, released core-first over a handful of stages, accumulated, and each task is dated to
+      the first stage that can solve it. Nothing in that is generative &mdash; no LLM in the loop, no
+      human labelling pass &mdash; so one seed always yields the same stream. Bring your own seed:
+      a public suite like <a href="https://www.tbench.ai/" target="_blank" rel="noopener">Terminal-Bench</a>
+      or <a href="https://huggingface.co/datasets/mercor/apex-agents" target="_blank" rel="noopener">APEX-Agents</a>,
+      or the internal one nobody else has.
+    </p>
+
+    <h3 class="sv-h3">What your seed has to have</h3>
+    <div class="sv-knobs">
+      <article class="sv-knob">
+        <span class="sv-kn">a grader, not a judge</span>
+        <p>
+          Each task needs a <b>verifier-checkable</b> outcome: something that reads the end state and
+          returns pass or fail. If a model scores the answers instead, drift in the grader and drift
+          in the harness draw the same curve &mdash; and attributing the change to the harness is the
+          entire purpose.
+        </p>
+      </article>
+      <article class="sv-knob">
+        <span class="sv-kn">a record of what each task takes</span>
+        <p>
+          Per task, the set of capabilities a solution needs. On the tool axis most seeds already ship
+          it as an oracle tool list; on the other two axes you derive it, deterministically, from
+          material the seed already carries. It is construction and analysis material: the agent is
+          never shown it.
+        </p>
+      </article>
+      <article class="sv-knob">
+        <span class="sv-kn">capabilities that repeat</span>
+        <p>
+          Release order comes from frequency, so a suite where every task needs its own private
+          capability has no core and no tail and cannot be staged. What works is the ordinary shape:
+          a few capabilities most tasks touch, a long tail only a handful do.
+        </p>
+      </article>
+    </div>
+    <p class="sv-cap sv-cap--mid">
+      <b>What you do not need: new tasks, an LLM, a human pass, or a GPU.</b> Construction is parsing,
+      counting and substitution. It runs on a laptop, and anyone holding your seed can reproduce your
+      stream exactly &mdash; which is the property that makes a moving harness measurable at all.
+    </p>
+
+    <h3 class="sv-h3">The recipe, in four steps</h3>
+    <ol class="sv-flow">
+      <li><b>annotate</b><i>what each task needs, out of one universe of capabilities</i></li>
+      <li><b>rank and release</b><i>frequent first; each capability gets the stage it arrives at</i></li>
+      <li><b>accumulate</b><i>a stage holds everything released so far &mdash; nothing is withdrawn</i></li>
+      <li><b>date the tasks</b><i>each task lands at the first stage that covers it</i></li>
+    </ol>
+
+    <div class="sv-cards bc-inv">
+      <article class="sv-card">
+        <span class="sv-tag">Solvable on arrival</span>
+        <h3>Nothing is impossible when it appears</h3>
+        <p>
+          A task is dated to a stage whose harness already contains everything the task needs, so a
+          failure is the system&rsquo;s and never the schedule&rsquo;s. That is what makes a score at
+          stage <code>t</code> comparable to a score at stage <code>t+1</code>.
+        </p>
+      </article>
+      <article class="sv-card">
+        <span class="sv-tag">And no stage is a rerun</span>
+        <h3>Every task needs something that just arrived</h3>
+        <p>
+          Because a task lands at the <em>first</em> stage that covers it, its latest-arriving
+          capability is one the stage just introduced. Growth is therefore load-bearing: a system that
+          ignores what appeared cannot pass by repeating what worked last stage.
+        </p>
+      </article>
+    </div>
+
+    <p class="sv-cap">
+      Both properties fall out of the arithmetic rather than being audited afterwards, which is why the
+      steps are short enough to print whole. What follows is one small module &mdash; four steps, no
+      dependency outside the standard library &mdash; and then the two public seeds run through it.
+    </p>
+
+    <h3 class="sv-h3">Step 1 &mdash; the annotation, and the only contract there is</h3>
+    <p class="sv-cap">
+      Everything downstream reads one dictionary: <code>{task_id: capabilities it needs}</code>. Where
+      that comes from is the only part specific to your seed &mdash; the axis panels below and the two
+      worked examples at the end are all about producing it. This is the part in between, and it earns a
+      function of its own for one reason: <b>two labels that mean one capability have to become one
+      string</b>, or the ranking splits a capability most tasks need into two that nobody does.
+    </p>
+    <div class="sv-codewrap">
+      <span class="sv-lang">python &middot; evolve.py</span>
+      <button class="sv-copy" type="button">Copy</button>
+      <pre class="sv-code" data-lang="python"><code>import json, random
+from collections import Counter
+from math import ceil
+from pathlib import Path
+
+
+def annotate(tasks, capabilities_of, canonical=lambda c: c.strip().lower()):
+    """Step 1, for any axis and any seed: {task_id: frozenset(capabilities)}.
+
+    `capabilities_of` is the one function you write. `canonical` folds aliases
+    together, and it has to happen here, before anything is counted: frequency is
+    what decides release order, and a split label lands in the tail twice.
+    """
+    ann = {}
+    for task in tasks:
+        caps = frozenset(canonical(c) for c in capabilities_of(task) if c)
+        if caps:                    # unannotated: skip it rather than guess a stage
+            ann[str(task["task_id"])] = caps
+    return ann</code></pre>
+    </div>
+
+    <h3 class="sv-h3">Step 2 &mdash; rank by frequency, release the core first</h3>
+    <p class="sv-cap">
+      Equal buckets over the ranking are the obvious schedule and the wrong one. Two things go wrong on
+      a real frequency distribution, and both are cheaper to handle here than to discover later: a
+      capability two tasks in the suite need cannot carry a stage, and a stage nobody lands on is a
+      rerun of the one before it. The first bucket is also deliberately the largest, and grows further
+      if too little turns out to be covered by it alone &mdash; it is the harness that already exists,
+      and a stream starting from three capabilities measures a cold start rather than growth.
+    </p>
+    <div class="sv-codewrap">
+      <span class="sv-lang">python &middot; evolve.py</span>
+      <button class="sv-copy" type="button">Copy</button>
+      <pre class="sv-code" data-lang="python"><code>def release_schedule(ann, stages=5, first_frac=0.45, min_uses=2, min_new=5):
+    """Give every capability the stage it arrives at: {capability: stage}.
+
+    Hands back the annotation as well, because dropping a capability drops the
+    tasks that needed it -- the two have to stay in step.
+    """
+    ann = dict(ann)
+    while True:                     # a rare capability is noise, and so is its task
+        freq = Counter(c for caps in ann.values() for c in caps)
+        rare = {c for c, n in freq.items() if n &lt; min_uses}
+        if not rare:
+            break
+        ann = {i: caps for i, caps in ann.items() if not (caps &amp; rare)}
+    if not freq:      # the third precondition failing, not a bug: this seed has no core
+        raise ValueError("nothing survives min_uses: no capability repeats across tasks")
+
+    # Core first, long tail last; the name breaks ties so the order can never
+    # depend on the iteration order of a dict.
+    order = sorted(freq, key=lambda c: (-freq[c], c))
+    head = max(1, round(len(order) * first_frac))
+    tail = order[head:]
+    per = max(1, ceil(len(tail) / max(stages - 1, 1)))
+    buckets = [order[:head]] + [tail[i:i + per] for i in range(0, len(tail), per)]
+    release = {c: t for t, bucket in enumerate(buckets, 1) for c in bucket}
+
+    return ann, _merge_thin(ann, release, min_new)
+
+
+def _merge_thin(ann, release, min_new):
+    """Fold away a stage too few tasks land on: it is a rerun of the one before it.
+
+    The floor gives way to the stage count, since three stages is the least that is
+    still a stream -- but a stage nothing at all lands on is folded whatever the
+    count, because zero is not a judgment call. Folding the first stage forward is
+    how the initial anchor grows when too little turns out to be covered by it.
+    """
+    while True:
+        landed = Counter(date_tasks(ann, release).values())   # step 3, same module
+        live = sorted(set(release.values()))
+        floor = min_new if len(live) &gt; 3 else 1
+        thin = next((t for t in live if landed[t] &lt; floor), None)
+        if thin is None or len(live) == 1:
+            break
+        into = next((t for t in live if t &gt; thin), live[live.index(thin) - 1])
+        release = {c: (into if r == thin else r) for c, r in release.items()}
+
+    renumber = {r: t for t, r in enumerate(sorted(set(release.values())), 1)}
+    return {c: renumber[r] for c, r in release.items()}</code></pre>
+    </div>
+
+    <h3 class="sv-h3">Steps 3 and 4 &mdash; accumulate, date, split, write</h3>
+    <p class="sv-cap">
+      The rest is arithmetic. A stage offers everything released up to it, a task is dated to the first
+      stage that covers it, and the two invariants above are asserted where each row is made rather
+      than audited after the fact. What it writes is the layout the published corpora use, so a stream
+      you build this way loads with the same <code>load_dataset</code> call and scores through the same
+      client as ours &mdash; the <a href="#service">Evaluation</a> tab.
+    </p>
+    <div class="sv-codewrap">
+      <span class="sv-lang">python &middot; evolve.py</span>
+      <button class="sv-copy" type="button">Copy</button>
+      <pre class="sv-code" data-lang="python"><code>def date_tasks(ann, release):
+    """Each task lands at the first stage that covers it, which is the release
+    stage of its latest-arriving capability."""
+    return {i: max(release[c] for c in caps) for i, caps in ann.items() if caps}
+
+
+def harness(release):
+    """What a stage offers: everything released so far, distractors included. This
+    is what the agent is handed -- never the oracle set, which makes growth free."""
+    return {t: frozenset(c for c, r in release.items() if r &lt;= t)
+            for t in range(1, max(release.values()) + 1)}
+
+
+def stream(ann, release, domain, adapt_ratio=0.3, seed=0, min_adapt=1, min_test=3):
+    """One row per task, in the layout the published datasets use."""
+    H, at, rng = harness(release), date_tasks(ann, release), random.Random(seed)
+    rows = []
+    for t in sorted(H):
+        here = sorted(i for i, s in at.items() if s == t)
+        rng.shuffle(here)
+        # Floors on both sides: a stage scored on two tasks says nothing, and a
+        # stage with nothing to adapt on cannot be adapted to.
+        k = min(max(round(len(here) * adapt_ratio), min_adapt),
+                max(len(here) - min_test, 0))
+        for n, i in enumerate(here):
+            assert ann[i] &lt;= H[t]                               # solvable on arrival
+            assert ann[i] &amp; (H[t] - H.get(t - 1, frozenset()))  # needs what arrived
+            rows.append({"domain": domain, "version": f"v{t}",
+                         "split": "train" if n &lt; k else "test", "task_id": i,
+                         "oracle": sorted(ann[i]), "cumulative": sorted(H[t])})
+    return rows
+
+
+def manifest(ann, release, rows, **provenance):
+    """What lets anyone check your stream without rerunning your build: what arrived
+    when, what landed where, and the knobs you used. If a model is any part of your
+    grader, pin its exact snapshot in here as provenance."""
+    return {"stages": max(release.values()), "release": dict(sorted(release.items())),
+            "dated": dict(sorted(date_tasks(ann, release).items())),
+            "splits": {v: sorted(r["task_id"] for r in rows if r["version"] == v)
+                       for v in sorted({r["version"] for r in rows})}, **provenance}
+
+
+def write(rows, out: Path, meta=None):
+    """v_k/train.jsonl, v_k/test.jsonl and the manifest beside them. That is the
+    whole of the layout."""
+    for row in rows:
+        f = out / row["version"] / f"{row['split']}.jsonl"
+        f.parent.mkdir(parents=True, exist_ok=True)
+        with f.open("a") as fh:
+            fh.write(json.dumps(row) + "\n")
+    if meta:
+        (out / "manifest.json").write_text(json.dumps(meta, indent=2, default=list))</code></pre>
+    </div>
+
+    <h3 class="sv-h3">What that leaves you holding</h3>
+    <div class="sv-knobs">
+      <article class="sv-knob">
+        <span class="sv-kn">one manifest</span>
+        <p>
+          The release stage of every capability, the stage each task is dated to, and the split ids.
+          Build twice and diff it: anything that moves is an unseeded shuffle or a missing tie-break,
+          and means your stream is not a fixed object.
+        </p>
+      </article>
+      <article class="sv-knob">
+        <span class="sv-kn">two views of every task</span>
+        <p>
+          The <code>oracle</code> column, the gold capability set, for analysis; and
+          <code>cumulative</code>, what the agent is actually given &mdash; the accumulated pool with
+          its distractors. Report the gap: it is the cost of growth, and what makes streams comparable.
+        </p>
+      </article>
+      <article class="sv-knob">
+        <span class="sv-kn">versioned splits</span>
+        <p>
+          <code>{domain}_v{stage}</code> with <code>train</code> and <code>test</code>, one row per
+          task &mdash; the shape the <a href="#service">Evaluation</a> tab already reads.
+        </p>
+      </article>
+    </div>
+
+    <h3 class="sv-h3">Three axes, one recipe &mdash; what changes is the annotation</h3>
+    <p class="sv-cap sv-cap--mid">
+      The four steps above are axis-blind: they only ever see <code>{task &rarr; capabilities}</code>.
+      What differs per axis is where that mapping comes from, and it gets progressively less free.
+      Tools are usually already labelled; skills have to be mined out of the prompts; agents are
+      induced from the tool namespace.
+    </p>
+
+    <div class="sv-tabs" role="tablist" aria-label="Construction by axis">
+      <button class="sv-tab is-active" type="button" role="tab" data-sv="tools">Tools &middot; annotation exists</button>
+      <button class="sv-tab" type="button" role="tab" data-sv="skills">Skills &middot; mine the prompts</button>
+      <button class="sv-tab" type="button" role="tab" data-sv="agents">Agents &middot; partition the tools</button>
+    </div>
+
+    <div class="sv-panel is-active" data-sv-panel="tools">
+      <p class="sv-cap">
+        The cheap axis, and the one to start with. Most agentic suites already record which tools a
+        task is supposed to need &mdash; an oracle list, a required-software field, a manifest of MCP
+        servers. That field <em>is</em> the annotation, so there is nothing to derive and step 1 is a
+        field read. Everything else about your task rides along untouched.
+      </p>
+      <div class="sv-codewrap">
+        <span class="sv-lang">python &middot; tools_axis.py</span>
+        <button class="sv-copy" type="button">Copy</button>
+        <pre class="sv-code" data-lang="python"><code>from evolve import annotate, release_schedule, stream
+
+FIELDS = ("required_tools", "oracle_tools", "tools", "required_software", "apis")
+
+
+def tool_capabilities(task):
+    """Whichever field your suite records the need in -- one of them will be it."""
+    for f in FIELDS:
+        if task.get(f):
+            return task[f] if isinstance(task[f], list) else [task[f]]
+    return []                    # unannotated: annotate() drops it rather than guess
+
+
+def as_given(task, row, catalog):
+    """The substitution that makes the axis bite, and the easiest thing to get
+    wrong: what the agent receives at this stage is the CUMULATIVE pool, oracle
+    tools and distractors together. Selection is part of the task.
+    """
+    return dict(task, selected_tools=row["cumulative"],
+                tool_specs=[catalog[c] for c in row["cumulative"]])</code></pre>
+      </div>
+      <p class="sv-cap">
+        Handing a task its own oracle list instead would make a growing catalog free, and is why the
+        published rows carry both columns: the gold set for analysis, the accumulated pool for the
+        agent. If your seed defines tools per task rather than in one shared catalog, build the catalog
+        first &mdash; a capability has to mean the same thing in every stage that offers it.
+      </p>
+    </div>
+
+    <div class="sv-panel" data-sv-panel="skills">
+      <p class="sv-cap">
+        No seed we have seen ships skill annotations, so this axis is mined &mdash; and mined without
+        a model, because a skill invented by an LLM is a skill whose necessity nobody can check. What
+        the seed does carry is procedural knowledge sitting in plain sight, in the prompts. Which
+        route you take depends on whether your tasks share a policy.
+      </p>
+      <div class="sv-cards">
+        <article class="sv-card sv-card--eog">
+          <span class="sv-tag">Route A &middot; a shared policy in the prompt</span>
+          <h3>Split it, then take it away</h3>
+          <p>
+            Long system prompts carry a procedural policy. Cut it on its own section structure:
+            general instructions stay in the prompt, each procedural section becomes a reference
+            skill, and the prompt is <b>stripped</b> of what was extracted. That removal is what makes
+            the axis real &mdash; the procedure is no longer in front of the agent, it has to be
+            found in the pool. A prompt that will not decompose is not a skill stream, which is why
+            only three of our eight enterprise domains have one.
+          </p>
+        </article>
+        <article class="sv-card sv-card--ale">
+          <span class="sv-tag">Route B &middot; no shared policy</span>
+          <h3>Name the recurring atoms</h3>
+          <p>
+            Heterogeneous suites have no common policy to divide. Instead define a small closed
+            catalog of procedural atoms &mdash; a canonical procedure plus the fixed lexical patterns
+            and software anchors that identify it. Nothing is removed from the prompt here, so the
+            skills are additive: the question becomes whether the system picks up an offered
+            procedure, not whether it can recover one that was taken away.
+          </p>
+        </article>
+      </div>
+      <p class="sv-cap">
+        Then associate skills with tasks, and use the <b>grader</b> as the signal &mdash; whatever the
+        verifier reads is what the task is actually about. Three rules keep that honest, and they are
+        deliberately conservative, since a skill wrongly marked essential inflates every score that
+        follows it.
+      </p>
+      <div class="sv-knobs">
+        <article class="sv-knob">
+          <span class="sv-kn">a checked value decides</span>
+          <p>
+            A specific value the verifier asserts and the skill names is decisive on its own: the
+            task cannot pass without producing exactly what that procedure prescribes.
+          </p>
+        </article>
+        <article class="sv-knob">
+          <span class="sv-kn">a bare field needs corroboration</span>
+          <p>
+            A field name alone is weak evidence &mdash; many procedures touch the same field &mdash;
+            so a field-level match counts only when several constraints agree.
+          </p>
+        </article>
+        <article class="sv-knob">
+          <span class="sv-kn">bookkeeping is ignored</span>
+          <p>
+            Identifiers and audit columns the environment manages are matched by everything and mean
+            nothing. Leave them out or every skill matches every task.
+          </p>
+        </article>
+      </div>
+      <div class="sv-codewrap">
+        <span class="sv-lang">python &middot; skills_axis.py</span>
+        <button class="sv-copy" type="button">Copy</button>
+        <pre class="sv-code" data-lang="python"><code>import re
+
+BOOKKEEPING = {"id", "uuid", "created_at", "updated_at", "created_by", "status"}
+
+
+def mine_skills(prompt, min_chars=400):
+    """Route A. Cut a shared policy on its own section structure, and hand back the
+    prompt with what you cut REMOVED -- a procedure still sitting in front of the
+    agent is not one it has to retrieve.
+    """
+    parts = re.split(r"\n(?=#{2,3} )", prompt)     # your seed's own headings
+    general, skills = [parts[0]], {}
+    for part in parts[1:]:
+        title = part.splitlines()[0].lstrip("# ").strip()
+        if len(part) &gt;= min_chars:      # thinner than this is not a procedure
+            skills[title.lower().replace(" ", "_")] = part
+        else:
+            general.append(part)
+    return skills, "\n".join(general)
+
+
+def skill_capabilities(task, skills, grader_reads):
+    """Which mined skills a task cannot pass without -- decided by the verifier.
+
+    `grader_reads(task)` is the one function you write: a parse of your own grader
+    into the fields it asserts on and the literal values it asserts. The three rules
+    above are the three lines below.
+    """
+    checked = grader_reads(task)
+    need = set()
+    for sid, body in skills.items():
+        text = body.lower()
+        hits = [v for v in checked["values"] if len(str(v)) &gt; 3 and str(v).lower() in text]
+        fields = [f for f in checked["fields"]
+                  if f.lower() not in BOOKKEEPING and f.lower() in text]
+        if hits or len(fields) &gt; 1:     # a value decides; one bare field does not
+            need.add(sid)
+    return need</code></pre>
+      </div>
+      <p class="sv-cap">
+        Then filter, and expect to lose material: a skill no task needs is dropped, a task no skill
+        matches is dropped, and a domain left with fewer than three non-empty stages is not a stream.
+        Ours kept 76.6% of eligible tasks and 42 skills. What survives goes through the same four
+        steps as any other axis. Worth stating plainly: this is a verifier-grounded heuristic, not a
+        proof of necessity or sufficiency &mdash; the annotation is strong enough to schedule a stream
+        and to analyze one, and we do not claim more for it.
+      </p>
+    </div>
+
+    <div class="sv-panel" data-sv-panel="agents">
+      <p class="sv-cap">
+        The agent axis is not mined from tasks at all: it is induced from the tool axis, so build that
+        one first. The observation it rests on is that a tool namespace already encodes ownership
+        &mdash; a tool belongs to an app, a service, a product, a library. Group by owner and each
+        owner becomes a specialist worth delegating to, with no new content written for it.
+      </p>
+      <ol class="sv-flow">
+        <li><b>own</b><i>every tool maps to exactly one owner &mdash; a disjoint partition</i></li>
+        <li><b>bundle</b><i>an owner becomes a specialist: routing blurb, its tools, its procedures</i></li>
+        <li><b>annotate</b><i>a task needs the owners of the tools it needed</i></li>
+        <li><b>release</b><i>same schedule, over specialists instead of tools</i></li>
+      </ol>
+      <div class="sv-codewrap">
+        <span class="sv-lang">python &middot; agents_axis.py</span>
+        <button class="sv-copy" type="button">Copy</button>
+        <pre class="sv-code" data-lang="python"><code>def owner_of(tool):
+    """A tool namespace already encodes ownership -- split it. Where a seed has no
+    namespace, a flat list of software say, canonicalize into families first so a
+    stack, its CLI and its library all land in one place.
+    """
+    return tool.split(".", 1)[0]              # salesforce.create_case -> salesforce
+
+
+def induce_agents(tool_ann):
+    """{owner: its tools} and {task: the owners it needs}. The second one is the
+    agent-axis annotation, and it goes through the same steps 2-4 as any other."""
+    bundles = {}
+    for caps in tool_ann.values():
+        for tool in caps:
+            bundles.setdefault(owner_of(tool), set()).add(tool)
+    agent_ann = {i: frozenset(owner_of(t) for t in caps) for i, caps in tool_ann.items()}
+
+    # Ownership has to be a partition and not a tagging, and the induced labels have
+    # to cover the axis they came from -- otherwise the annotation means nothing.
+    assert sum(map(len, bundles.values())) == len(set().union(*bundles.values()))
+    for i, owners in agent_ann.items():
+        assert tool_ann[i] &lt;= set().union(*(bundles[o] for o in owners))
+    return bundles, agent_ann</code></pre>
+      </div>
+      <p class="sv-cap">
+        Each bundle then needs a routing blurb the lead agent can read &mdash; the owner&rsquo;s name,
+        what it is for, its tools &mdash; and that is the only text this axis asks you to write.
+      </p>
+      <p class="sv-cap">
+        What makes this the hardest of the three is the one deliberate restriction at evaluation: the
+        lead agent gets no tools of its own, only the cumulative pool of specialists, so the work has
+        to be delegated. Ours land at 62 specialists, and 85.2% of agent-axis tasks need more than one
+        of them &mdash; coordination pressure that comes out of the seed&rsquo;s own tool structure
+        rather than from anything we wrote.
+      </p>
+    </div>
+
+    <h3 class="sv-h3">Worked example 1 &mdash; Terminal-Bench, where the capability is the software</h3>
+    <p class="sv-cap">
+      <a href="https://www.tbench.ai/" target="_blank" rel="noopener">Terminal-Bench</a> meets the
+      requirement seeds most often fail: a task carries its own tests and is scored by running them,
+      so pass and fail are settled by execution. What it has no field for is the capability, so that
+      part is derived &mdash; from the two files that already say what a task needs, the Dockerfile
+      that builds its environment and the reference solution that proves it solvable.
+    </p>
+    <div class="sv-codewrap">
+      <span class="sv-lang">python &middot; seed_terminal_bench.py</span>
+      <button class="sv-copy" type="button">Copy</button>
+      <pre class="sv-code" data-lang="python"><code>import re
+from pathlib import Path
+from evolve import annotate, manifest, release_schedule, stream, write
+
+# Two task layouts are in the wild and both carry the two files we read:
+#   task.yaml + Dockerfile + solution.sh          (terminal-bench)
+#   task.toml + environment/ + solution/solve.sh  (Harbor)
+INSTALL = re.compile(r"(?:apt-get|apt|pip3?|npm|cargo|gem)\s+(?:install|add)\s+([^\n&amp;|;]*)")
+INVOKE = re.compile(r"^\s*(?:sudo\s+)?([a-z][\w.+-]*)", re.M)
+FAMILY = {"pip3": "pip", "python3": "python", "apt-get": "apt", "nodejs": "node",
+          "g++": "gcc", "psql": "postgres", "libpq-dev": "postgres"}
+SHELL = {"cd", "echo", "cat", "set", "if", "fi", "for", "do", "done", "then", "exit"}
+
+
+def tb_tasks(root: Path):
+    """One dict per task directory, either layout. The directory name is the id."""
+    for d in sorted(p for p in root.iterdir() if p.is_dir()):
+        env = _first(d / "environment/Dockerfile", d / "Dockerfile")
+        sol = _first(d / "solution/solve.sh", d / "solution.sh")
+        if not (env and sol):     # no reference solution: nothing states the need
+            continue
+        yield {"task_id": d.name, "env": env.read_text(), "solution": sol.read_text()}
+
+
+def _first(*paths):
+    return next((p for p in paths if p.exists()), None)
+
+
+def tb_capabilities(task):
+    """Whatever either file installs, plus what the reference solution invokes.
+
+    Both are needed -- the Dockerfile has the libraries, the solution has the CLIs --
+    and tests/ is deliberately never read: pytest is the grader's dependency, not the
+    agent's, and counting it would put it in every task's annotation.
+    """
+    got = set()
+    for spec in INSTALL.findall(task["env"] + "\n" + task["solution"]):
+        got |= {w.split("==")[0] for w in spec.split() if not w.startswith("-")}
+    got |= set(INVOKE.findall(task["solution"]))
+    return {FAMILY.get(c, c) for c in got} - SHELL
+
+
+ann = annotate(tb_tasks(Path("terminal-bench/tasks")), tb_capabilities)
+ann, release = release_schedule(ann, stages=5, min_uses=3)
+rows = stream(ann, release, domain="terminal_bench")
+write(rows, Path("data/terminal_bench"),
+      manifest(ann, release, rows, enforcement="allowlist-in-instruction"))</code></pre>
+    </div>
+    <p class="sv-cap">
+      Two things are worth doing by hand here. Print the frequency table before you stage anything and
+      read the top forty labels: canonicalization is the whole game on a mined annotation, and
+      <code>FAMILY</code> above is a starting point, not a finished map. Then decide how a stage is
+      <em>enforced</em>, because a container image will happily contain software the stage has not
+      released yet: either build one image per stage from the cumulative pool, which is the strict
+      reading, or state the pool as an allowlist in the instruction and hold the image fixed, which is
+      cheaper and is what our own enterprise track does. Both are defensible. Mixing them across
+      stages is not.
+    </p>
+
+    <h3 class="sv-h3">Worked example 2 &mdash; APEX-Agents, where the capability is the application</h3>
+    <p class="sv-cap">
+      <a href="https://huggingface.co/datasets/mercor/apex-agents" target="_blank" rel="noopener">APEX-Agents</a>
+      is the opposite case: the namespace is already there and the grader is the part you have to
+      settle. 480 long-horizon professional tasks across 33 worlds of files and applications &mdash;
+      mail, spreadsheets, documents, calendar, chat, code execution &mdash; and applications are the
+      shape both the tool axis and the ownership partition want, with 33 worlds supplying the
+      repetition a frequency ranking needs to mean anything.
+    </p>
+    <div class="sv-codewrap">
+      <span class="sv-lang">python &middot; seed_apex_agents.py</span>
+      <button class="sv-copy" type="button">Copy</button>
+      <pre class="sv-code" data-lang="python"><code>from pathlib import Path
+from datasets import load_dataset
+from evolve import annotate, manifest, release_schedule, stream, write
+
+JUDGE = "pin-the-exact-snapshot-here"   # a judge that moves moves every score with it
+
+# A closed catalog of the applications a world exposes, each with the cues that
+# identify it. Lexical and fixed: no model decides what a task needs.
+APPS = {
+    "mail":          ("email", "e-mail", "inbox", "reply to", "sends a message"),
+    "spreadsheets":  ("spreadsheet", "xlsx", "worksheet", "cell", "formula", "tab named"),
+    "documents":     ("document", "docx", "memo", "write-up", "drafts a"),
+    "presentations": ("presentation", "slide", "deck", "pptx"),
+    "calendar":      ("calendar", "meeting", "invite", "schedules a"),
+    "chat":          ("chat", "channel", "direct message"),
+    "code":          ("script", "python", "notebook", "code execution"),
+    "pdfs":          ("pdf", "scanned", "filing"),
+}
+
+
+def apex_tasks():
+    """Take the dataset card's own advice and print ds[0].keys() first -- field names
+    move. What this reads is the id, the world, the prompt and the rubric criteria.
+    """
+    for row in load_dataset("mercor/apex-agents", split="train"):   # gated: accept terms
+        rubric = row.get("rubric") or row.get("rubric_criteria") or []
+        criteria = [c if isinstance(c, str) else c.get("criterion", str(c)) for c in rubric]
+        yield {"task_id": row["task_id"], "world": row["world_id"],
+               "text": " ".join([row["prompt"], *criteria]).lower()}
+
+
+def apex_capabilities(task):
+    """A criterion that says "the email states X" needs Mail. Grade-relevant text is
+    the right thing to read: the rubric is what the task is actually about.
+    """
+    return {app for app, cues in APPS.items() if any(c in task["text"] for c in cues)}
+
+
+ann = annotate(apex_tasks(), apex_capabilities)
+ann, release = release_schedule(ann, stages=4, first_frac=0.5, min_new=12)
+rows = stream(ann, release, domain="apex_agents")
+write(rows, Path("data/apex_agents"), manifest(ann, release, rows, judge=JUDGE))
+
+# The agent axis then comes for free: one specialist per application, since an
+# application owns its own actions. induce_agents(ann), then steps 2-4 again.</code></pre>
+    </div>
+    <p class="sv-cap">
+      Freeze the judge model and the rubric before you stage anything, and record both in the manifest.
+      Scoring here is a rubric of binary criteria adjudicated by a model, so an unpinned judge means a
+      stage-to-stage difference is reporting two movements at once &mdash; and this is the requirement
+      the seed does not meet on its own. Note also what the catalog size costs you: eight applications
+      support three or four stages, not ten, because every stage has to introduce something at least
+      <code>min_new</code> surviving tasks need. For a longer stream, split the namespace finer &mdash;
+      reading a spreadsheet against writing one, searching mail against sending it &mdash; which is
+      exactly what a tool-level namespace hands you for nothing. Their terms also restrict the data to
+      evaluation, so read them before building adaptation splits out of it.
+    </p>
+
+    <p class="sv-cap sv-cap--mid">
+      Neither suite is ours and neither has been staged by us; both are read here as seeds, and the code
+      on this page is the whole of what stands between one and a stream. What it writes is what the
+      <a href="#service">Evaluation</a> tab reads, and <a href="#stats">Benchmark</a> is what 17 streams
+      built this way look like once they have been scored.
+    </p>
+  </div>
+</section>
+
+</div><!-- /construction -->
 
 <footer class="footer">
   <div class="container">

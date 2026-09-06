@@ -1688,13 +1688,16 @@ const SV = (() => {
     return out + esc(src.slice(last));
   }
 
-  function show(key) {
-    $$(".sv-tab").forEach((t) => {
+  /* Two views carry a strip of these now -- the service quickstart and the construction
+   * recipe -- and they switch independently, so a strip is scoped to the view that owns it.
+   * Unscoped, opening one view's first panel would leave the other view with none. */
+  function show(key, scope) {
+    $$(".sv-tab", scope).forEach((t) => {
       const on = t.dataset.sv === key;
       t.classList.toggle("is-active", on);
       t.setAttribute("aria-selected", String(on));
     });
-    $$(".sv-panel").forEach((p) => p.classList.toggle("is-active", p.dataset.svPanel === key));
+    $$(".sv-panel", scope).forEach((p) => p.classList.toggle("is-active", p.dataset.svPanel === key));
   }
 
   /* Which execution environment the reader is being shown: the hosted service or running it
@@ -1728,15 +1731,19 @@ const SV = (() => {
       showEnv($$(".ev-tab")[0]?.dataset.ev || "api");
     }
 
-    $$(".sv-panel").forEach((p) => {
-      p.id = `sv-panel-${p.dataset.svPanel}`;
-      p.setAttribute("role", "tabpanel");
-      p.setAttribute("aria-labelledby", `sv-tab-${p.dataset.svPanel}`);
-    });
-    tabs.forEach((t) => {
-      t.id = `sv-tab-${t.dataset.sv}`;
-      t.setAttribute("aria-controls", `sv-panel-${t.dataset.sv}`);
-      t.addEventListener("click", () => show(t.dataset.sv));
+    const strips = $$(".pv-view").filter((v) => $$(".sv-tab", v).length);
+    strips.forEach((scope) => {
+      $$(".sv-panel", scope).forEach((p) => {
+        p.id = `sv-panel-${p.dataset.svPanel}`;
+        p.setAttribute("role", "tabpanel");
+        p.setAttribute("aria-labelledby", `sv-tab-${p.dataset.svPanel}`);
+      });
+      $$(".sv-tab", scope).forEach((t) => {
+        t.id = `sv-tab-${t.dataset.sv}`;
+        t.setAttribute("aria-controls", `sv-panel-${t.dataset.sv}`);
+        t.addEventListener("click", () => show(t.dataset.sv, scope));
+      });
+      show($$(".sv-tab", scope)[0].dataset.sv, scope);
     });
 
     $$(".sv-copy").forEach((btn) => {
@@ -1750,8 +1757,6 @@ const SV = (() => {
         } catch (_) {}
       });
     });
-
-    show(tabs[0].dataset.sv);
   }
 
   return { init };

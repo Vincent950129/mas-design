@@ -69,7 +69,11 @@ body {
   display: flex;
   align-items: stretch;
   justify-content: center;
-  gap: 26px;
+  /* Eight tabs and the demo pill, one of the tabs three words long: at 26px the row outgrew
+     the bar by a few pixels, and because it is centred what got clipped was the first tab
+     rather than the last. The row still scrolls on a narrow screen; this only keeps it from
+     scrolling on a wide one. */
+  gap: 22px;
   max-width: 1000px;
   margin: 0 auto;
   padding: 0 16px;
@@ -934,6 +938,17 @@ footer.footer { background: none; }
   color: #1f2a44;
   box-shadow: 0 10px 22px -18px rgba(15, 23, 42, 0.55);
 }
+/* Of the four, this is the claim a reader can act on rather than only read, so it is the
+   one that says where to go. */
+.diff-pill .diff-go {
+  flex: 0 0 auto;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--accent);
+  border-bottom: 1px solid rgba(78, 84, 200, 0.32);
+  padding-bottom: 1px;
+}
+.diff-pill .diff-go:hover { border-bottom-color: var(--accent); }
 .diff-ico {
   display: flex;
   align-items: center;
@@ -3262,3 +3277,21 @@ table.lb tbody td.lb-meta { font-size: 11.5px; font-weight: 650; color: #64748b;
   .cs-k { margin-top: 8px; }
   .cs-scoreboard { flex-direction: row; flex-wrap: wrap; gap: 4px 10px; }
 }
+
+/* ---------- Construction: bring your own seed ---------- */
+
+/* The two guarantees are properties of the arithmetic rather than one more pair of feature
+   cards, so they take the palette's green -- the one the landing already uses for a thing
+   that holds -- and not the indigo/amber of the service cards, which on this page have come
+   to mean "one seed" and "the other seed". */
+.bc-inv .sv-card { border-color: #a7f3d0; background: #f7fefb; }
+.bc-inv .sv-card h3 { margin-top: 9px; }
+.bc-inv .sv-tag {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid rgba(4, 120, 87, 0.22);
+}
+
+/* The construction view is read while typing rather than while scrolling, so its file-labelled
+   blocks get a little more air above them than the narrative ones on the other views. */
+.pv-view[data-pv-view="construction"] .sv-codewrap { margin-top: 14px; }
