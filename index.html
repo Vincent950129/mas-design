@@ -269,9 +269,12 @@
   .dot.is-on { opacity: 1; transform: scale(1); }
   .dotlbl { opacity: 0; transition: opacity .5s ease; }
   .dotlbl.is-on { opacity: 1; }
-  /* branches grow out of the trunk; tobe = faint, future-bound paths to the frontier */
+  /* branches grow out of the trunk; continuation advances the peer-level research line;
+     tobe = faint, future-bound paths to the frontier */
   .branch { fill: none; stroke: #e6007e; stroke-width: 2.4; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; opacity: .92; transition: stroke-dashoffset .75s ease; }
   .branch.is-on { stroke-dashoffset: 0; }
+  .continuation { fill: none; stroke: #e6007e; stroke-width: 4; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 1s ease; }
+  .continuation.is-on { stroke-dashoffset: 0; }
   .tobe { fill: none; stroke: #b9b1c4; stroke-width: 1.8; stroke-dasharray: 4 6; opacity: 0; transition: opacity .7s ease; }
   .tobe.is-on { opacity: .6; }
   .lineage { fill: none; stroke: #e6007e; stroke-width: 1.8; stroke-dasharray: 2 7; stroke-linecap: round; opacity: 0; transition: opacity .7s ease; }
@@ -286,7 +289,7 @@
     .layer, .edge, .bandwrap, .frame { opacity: 1 !important; transform: none !important; }
     .inflow, .statelink { opacity: .5 !important; }
     .spine { stroke-dashoffset: 0 !important; }
-    .branch { stroke-dashoffset: 0 !important; }
+    .branch, .continuation { stroke-dashoffset: 0 !important; }
     .tobe { opacity: .6 !important; }
     .lineage { opacity: .5 !important; }
     .dot, .dotlbl { opacity: 1 !important; transform: none !important; }
@@ -308,7 +311,7 @@
   }
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
-    .layer, .edge, .spine, .branch, .tobe, .lineage, .dot, .dotlbl, #p2halo, .stage-item, .stage-desc,
+    .layer, .edge, .spine, .branch, .continuation, .tobe, .lineage, .dot, .dotlbl, #p2halo, .stage-item, .stage-desc,
     .spark, .subgrow, .bandwrap, .frame, .inflow, .statelink, .hcap, .hslot, .slayer,
     #camera, .cell__det, .agent, .lvl.is-nested, .cell.is-flying, .lattice.is-rising,
     .ver__box { transition: none; }
@@ -515,7 +518,7 @@
   <div class="page__pin">
     <!-- LEFT: animated timeline -->
     <div class="col col--viz">
-      <svg id="road" viewBox="0 0 360 1020" role="img" aria-label="Roadmap: a foundational trunk that branches into directions and converges into a live demo">
+      <svg id="road" viewBox="0 0 360 1020" role="img" aria-label="Roadmap: a foundational trunk, three branched research directions, and a peer-level continuation to EvoHarnessBench">
         <defs>
           <linearGradient id="haloGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff4fa3" /><stop offset="1" stop-color="#b5179e" /></linearGradient>
         </defs>
@@ -523,14 +526,16 @@
         <!-- foundational trunk: Survey → MAS-Zero → MAS-Orchestra -->
         <path class="spine" id="spine" d="M58,40 L58,300" pathLength="1" />
 
-        <!-- four parallel directions grow out of MAS-Orchestra -->
+        <!-- three parallel directions grow out of MAS-Orchestra -->
         <path class="branch" data-page="2" data-stage="4" d="M58,300 C64,356 112,372 112,420" pathLength="1" />
         <path class="branch" data-page="2" data-stage="5" d="M58,300 C66,470 112,478 112,540" pathLength="1" />
         <path class="branch" data-page="2" data-stage="6" d="M58,300 C70,600 112,602 112,660" pathLength="1" />
-        <path class="branch" data-page="2" data-stage="7" d="M58,300 C74,700 112,714 112,780" pathLength="1" />
+
+        <!-- EvoHarnessBench is a peer-level continuation of the main research line -->
+        <path class="continuation" data-page="2" data-stage="7" d="M58,316 L58,780" pathLength="1" />
 
         <!-- direct lineage: the live demo is MAS-Orchestra's application -->
-        <path class="lineage" data-page="2" data-stage="8" d="M58,316 L58,863" />
+        <path class="lineage" data-page="2" data-stage="8" d="M58,798 L58,863" />
 
         <!-- and the demo points forward to the open frontier -->
         <path class="tobe" data-page="2" data-stage="9" d="M58,901 L58,962" />
@@ -558,8 +563,9 @@
         <g class="dot" data-page="2" data-stage="6"><circle cx="112" cy="660" r="6.5" fill="#fff" stroke="#e6007e" stroke-width="2.4" /></g>
         <g class="dotlbl" data-page="2" data-stage="6"><text x="138" y="655" class="node-tag" fill="#8b8794" style="text-anchor:start">2026 · ANALYSIS</text><text x="138" y="673" class="node-label" style="text-anchor:start;font-size:15px">IlluMAS · LiveResearchBench</text></g>
 
-        <g class="dot" data-page="2" data-stage="7"><circle cx="112" cy="780" r="6.5" fill="#fff" stroke="#e6007e" stroke-width="2.4" /></g>
-        <g class="dotlbl" data-page="2" data-stage="7"><text x="138" y="775" class="node-tag" fill="#8b8794" style="text-anchor:start">2026 · ENVIRONMENT</text><text x="138" y="793" class="node-label" style="text-anchor:start;font-size:15px">EvoHarnessBench</text></g>
+        <!-- PEER milestone — the next work on the main line, not another branch -->
+        <g class="dot" data-page="2" data-stage="7"><circle cx="58" cy="780" r="12" fill="#e6007e" /></g>
+        <g class="dotlbl" data-page="2" data-stage="7"><text x="86" y="775" class="node-tag" fill="#8b8794" style="text-anchor:start">2026 · ENVIRONMENT</text><text x="86" y="793" class="node-label" style="text-anchor:start;font-size:15px">EvoHarnessBench</text></g>
 
         <!-- the application: where the whole series converges into something you can run -->
         <g class="dot dot--demo" data-page="2" data-stage="8">
@@ -686,7 +692,7 @@
 
 <script>
   (function () {
-    var P2_POS = [null, { x: 58, y: 60 }, { x: 58, y: 180 }, { x: 58, y: 300 }, { x: 112, y: 420 }, { x: 112, y: 540 }, { x: 112, y: 660 }, { x: 112, y: 780 }, { x: 58, y: 882 }, { x: 58, y: 972 }]; // node centres by stage (1..9)
+    var P2_POS = [null, { x: 58, y: 60 }, { x: 58, y: 180 }, { x: 58, y: 300 }, { x: 112, y: 420 }, { x: 112, y: 540 }, { x: 112, y: 660 }, { x: 58, y: 780 }, { x: 58, y: 882 }, { x: 58, y: 972 }]; // node centres by stage (1..9)
     // Everything past the last harness version — the diagram coming apart, and the robot that gets
     // built out of it a scale up — hangs off this one flag. Turn it on and all of it is back; the
     // machinery for it stays intact either way. It gates the autoplay step as well as the animation,
@@ -702,7 +708,7 @@
     var p1Layers = loop.querySelectorAll('[data-reveal]');
     var p1Stages = document.querySelectorAll('.stage-item');
     var p2Dots = road.querySelectorAll('.dot, .dotlbl');
-    var p2Flows = road.querySelectorAll('.branch, .tobe, .lineage');
+    var p2Flows = road.querySelectorAll('.branch, .continuation, .tobe, .lineage');
     var p2Cards = document.querySelectorAll('.mcard');
 
     var state = { 1: 0, 2: 0 };
