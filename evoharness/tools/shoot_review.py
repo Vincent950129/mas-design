@@ -57,8 +57,9 @@ def main() -> int:
         nav = pg.eval_on_selector_all(
             ".pv-bar-inner > *", "ns => ns.map(n => [n.tagName, n.innerText.trim()])")
         views = [t for tag, t in nav if tag == "BUTTON"]
-        check(views == ["Overview", "Benchmark", "Tasks", "Results", "Cases", "Evaluate",
-                        "Leaderboard"], "the view tabs are unchanged", str(views))
+        check(views == ["Overview", "Benchmark", "Tasks", "Results", "Cases", "Leaderboard",
+                        "Evaluate Your Agent", "Create Your Benchmark"],
+              "the view tabs are unchanged", str(views))
         # The hero's CTA row duplicated these tabs, so it is gone and the demo moved up here.
         check(not pg.query_selector(".cta-buttons"), "the duplicated hero CTA row is gone")
         pill = pg.query_selector(".pv-bar .pv-demo")

@@ -101,10 +101,10 @@
     <button class="pv-tab" type="button" data-pv="tasks">Tasks</button>
     <button class="pv-tab" type="button" data-pv="results">Results</button>
     <button class="pv-tab" type="button" data-pv="cases">Cases</button>
-    <!-- The view key stays "evaluate": #evaluate is what the floor's CTA and any shared link
-         point at. Only the label is a noun, to sit with the six around it. -->
-    <button class="pv-tab" type="button" data-pv="evaluate">Evaluation</button>
     <button class="pv-tab" type="button" data-pv="leaderboard">Leaderboard</button>
+    <!-- The view key stays "evaluate": #evaluate is what the floor's CTA and any shared link
+         point at, while the reader-facing label is a clearer call to action. -->
+    <button class="pv-tab" type="button" data-pv="evaluate">Evaluate Your Agent</button>
     <!-- The one tab that asks for something rather than showing something: the Benchmark tab is
          ours, this is the reader making their own out of a seed we have never seen. The view key
          stays `construction`, which is what the section is and what the paper calls it. -->
@@ -2469,7 +2469,7 @@ def _merge_thin(ann, release, min_new):
       stage that covers it, and the two invariants above are asserted where each row is made rather
       than audited after the fact. What it writes is the layout the published corpora use, so a stream
       you build this way loads with the same <code>load_dataset</code> call and scores through the same
-      client as ours &mdash; the <a href="#service">Evaluation</a> tab.
+      client as ours &mdash; the <a href="#service">Evaluate Your Agent</a> tab.
     </p>
     <div class="sv-codewrap">
       <span class="sv-lang">python &middot; evolve.py</span>
@@ -2553,7 +2553,7 @@ def write(rows, out: Path, meta=None):
         <span class="sv-kn">versioned splits</span>
         <p>
           <code>{domain}_v{stage}</code> with <code>train</code> and <code>test</code>, one row per
-          task &mdash; the shape the <a href="#service">Evaluation</a> tab already reads.
+          task &mdash; the shape the <a href="#service">Evaluate Your Agent</a> tab already reads.
         </p>
       </article>
     </div>

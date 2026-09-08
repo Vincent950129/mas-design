@@ -11,8 +11,8 @@ Printing an algorithm that does not run is worse than printing none.
 The rest guards the wiring. Two views carry a .sv-tab strip, and those strips used to be
 one global group, so a click in either would blank the other's panels -- a regression
 that is invisible on the tab you are looking at and obvious on the one you are not. Also
-pins the Evaluate -> Evaluation rename: the label is a noun now, but the view key has to
-stay `evaluate`, because the floor's own CTA links to #evaluate.
+pins the Evaluate Your Agent label and its position after Leaderboard, while the view key
+stays `evaluate`, because the floor's own CTA links to #evaluate.
 
 No network needed. Expects a static server: python3 -m http.server 8777 from the
 directory above evoharness/.
@@ -33,11 +33,12 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 OUT = ROOT / "tools/proofs"
 BASE = "http://127.0.0.1:8777/evoharness/index.html"
 
-# The tab strip, in order. The label a reader sees, and the view key the router uses --
-# they differ for Evaluation on purpose and the comment in index.html says why.
+# The tab strip, in order. The label a reader sees and the view key the router uses differ
+# for Evaluate Your Agent on purpose; the comment in index.html says why.
 TABS = [("overview", "Overview"), ("benchmark", "Benchmark"), ("tasks", "Tasks"),
-        ("results", "Results"), ("cases", "Cases"), ("evaluate", "Evaluation"),
-        ("leaderboard", "Leaderboard"), ("construction", "Create Your Benchmark")]
+        ("results", "Results"), ("cases", "Cases"), ("leaderboard", "Leaderboard"),
+        ("evaluate", "Evaluate Your Agent"),
+        ("construction", "Create Your Benchmark")]
 # The construction view is three independent strips now, because printed whole it was a
 # page nobody would scroll: a step, an axis and a seed are each read one at a time. Every
 # group's keys in the order its chips appear, and the panel it has to open on.

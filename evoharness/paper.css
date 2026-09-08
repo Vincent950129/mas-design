@@ -69,12 +69,10 @@ body {
   display: flex;
   align-items: stretch;
   justify-content: center;
-  /* Eight tabs and the demo pill, one of the tabs three words long: at 26px the row outgrew
-     the bar by a few pixels, and because it is centred what got clipped was the first tab
-     rather than the last. The row still scrolls on a narrow screen; this only keeps it from
-     scrolling on a wide one. */
+  /* Eight tabs and the demo pill, including two three-word actions. Keep the full row visible
+     on a wide screen; below that it becomes a left-aligned horizontal scroller. */
   gap: 22px;
-  max-width: 1000px;
+  max-width: 1240px;
   margin: 0 auto;
   padding: 0 16px;
   overflow-x: auto;
@@ -129,8 +127,11 @@ body {
 /* The first section of a view sits under the sticky bar, so it needs less air. */
 .pv-view > .section:first-child { padding-top: 2.2rem; }
 
-@media (max-width: 768px) {
+@media (max-width: 1200px) {
   .pv-bar-inner { justify-content: flex-start; gap: 18px; }
+}
+
+@media (max-width: 768px) {
   .pv-tab { font-size: 0.9rem; }
   .pv-demo { font-size: 0.84rem; padding: 6px 12px; }
   .pv-slim b { font-size: 1.1rem; }
