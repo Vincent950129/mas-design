@@ -23,6 +23,7 @@ BANNER = "run the evolving mode in your browser"
 # hostname is only good for as long as the tunnel runs -- see the reachability check.
 DEMO = ("https://fails-scotland-diagnostic-joy.trycloudflare.com/"
         "?mode=enterprise&gym=csm&evolving=1")
+PAPER = "https://huggingface.co/papers/2609.04280"
 
 fails: list[str] = []
 checks = 0
@@ -62,6 +63,13 @@ def main() -> int:
               "the view tabs are unchanged", str(views))
         # The hero's CTA row duplicated these tabs, so it is gone and the demo moved up here.
         check(not pg.query_selector(".cta-buttons"), "the duplicated hero CTA row is gone")
+        paper = pg.query_selector(".pv-bar .pv-paper")
+        check(paper is not None, "the paper is offered beside the demo")
+        check(paper.inner_text().strip() == "Paper↗" and paper.get_attribute("href") == PAPER,
+              "the paper pill points at the published paper")
+        check(paper.get_attribute("target") == "_blank"
+              and "noopener" in (paper.get_attribute("rel") or ""),
+              "the paper pill opens safely")
         pill = pg.query_selector(".pv-bar .pv-demo")
         check(pill is not None, "the demo is offered in the nav instead")
         check(pill.get_attribute("href") == DEMO, "the demo pill points at the deployment",
@@ -86,6 +94,13 @@ def main() -> int:
                         " s.color, s.borderRadius]; }")
         check(look[0].startswith("linear-gradient") and int(look[1]) >= 700
               and look[2] == "rgb(255, 255, 255)", "the demo pill keeps its emphasis", str(look))
+        paper_look = pg.eval_on_selector(
+            ".pv-paper", "n => { const s = getComputedStyle(n);"
+                         " return [s.backgroundImage.slice(0, 18), s.fontWeight,"
+                         " s.color, s.borderRadius]; }")
+        check(paper_look[0].startswith("linear-gradient") and int(paper_look[1]) >= 700
+              and paper_look[2] == "rgb(255, 255, 255)",
+              "the paper pill matches the demo's emphasis", str(paper_look))
         # Author photos. Cards render at 66px with object-fit: cover, so the guard is on
         # both ends: big enough not to blur, small enough not to ship a master into a hero.
         cards = pg.eval_on_selector_all(".author-card", """ns => ns.map(c => {
@@ -132,6 +147,8 @@ def main() -> int:
               "switching views still works alongside it")
         check(pg.eval_on_selector(".pv-demo", "n => n.offsetHeight > 0"),
               "the demo pill rides along on every view")
+        check(pg.eval_on_selector(".pv-paper", "n => n.offsetHeight > 0"),
+              "the paper pill rides along on every view")
         pg.locator(".pv-bar").screenshot(path=str(OUT / "rv-nav.png"))
         pg.click('.pv-tab[data-pv="overview"]')
         pg.wait_for_timeout(500)

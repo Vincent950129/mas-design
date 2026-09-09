@@ -94,7 +94,7 @@
   </button>
 </div>
 
-<nav class="pv-bar" aria-label="Paper sections and live demo">
+<nav class="pv-bar" aria-label="Paper sections, paper, and live demo">
   <div class="pv-bar-inner">
     <button class="pv-tab is-active" type="button" data-pv="overview">Overview</button>
     <button class="pv-tab" type="button" data-pv="benchmark">Benchmark</button>
@@ -109,10 +109,14 @@
          ours, this is the reader making their own out of a seed we have never seen. The view key
          stays `construction`, which is what the section is and what the paper calls it. -->
     <button class="pv-tab" type="button" data-pv="construction">Create Your Benchmark</button>
-    <!-- An anchor rather than a .pv-tab: the demo is a deployment elsewhere, not a view of
-         this page, so it must not go through PV.open. It keeps the hero CTA's emphasis. -->
-    <a class="pv-demo" href="https://fails-scotland-diagnostic-joy.trycloudflare.com/?mode=enterprise&amp;gym=csm&amp;evolving=1"
-       target="_blank" rel="noopener">Live Demo<span aria-hidden="true">&#8599;</span></a>
+    <!-- External destinations are actions rather than .pv-tabs, so they do not go through
+         PV.open. Paper carries the site's cool palette; the live deployment stays warm. -->
+    <span class="pv-actions">
+      <a class="pv-action pv-paper" href="https://huggingface.co/papers/2609.04280"
+         target="_blank" rel="noopener">Paper<span aria-hidden="true">&#8599;</span></a>
+      <a class="pv-action pv-demo" href="https://fails-scotland-diagnostic-joy.trycloudflare.com/?mode=enterprise&amp;gym=csm&amp;evolving=1"
+         target="_blank" rel="noopener">Live Demo<span aria-hidden="true">&#8599;</span></a>
+    </span>
   </div>
 </nav>
 

@@ -69,8 +69,8 @@ body {
   display: flex;
   align-items: stretch;
   justify-content: center;
-  /* Eight tabs and the demo pill, including two three-word actions. Keep the full row visible
-     on a wide screen; below that it becomes a left-aligned horizontal scroller. */
+  /* Eight tabs and the external-action pills, including two three-word labels. Keep the full
+     row visible on a wide screen; below that it becomes a left-aligned horizontal scroller. */
   gap: 22px;
   max-width: 1240px;
   margin: 0 auto;
@@ -95,30 +95,48 @@ body {
 .pv-tab:hover { color: #1f2a44; }
 .pv-tab.is-active { color: var(--accent); border-bottom-color: var(--accent); }
 
-/* The demo is the one item here that leaves the page, so it is a pill rather than a tab,
-   in the same warm gradient the demo banner uses. */
-.pv-demo {
+/* Paper and the demo leave the page, so they read as a compact pair of action pills rather
+   than internal tabs. Paper uses the site palette; the demo keeps the banner's warm gradient. */
+.pv-actions {
   flex: 0 0 auto;
-  align-self: center;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pv-action {
+  flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
   gap: 5px;
   padding: 7px 15px;
   border-radius: 999px;
-  background: linear-gradient(135deg, #ff6b6b, #ee5a24, #f7971e);
   color: #fff;
   font-size: 0.9rem;
   font-weight: 800;
   text-decoration: none;
   white-space: nowrap;
-  box-shadow: 0 6px 16px -7px rgba(238, 90, 36, 0.9);
   transition: transform .15s, box-shadow .15s, filter .15s;
 }
-.pv-demo:hover,
-.pv-demo:focus {
+.pv-paper {
+  background: linear-gradient(135deg, #4e54c8, #8f64eb);
+  box-shadow: 0 6px 16px -7px rgba(78, 84, 200, 0.9);
+}
+.pv-demo {
+  background: linear-gradient(135deg, #ff6b6b, #ee5a24, #f7971e);
+  box-shadow: 0 6px 16px -7px rgba(238, 90, 36, 0.9);
+}
+.pv-action:hover,
+.pv-action:focus {
   color: #fff;
   transform: translateY(-1px);
   filter: saturate(1.1);
+}
+.pv-paper:hover,
+.pv-paper:focus {
+  box-shadow: 0 9px 20px -8px rgba(78, 84, 200, 1);
+}
+.pv-demo:hover,
+.pv-demo:focus {
   box-shadow: 0 9px 20px -8px rgba(238, 90, 36, 1);
 }
 
@@ -133,7 +151,7 @@ body {
 
 @media (max-width: 768px) {
   .pv-tab { font-size: 0.9rem; }
-  .pv-demo { font-size: 0.84rem; padding: 6px 12px; }
+  .pv-action { font-size: 0.84rem; padding: 6px 12px; }
   .pv-slim b { font-size: 1.1rem; }
   .pv-slim span { font-size: 0.82rem; }
 }
