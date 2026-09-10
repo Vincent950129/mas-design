@@ -65,8 +65,11 @@ def main() -> int:
         check(not pg.query_selector(".cta-buttons"), "the duplicated hero CTA row is gone")
         paper = pg.query_selector(".pv-bar .pv-paper")
         check(paper is not None, "the paper is offered beside the demo")
-        check(paper.inner_text().strip() == "Paper↗" and paper.get_attribute("href") == PAPER,
+        check("Paper" in paper.inner_text() and "Upvote" in paper.inner_text()
+              and paper.get_attribute("href") == PAPER,
               "the paper pill points at the published paper")
+        check(pg.query_selector(".pv-paper .pv-upvote-icon") is not None,
+              "the upvote invitation carries its heart icon")
         check(paper.get_attribute("target") == "_blank"
               and "noopener" in (paper.get_attribute("rel") or ""),
               "the paper pill opens safely")

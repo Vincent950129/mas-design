@@ -72,7 +72,7 @@ body {
   /* Eight tabs and the external-action pills, including two three-word labels. Keep the full
      row visible on a wide screen; below that it becomes a left-aligned horizontal scroller. */
   gap: 22px;
-  max-width: 1240px;
+  max-width: 1320px;
   margin: 0 auto;
   padding: 0 16px;
   overflow-x: auto;
@@ -121,6 +121,17 @@ body {
   background: linear-gradient(135deg, #4e54c8, #8f64eb);
   box-shadow: 0 6px 16px -7px rgba(78, 84, 200, 0.9);
 }
+.pv-upvote-icon {
+  width: 18px;
+  height: 18px;
+  fill: #ff4d4f;
+  filter: drop-shadow(0 1px 1px rgba(180, 24, 27, 0.28));
+  transition: transform .18s cubic-bezier(.2, .8, .2, 1);
+}
+.pv-paper:hover .pv-upvote-icon,
+.pv-paper:focus .pv-upvote-icon {
+  transform: scale(1.18) rotate(-5deg);
+}
 .pv-demo {
   background: linear-gradient(135deg, #ff6b6b, #ee5a24, #f7971e);
   box-shadow: 0 6px 16px -7px rgba(238, 90, 36, 0.9);
@@ -145,7 +156,7 @@ body {
 /* The first section of a view sits under the sticky bar, so it needs less air. */
 .pv-view > .section:first-child { padding-top: 2.2rem; }
 
-@media (max-width: 1200px) {
+@media (max-width: 1320px) {
   .pv-bar-inner { justify-content: flex-start; gap: 18px; }
 }
 
