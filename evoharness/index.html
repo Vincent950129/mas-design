@@ -1588,7 +1588,8 @@
     <p class="sv-lead">
       You can score your own agent on these same executable tasks in two environments. The
       <b>hosted service</b> runs today: it holds the environment and the grader, so there is nothing
-      to stand up and you supply only an <code>f(task)</code> callable. Running <b>locally</b> is
+      to stand up. Give your coding agent the portable evaluation skill, or supply an
+      <code>f(task)</code> callable through the SDK. Running <b>locally</b> is
       where the corpus itself lives &mdash; the task data is already public on Hugging Face, and the
       runner that executes and grades it against your own machine is on the way.
     </p>
@@ -1655,7 +1656,7 @@
       <button class="sv-tab" type="button" role="tab" data-sv="install">Install</button>
       <button class="sv-tab" type="button" role="tab" data-sv="health">Health check</button>
       <button class="sv-tab" type="button" role="tab" data-sv="agent">Wrap your method</button>
-      <button class="sv-tab" type="button" role="tab" data-sv="ports">Connect any stack</button>
+      <button class="sv-tab" type="button" role="tab" data-sv="ports">Connect any agent</button>
       <button class="sv-tab" type="button" role="tab" data-sv="score">Score and leaderboard</button>
       <button class="sv-tab" type="button" role="tab" data-sv="continual">Continual learning</button>
     </div>
@@ -1737,7 +1738,8 @@ pip install "$EVAL_SERVICE_URL$WHEEL"</code></pre>
       <div class="sv-codewrap">
         <span class="sv-lang">python</span>
         <button class="sv-copy" type="button">Copy</button>
-        <pre class="sv-code" data-lang="python"><code>from simple_agentic_evals import (EvalClient, ServiceError, run_benchmark,
+        <pre class="sv-code" data-lang="python"><code>from simple_agentic_evals import (CommandAgent, EvalClient, ServiceError,
+                                  run_benchmark, run_leaderboard,
                                   react_agent, acp_codex_agent, to_openai_tools)
 
 client    = EvalClient()      # endpoint and auth resolved for you -- no URL to paste
@@ -1788,6 +1790,28 @@ with t:
     </div>
 
     <div class="sv-panel" data-sv-panel="agent">
+      <p class="sv-cap">
+        <b>If you just want a quick dry run.</b> Install the public skill, then simply ask
+        the current agent to <em>&ldquo;use the evolve-eval skill to evaluate yourself.&rdquo;</em> It can
+        ask for <code>EVAL_SERVICE_API_KEY</code> if it is missing, start a task, act through the
+        task&rsquo;s tools or files, grade the result, and return the JSON. Its existing model login
+        stays with the agent; the service key only authenticates evaluation calls.
+      </p>
+      <div class="sv-codewrap">
+        <span class="sv-lang">bash</span>
+        <button class="sv-copy" type="button">Copy</button>
+        <pre class="sv-code" data-lang="bash"><code>mkdir -p "${CODEX_HOME:-$HOME/.codex}/skills/evolve-eval"
+curl -fsSL https://educator-marrow-cultural.ngrok-free.dev/resources/evolve-eval/SKILL.md \
+  -o "${CODEX_HOME:-$HOME/.codex}/skills/evolve-eval/SKILL.md"
+
+# Then tell your coding agent: Use the evolve-eval skill to evaluate yourself.</code></pre>
+      </div>
+      <p class="sv-cap">
+        <b>For a scalable experiment, use the benchmark runner instead.</b> First wrap your method
+        as the callable below, then use <b>Connect any agent</b> to connect it through the EOG tool
+        interface or ALE input/output files. Once both pieces are in place,
+        <code>run_benchmark</code> can evaluate fresh, isolated instances across the full task scope.
+      </p>
       <p class="sv-cap">
         <code>run_benchmark</code> takes <b>anything callable that accepts a task</b>. There is no
         base class to subclass and nothing to register, so if your method already exists you are
@@ -1876,7 +1900,7 @@ def my_agent(task):
         yours; anything reachable from inside a Python function can be scored.
       </p>
       <p class="sv-cap">
-        <b>Port A &mdash; tools.</b> <code>task.mcp_url(server)</code> with a bearer header is a
+        <b>EOG tool-use interface &mdash; MCP.</b> <code>task.mcp_url(server)</code> with a bearer header is a
         standard <b>MCP endpoint over streamable HTTP</b>, so any conformant client connects to it,
         the official MCP SDK included. Underneath, the contract every agent framework consumes is
         just <em>a list of JSON-Schema tool declarations plus a <code>call(name, args)</code>
@@ -1897,7 +1921,8 @@ mcp.call_tool(tools[0]["name"], {})     # 2. HOW YOUR POLICY ACTS      (a plain 
 mcp.close()</code></pre>
       </div>
       <p class="sv-cap">
-        <b>Port B &mdash; artifacts.</b> <code>fetch_inputs_to(dir)</code> stages the task&rsquo;s files
+        <b>ALE artifact-delivery interface &mdash; input/output files.</b>
+        <code>fetch_inputs_to(dir)</code> stages the task&rsquo;s files
         on your disk and <code>submit_dir(dir)</code> ships back whatever your policy wrote. The
         contract is a filesystem, so a container, a CLI, a remote job or another language all sit
         behind it equally well. Submitted paths are normalized under the task&rsquo;s
@@ -1987,22 +2012,22 @@ print(f"floor {floor.accuracy:.3f}   mine {report.accuracy:.3f}")
       <div class="sv-codewrap">
         <span class="sv-lang">python</span>
         <button class="sv-copy" type="button">Copy</button>
-        <pre class="sv-code" data-lang="python"><code># `leaderboard_row` and `show` are ~40 lines defined in the Level 1 notebook, not in the
-# SDK. They run both benchmarks `seeds` times and return exactly the record the
-# leaderboard stores. A row built with `limit` is stamped `partial` -- do not submit it.
-row = leaderboard_row(my_agent, "My Method", cat="memory", seeds=3)   # hours, real money
-show(row)
+        <pre class="sv-code" data-lang="python"><code># The SDK runs both benchmarks, aggregates repeats, and returns leaderboard JSON.
+# A limited rehearsal is stamped `partial`; token telemetry stays None if unreported.
+row = run_leaderboard(my_agent, "My Method", client=client,
+                      cat="memory", seeds=1, limit=2)
+print(json.dumps(row, indent=2))
 
-# Underneath it is nothing but repeats of the call above, without the `limit`:
-#
-#     run_benchmark(my_agent, "deployment_eval", client=client, benchmark=bench)
-#
 #   Pass %    mean(r.success_rate)          strict -- every verifier on the task passed
 #   Score     mean(r.accuracy)              partial credit -- mean verifier pass rate
 #   h         mean(r.agent_s) / 3600        agent time; r.latency_s is wall clock, not this
 #   Tok M     mean(r.total_tokens) / 1e6    None rather than 0 when nothing reported usage
 #   Overall   sum(n_success) / sum(n_tasks) pooled across both, over tasks not percentages
 #   +/-       pstdev over the `seeds` repeats
+
+# A publishable no-limit run is expensive and requires explicit acknowledgement:
+# row = run_leaderboard(my_agent, "My Method", client=client, seeds=3,
+#                       confirm_full_cost=True)
 
 # Two switches worth knowing before you commit:
 #   dataset=  the evolving axis -- "evovling_tools" | "evovling_skills" | "evovling_agents",

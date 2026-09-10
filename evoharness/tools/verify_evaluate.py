@@ -225,6 +225,30 @@ def check_page() -> None:
         check(pg.eval_on_selector_all(key + ".sv-code code .t-k", "ns => ns.length") > 0,
               "the key step's snippets are syntax highlighted")
 
+        agent_text = pg.eval_on_selector(
+            '.sv-panel[data-sv-panel="agent"]', "n => n.innerText")
+        check("Wrap your method" in pg.eval_on_selector(
+            '.sv-tab[data-sv="agent"]', "n => n.innerText"),
+              "the callable tab is labelled Wrap your method")
+        check("resources/evolve-eval/SKILL.md" in agent_text,
+              "the wrapper tab starts with the portable skill")
+        check("evaluate yourself" in agent_text,
+              "the current-agent invocation is explicit")
+        ports = '.sv-panel[data-sv-panel="ports"] '
+        ports_text = pg.eval_on_selector(ports, "n => n.innerText")
+        check("Connect any agent" in pg.eval_on_selector(
+            '.sv-tab[data-sv="ports"]', "n => n.innerText"),
+              "the integration tab is labelled Connect any agent")
+        check(all(x in ports_text for x in ("EOG tool-use interface", "MCP",
+                                             "ALE artifact-delivery interface",
+                                             "input/output files", "task.mcp_session",
+                                             "fetch_inputs_to", "submit_dir")),
+              "the existing MCP and artifact integration paths remain")
+        score_text = pg.eval_on_selector(
+            '.sv-panel[data-sv-panel="score"]', "n => n.innerText")
+        check("run_leaderboard" in score_text and "confirm_full_cost=True" in score_text,
+              "the score tab uses the guarded SDK leaderboard API")
+
         # The knobs are a recap, so they have to land after the walkthrough that motivates
         # them -- reading them before the reader knows how a run works is the old bug.
         order = pg.evaluate(
