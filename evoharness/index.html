@@ -1733,8 +1733,9 @@ os.environ["OPENAI_API_KEY"]       = getpass.getpass("OpenAI API key: ")</code><
       <div class="sv-codewrap">
         <span class="sv-lang">bash</span>
         <button class="sv-copy" type="button">Copy</button>
-        <pre class="sv-code" data-lang="bash"><code>WHEEL=$(curl -s "$EVAL_SERVICE_URL/sdk" | python -c 'import json,sys; print(json.load(sys.stdin)["path"])')
-pip install "$EVAL_SERVICE_URL$WHEEL"</code></pre>
+        <pre class="sv-code" data-lang="bash"><code>SDK_BASE="https://educator-marrow-cultural.ngrok-free.dev"
+WHEEL_URL=$(curl -fsSL "$SDK_BASE/sdk" | python -c 'import json,sys; d=json.load(sys.stdin); print(d["base_url"] + d["path"])')
+python -m pip install "$WHEEL_URL"</code></pre>
       </div>
       <p class="sv-cap">
         Install the wheel the deployment is <em>currently</em> serving, not merely <em>a</em> wheel: a
