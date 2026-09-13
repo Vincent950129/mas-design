@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import json
 import hashlib
+import html as html_lib
 import os
 import pathlib
 import random
@@ -42,7 +43,7 @@ def service_request(path: str) -> urllib.request.Request:
 TABS = [("overview", "Overview"), ("benchmark", "Benchmark"), ("tasks", "Tasks"),
         ("results", "Results"), ("cases", "Cases"), ("leaderboard", "Leaderboard"),
         ("evaluate", "Evaluate Your Agent"),
-        ("construction", "Create Your Benchmark")]
+        ("construction", "Create Your Benchmark"), ("blog", "Blog Share")]
 # The detailed route is a hierarchy: seed -> section -> one track's pipeline step.
 GROUPS = {
     "seed-benchmarks": ["tb2-seed", "apex-seed", "hyper-seed"],
@@ -669,8 +670,13 @@ def main() -> int:
     html = (ROOT / "index.html").read_text()
 
     print("\nThe tab strip")
-    bar = re.findall(r'data-pv="([a-z]+)">([^<]+)<', html)
-    check(bar == TABS, "eight views, in order, each under the label it shows a reader",
+    bar = []
+    for key, label_html in re.findall(
+            r'<button class="pv-tab(?: [^"]+)?" type="button" data-pv="([a-z]+)"[^>]*>'
+            r'(.*?)</button>', html, re.S):
+        label = html_lib.unescape(re.sub(r'<[^>]+>', ' ', label_html))
+        bar.append((key, " ".join(label.split())))
+    check(bar == TABS, "nine views, in order, each under the label it shows a reader",
           " · ".join(f"{k}:{v}" for k, v in bar))
     check(re.search(r'href="#evaluate"', (ROOT / "app.js").read_text()) is not None,
           "the floor's CTA still points at #evaluate, which the rename left alone")

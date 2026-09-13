@@ -22,7 +22,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
   <link rel="stylesheet" href="./static/css/index.css">
   <link rel="stylesheet" href="obs.css">
-  <link rel="stylesheet" href="paper.css?v=20260913-overview-6">
+  <link rel="stylesheet" href="paper.css?v=20260913-blog-9">
   <link rel="icon" href="./static/images/favicon.svg">
   <script defer src="./static/js/fontawesome.all.min.js"></script>
 </head>
@@ -109,6 +109,14 @@
          ours, this is the reader making their own out of a seed we have never seen. The view key
          stays `construction`, which is what the section is and what the paper calls it. -->
     <button class="pv-tab" type="button" data-pv="construction">Create Your Benchmark</button>
+    <button class="pv-tab pv-blog-tab" type="button" data-pv="blog"
+            aria-label="Blog — share and repost">
+      <span>Blog</span>
+      <svg class="pv-blog-heart" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 20.5S4 16.1 4 9.7C4 6.5 6.2 4.5 8.8 4.5c1.5 0 2.6.7 3.2 1.8.6-1.1 1.7-1.8 3.2-1.8 2.6 0 4.8 2 4.8 5.2 0 6.4-8 10.8-8 10.8Z" />
+      </svg>
+      <span>Share</span>
+    </button>
     <!-- External destinations are actions rather than .pv-tabs, so they do not go through
          PV.open. Paper carries the site's cool palette; the live deployment stays warm. -->
     <span class="pv-actions">
@@ -3054,6 +3062,246 @@ curl -fsSL -H "Authorization: Bearer $EVAL_SERVICE_API_KEY" \
 </section>
 
 </div><!-- /construction -->
+
+<div class="pv-view" data-pv-view="blog">
+<section class="section bl-section" id="blog">
+  <div class="container is-max-widescreen">
+    <svg class="bl-icon-sprite" aria-hidden="true">
+      <symbol id="bl-icon-linkedin" viewBox="0 0 24 24">
+        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 1 1 0-4.124 2.062 2.062 0 0 1 0 4.124zM6.998 20.452H3.676V9h3.322v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0z" />
+      </symbol>
+      <symbol id="bl-icon-x" viewBox="0 0 24 24">
+        <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.487-9.703L0 1.154h7.594l5.243 6.932zm-1.293 19.492h2.039L6.486 3.24H4.298z" />
+      </symbol>
+    </svg>
+    <header class="bl-head">
+      <p class="bl-eyebrow">News &amp; community</p>
+      <h2 class="title is-3 section-heading">Blog</h2>
+      <p class="bl-lead">
+        Join the conversation—let us know what you think about EvoHarnessBench!
+      </p>
+    </header>
+
+    <div class="bl-grid">
+      <a class="bl-card bl-card--linkedin"
+         href="https://www.linkedin.com/posts/shafiq-joty-b1a80a122_agenticai-llm-airesearch-activity-7504192085965725697-onbG?utm_source=social_share_send&amp;utm_medium=member_desktop_web&amp;rcm=ACoAAEbnfIsBBMMnnj42C3USJm4WJPIr8uaKPJk"
+         target="_blank" rel="noopener">
+        <div class="bl-meta">
+          <span class="bl-mark" aria-hidden="true">
+            <svg class="bl-brand-icon" viewBox="0 0 24 24"><use href="#bl-icon-linkedin" /></svg>
+          </span>
+          <span>LinkedIn</span>
+        </div>
+        <h3>Can agents keep pace as their harness evolves?</h3>
+        <p>
+          “We keep expanding agentic systems with new tools, skills, and specialist agents. Each
+          addition feels like an upgrade. But our new results show a surprising failure mode: as
+          the harness evolves, agents can silently lose competence on tasks they could already
+          solve. Salesforce Research introduces 🎉 EvoHarnessBench 🎉, a benchmark for studying
+          this setting.”
+        </p>
+        <div class="bl-foot">
+          <span class="bl-author">
+            <img class="bl-avatar" src="https://raihanjoty.github.io/img/nav/shafiq.jpg"
+                 width="42" height="42" alt="" referrerpolicy="no-referrer">
+            <span class="bl-byline">
+              <span>Shafiq Joty</span>
+              <time datetime="2026-09-11">Sep 11, 2026</time>
+            </span>
+          </span>
+          <span class="bl-open">Read more&hellip; <span aria-hidden="true">&#8599;</span></span>
+        </div>
+      </a>
+
+      <a class="bl-card bl-card--x"
+         href="https://x.com/JotyShafiq/status/2098433591638409504?s=20"
+         target="_blank" rel="noopener">
+        <div class="bl-meta">
+          <span class="bl-mark" aria-hidden="true">
+            <svg class="bl-brand-icon" viewBox="0 0 24 24"><use href="#bl-icon-x" /></svg>
+          </span>
+          <span>X</span>
+        </div>
+        <h3>
+          We keep adding tools, skills, and specialist agents to powerful agentic systems whenever
+          they seem useful.
+        </h3>
+        <p>
+          “Each addition feels like an upgrade. But what if an evolving harness quietly makes the
+          agent worse at tasks it could already solve? Our results show that it can. More
+          surprisingly, even today’s self-evolving methods cannot reliably adapt to new
+          capabilities while retaining earlier competence.”
+        </p>
+        <div class="bl-foot">
+          <span class="bl-author">
+            <img class="bl-avatar" src="https://raihanjoty.github.io/img/nav/shafiq.jpg"
+                 width="42" height="42" alt="" referrerpolicy="no-referrer">
+            <span class="bl-byline">
+              <span>Shafiq Joty · @JotyShafiq</span>
+              <time datetime="2026-09-11">Sep 11, 2026</time>
+            </span>
+          </span>
+          <span class="bl-open">Read more&hellip; <span aria-hidden="true">&#8599;</span></span>
+        </div>
+      </a>
+
+      <a class="bl-card bl-card--x"
+         href="https://x.com/vaidehi_patil_/status/2098463551199301654"
+         target="_blank" rel="noopener">
+        <div class="bl-meta">
+          <span class="bl-mark" aria-hidden="true">
+            <svg class="bl-brand-icon" viewBox="0 0 24 24"><use href="#bl-icon-x" /></svg>
+          </span>
+          <span>X</span>
+        </div>
+        <h3>
+          Excited to share our co-led work on EvoHarnessBench, a benchmark for self-evolving agents!
+        </h3>
+        <p>
+          “What happens when an agent’s environment keeps changing—not just because the tasks
+          change, but because its capabilities do? We study this overlooked form of continual
+          adaptation, where tools 🔧, skills 📚, and specialist agents 🤖 are progressively added
+          to the harness while previously solved tasks remain in evaluation. We find that expanding
+          the harness itself can induce forgetting, and that current self-evolving agents do not
+          reliably recover from it.”
+        </p>
+        <div class="bl-foot">
+          <span class="bl-author">
+            <img class="bl-avatar" src="https://vaidehi99.github.io/Vaidehi_Patil_files/avatar.JPG"
+                 width="42" height="42" alt="" referrerpolicy="no-referrer">
+            <span class="bl-byline">
+              <span>Vaidehi Patil · @vaidehi_patil_</span>
+              <time datetime="2026-09-11">Sep 11, 2026</time>
+            </span>
+          </span>
+          <span class="bl-open">Read more&hellip; <span aria-hidden="true">&#8599;</span></span>
+        </div>
+      </a>
+
+      <a class="bl-card bl-card--linkedin"
+         href="https://lnkd.in/p/eUeVQRkR"
+         target="_blank" rel="noopener">
+        <div class="bl-meta">
+          <span class="bl-mark" aria-hidden="true">
+            <svg class="bl-brand-icon" viewBox="0 0 24 24"><use href="#bl-icon-linkedin" /></svg>
+          </span>
+          <span>LinkedIn</span>
+        </div>
+        <h3>
+          We find that expanding the harness itself can induce forgetting
+        </h3>
+        <p>
+          “Current self-evolving agents do not reliably recover from it. Work co-led with Zixuan Ke
+          and Haizhou Shi, together with our amazing collaborators Yang Li, Ye Liu, Anurag Koul,
+          Sarath Shekkizhar, Jiayu (Mila) Wang, Xuan Phi Nguyen, Semih Yavuz, Mohit Bansal, and
+          Shafiq Joty at Salesforce Research and UNC Department of Computer Science!”
+        </p>
+        <div class="bl-foot">
+          <span class="bl-author">
+            <img class="bl-avatar" src="https://vaidehi99.github.io/Vaidehi_Patil_files/avatar.JPG"
+                 width="42" height="42" alt="" referrerpolicy="no-referrer">
+            <span class="bl-byline">
+              <span>Vaidehi Patil</span>
+              <time datetime="2026-09-11">Sep 11, 2026</time>
+            </span>
+          </span>
+          <span class="bl-open">Read more&hellip; <span aria-hidden="true">&#8599;</span></span>
+        </div>
+      </a>
+
+      <a class="bl-card bl-card--x"
+         href="https://x.com/KeZixuan/status/2098499453502341569?s=20"
+         target="_blank" rel="noopener">
+        <div class="bl-meta">
+          <span class="bl-mark" aria-hidden="true">
+            <svg class="bl-brand-icon" viewBox="0 0 24 24"><use href="#bl-icon-x" /></svg>
+          </span>
+          <span>X</span>
+        </div>
+        <h3>
+          What especially excited me about EvoHarnessBench is that it’s usually the harness—not the
+          model—that changes day to day.
+        </h3>
+        <p>
+          “We do this in everyday agent use: add useful tools, skills, or agents and move on, but
+          rarely rethink what already worked: did this addition break anything? 👀”
+        </p>
+        <div class="bl-foot">
+          <span class="bl-author">
+            <img class="bl-avatar" src="https://unavatar.io/x/KeZixuan"
+                 width="42" height="42" alt="" referrerpolicy="no-referrer">
+            <span class="bl-byline">
+              <span>Zixuan Ke · @KeZixuan</span>
+              <time datetime="2026-09-11">Sep 11, 2026</time>
+            </span>
+          </span>
+          <span class="bl-open">Read more&hellip; <span aria-hidden="true">&#8599;</span></span>
+        </div>
+      </a>
+
+      <a class="bl-card bl-card--linkedin"
+         href="https://www.linkedin.com/posts/haizhou-shi-229206180_agenticai-llm-airesearch-activity-7504228616994562048-Z7jc?utm_source=social_share_send&amp;utm_medium=member_desktop_web&amp;rcm=ACoAAEbnfIsBBMMnnj42C3USJm4WJPIr8uaKPJk"
+         target="_blank" rel="noopener">
+        <div class="bl-meta">
+          <span class="bl-mark" aria-hidden="true">
+            <svg class="bl-brand-icon" viewBox="0 0 24 24"><use href="#bl-icon-linkedin" /></svg>
+          </span>
+          <span>LinkedIn</span>
+        </div>
+        <h3>Can your agentic system keep up w/ the evolving harness 🤔?</h3>
+        <p>“Check out our recent benchmark EvoHarnessBench with evolving tools, skills, and agents!”</p>
+        <div class="bl-foot">
+          <span class="bl-author">
+            <img class="bl-avatar" src="https://haizhou-shi.github.io/images/profile-1.jpeg"
+                 width="42" height="42" alt="" referrerpolicy="no-referrer">
+            <span class="bl-byline">
+              <span>Haizhou Shi</span>
+              <time datetime="2026-09-11">Sep 11, 2026</time>
+            </span>
+          </span>
+          <span class="bl-open">Read more&hellip; <span aria-hidden="true">&#8599;</span></span>
+        </div>
+      </a>
+
+      <a class="bl-card bl-card--article"
+         href="https://co-r-e.com/method/harness-evolution-forgetting"
+         target="_blank" rel="noopener">
+        <div class="bl-meta">
+          <span class="bl-mark" aria-hidden="true">C</span>
+          <span>AI Research</span>
+          <span class="bl-meta-dot" aria-hidden="true">·</span>
+          <span class="bl-read-time">18 min read</span>
+        </div>
+        <h3>AI Agent Harness Evolution: Regression Risks from Adding Tools and Skills</h3>
+        <p>
+          “The part of an agent system that actually changes week to week is not the model. It is the
+          harness: the MCP servers you connected, the skill files you wrote, the subagents you
+          defined, the tool catalog that grew from twelve entries to two hundred because every
+          integration request added one more. The model gets swapped maybe twice a year. The harness
+          gets edited on a Tuesday afternoon.
+        </p>
+        <p>
+          Almost nobody re-runs the old tasks after that Tuesday afternoon. The new capability gets
+          tested against the thing it was added for, it works, the PR merges. The tasks the agent was
+          already solving are assumed to be fine, because nothing about them changed. Their tools are
+          still there. Their prompts are still there. The model is the same model.”
+        </p>
+        <div class="bl-foot">
+          <span class="bl-author">
+            <img class="bl-avatar" src="https://co-r-e.com/okuwaki.png"
+                 width="42" height="42" alt="" referrerpolicy="no-referrer">
+            <span class="bl-byline">
+              <span>Written by Masato Okuwaki</span>
+              <time datetime="2026-09-08">Sep 8, 2026</time>
+            </span>
+          </span>
+          <span class="bl-open">Read more&hellip; <span aria-hidden="true">&#8599;</span></span>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+</div><!-- /blog -->
 
 <footer class="footer">
   <div class="container">

@@ -69,7 +69,7 @@ body {
   display: flex;
   align-items: stretch;
   justify-content: center;
-  /* Eight tabs and the external-action pills, including two three-word labels. Keep the full
+  /* Nine tabs and the external-action pills, including two three-word labels. Keep the full
      row visible on a wide screen; below that it becomes a left-aligned horizontal scroller. */
   gap: 22px;
   max-width: 1320px;
@@ -94,6 +94,23 @@ body {
 }
 .pv-tab:hover { color: #1f2a44; }
 .pv-tab.is-active { color: var(--accent); border-bottom-color: var(--accent); }
+.pv-blog-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.pv-blog-heart {
+  width: 17px;
+  height: 17px;
+  fill: #ff4d4f;
+  filter: drop-shadow(0 1px 1px rgba(180, 24, 27, .22));
+  transition: transform .18s cubic-bezier(.2, .8, .2, 1);
+}
+.pv-blog-tab:hover .pv-blog-heart,
+.pv-blog-tab:focus-visible .pv-blog-heart,
+.pv-blog-tab.is-active .pv-blog-heart {
+  transform: scale(1.16) rotate(-5deg);
+}
 
 /* Paper and the demo leave the page, so they read as a compact pair of action pills rather
    than internal tabs. Paper uses the site palette; the demo keeps the banner's warm gradient. */
@@ -3777,4 +3794,160 @@ table.lb tbody td.lb-meta { font-size: 11.5px; font-weight: 650; color: #64748b;
 @media (max-width: 920px) {
   .tb2-chart-grid { grid-template-columns: 1fr; }
   .tb2-chart-card { max-width: 520px; width: 100%; margin: 0 auto; }
+}
+
+/* Blog and coverage — outbound cards stay lightweight so links are easy to extend. */
+.bl-section { min-height: calc(100vh - 210px); }
+.bl-head {
+  max-width: 700px;
+  margin: 0 auto 2rem;
+  text-align: center;
+}
+.bl-eyebrow {
+  margin: 0 0 .45rem;
+  color: var(--accent);
+  font-size: .76rem;
+  font-weight: 800;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+.bl-head .section-heading { margin-bottom: .65rem !important; }
+.bl-icon-sprite {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+.bl-lead {
+  margin: 0;
+  color: #58667f;
+  font-size: 1.04rem;
+  line-height: 1.65;
+}
+.bl-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.1rem;
+  max-width: 1040px;
+  margin: 0 auto;
+}
+.bl-card {
+  --bl-color: var(--accent);
+  display: flex;
+  min-height: 260px;
+  flex-direction: column;
+  padding: 1.55rem;
+  border: 1px solid #dce2f4;
+  border-top: 4px solid var(--bl-color);
+  border-radius: 18px;
+  background: linear-gradient(145deg, #fff 0%, #fbfbfe 100%);
+  box-shadow: 0 14px 32px -25px rgba(35, 45, 84, .55);
+  color: #25304a;
+  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+.bl-card:hover,
+.bl-card:focus-visible {
+  border-color: color-mix(in srgb, var(--bl-color) 44%, #dce2f4);
+  box-shadow: 0 18px 38px -23px rgba(35, 45, 84, .58);
+  color: #25304a;
+  outline: none;
+  transform: translateY(-3px);
+}
+.bl-card--linkedin { --bl-color: #0a66c2; }
+.bl-card--x { --bl-color: #202531; }
+.bl-card--article {
+  --bl-color: #d46a28;
+  grid-column: 1 / -1;
+  min-height: 220px;
+}
+.bl-meta {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  margin-bottom: 1.1rem;
+  color: var(--bl-color);
+  font-size: .75rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.bl-meta-dot { opacity: .45; }
+.bl-read-time { color: #7c879d; }
+.bl-mark {
+  display: inline-grid;
+  width: 29px;
+  height: 29px;
+  place-items: center;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--bl-color) 11%, white);
+  font-size: .85rem;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.bl-brand-icon {
+  display: block;
+  width: 15px;
+  height: 15px;
+  fill: currentColor;
+}
+.bl-card h3 {
+  margin: 0 0 .72rem;
+  color: #222d47;
+  font-size: 1.22rem;
+  font-weight: 750;
+  line-height: 1.35;
+}
+.bl-card > p {
+  margin: 0 0 1.35rem;
+  color: #5d6a82;
+  font-size: .93rem;
+  line-height: 1.65;
+}
+.bl-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid #e7eaf4;
+  color: #6b7690;
+  font-size: .78rem;
+  font-weight: 650;
+}
+.bl-author {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: .65rem;
+}
+.bl-avatar {
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #eef1f7;
+  box-shadow: 0 2px 8px rgba(31, 42, 68, .16);
+  object-fit: cover;
+}
+.bl-byline {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: .14rem;
+}
+.bl-byline time {
+  color: #959eb1;
+  font-size: .69rem;
+  font-weight: 600;
+  letter-spacing: .01em;
+}
+.bl-open { flex: 0 0 auto; color: var(--bl-color); font-weight: 800; }
+
+@media (max-width: 720px) {
+  .bl-grid { grid-template-columns: 1fr; }
+  .bl-card { min-height: 230px; }
+  .bl-card--article { grid-column: auto; }
 }
