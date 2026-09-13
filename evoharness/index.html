@@ -1587,12 +1587,11 @@
   <div class="container is-max-desktop">
     <h2 class="title is-3 section-heading has-text-centered">Evaluate Your Own Agent</h2>
     <p class="sv-lead">
-      You can score your own agent on these same executable tasks in two environments. The
-      <b>hosted service</b> runs today: it holds the environment and the grader, so there is nothing
-      to stand up. Give your coding agent the portable evaluation skill, or supply an
-      <code>f(task)</code> callable through the SDK. Running <b>locally</b> is
-      where the corpus itself lives &mdash; the task data is already public on Hugging Face, and the
-      runner that executes and grades it against your own machine is on the way.
+      Evaluate any verifier-backed evolving benchmark through one workflow. The SDK first checks
+      the live catalog: a healthy hosted adapter is used when it supports your track, mode, action
+      surface and harness; otherwise a checksum-approved adapter runs in a loopback-only local
+      service. EOG and ALE remain hosted, while Terminal-Bench 2, APEX-Agents, Hyper-&tau;-bench and
+      new datasets can use the same session, resource, grading and leaderboard APIs locally.
     </p>
 
     <div class="ev-choose">
@@ -1606,9 +1605,9 @@
       </button>
       <button class="ev-tab" type="button" role="tab" data-ev="local">
         <span class="ev-th"><span class="ev-tt">Local environment</span>
-          <span class="ev-ts is-soon">Data now &middot; runner soon</span></span>
-        <span class="ev-td">The task corpus is on Hugging Face under Apache-2.0. The runner that
-          stands up the environments is not released yet.</span>
+          <span class="ev-ts is-live">Available now</span></span>
+        <span class="ev-td">Run reviewed benchmark adapters on loopback. Adapter code and its
+          manifest must both match hashes you explicitly approve.</span>
       </button>
       </div>
     </div>
@@ -1622,9 +1621,9 @@
       <li><b>session freed</b><i>automatically, on scope exit</i></li>
     </ol>
     <p class="sv-cap sv-cap--mid">
-      <code>run_benchmark</code> does all four, once per task in the scope, so the only step you
-      write is the second. A leaderboard row covers both benchmarks below, and they hand your agent
-      different affordances.
+      <code>run_benchmark</code> does all four once per task. The action descriptor tells your agent
+      whether the task uses MCP, artifact files, an isolated terminal, or an official managed
+      runtime; <code>run_leaderboard</code> accepts any advertised benchmark sequence.
     </p>
 
     <div class="sv-cards">
@@ -1652,6 +1651,30 @@
       </article>
     </div>
 
+    <p class="sv-cap sv-cap--mid">
+      <b>If you just want a fast, interactive evaluation.</b> Set your service key, install the
+      authenticated <a href="https://educator-marrow-cultural.ngrok-free.dev/resources/evolve-eval/SKILL.md"
+      target="_blank" rel="noopener"><code>evolve-eval</code> skill</a>, then ask your current coding agent to
+      <em>&ldquo;use the evolve-eval skill to evaluate yourself on my dataset.&rdquo;</em> It guides you through
+      four approvals: suitability and hosted/local resolution; runtime and deviations; exact smoke
+      and cost plan; then results and optional reporting. It can use a healthy hosted target or help
+      validate and start a local adapter. Credentials stay in environment variables.
+    </p>
+    <div class="sv-codewrap">
+      <span class="sv-lang">bash &middot; install evolve-eval</span>
+      <button class="sv-copy" type="button">Copy</button>
+      <pre class="sv-code" data-lang="bash"><code>: "${EVAL_SERVICE_API_KEY:?Required — sign in and open MyAuthtoken}" &amp;&amp;
+curl -fsSL -H "Authorization: Bearer $EVAL_SERVICE_API_KEY" \
+  https://educator-marrow-cultural.ngrok-free.dev/resources/evolve-eval/install.sh | bash
+
+# Then tell your coding agent: Use evolve-eval to evaluate yourself on my dataset.</code></pre>
+    </div>
+
+    <p class="sv-cap sv-cap--mid">
+      For repeatable experiments and leaderboard runs, follow the SDK path from authentication
+      through agent integration, scoring, and continual evaluation.
+    </p>
+    <h3 class="sv-h3">Detailed evaluation workflow</h3>
     <div class="sv-tabs" role="tablist" aria-label="Quickstart steps">
       <button class="sv-tab is-active" type="button" role="tab" data-sv="key">Get the API key</button>
       <button class="sv-tab" type="button" role="tab" data-sv="install">Install</button>
@@ -1745,6 +1768,7 @@ python -m pip install "/tmp/${WHEEL##*/}"</code></pre>
         <span class="sv-lang">python</span>
         <button class="sv-copy" type="button">Copy</button>
         <pre class="sv-code" data-lang="python"><code>from simple_agentic_evals import (CommandAgent, EvalClient, ServiceError,
+                                  catalog_targets, inspect_adapter, resolve_target,
                                   run_benchmark, run_leaderboard,
                                   react_agent, acp_codex_agent, to_openai_tools)
 
@@ -1759,64 +1783,38 @@ print("connected ->", client.health())</code></pre>
 
     <div class="sv-panel" data-sv-panel="health">
       <p class="sv-cap">
-        The service is a <b>deployment</b>, not a library. The environments, the graders and the two
-        provided harnesses all execute on <em>that host</em>, so what actually works depends on what
-        it has installed &mdash; and the failure mode is quiet. An unavailable harness can return
-        <strong>without acting</strong>, and grading then reports the do-nothing floor: a
-        plausible-looking bad score rather than an error. Every notebook therefore opens with a
-        check, one row per capability, before it trusts a number.
+        Never infer support from a benchmark name. Resolution checks the live catalog&rsquo;s adapter
+        health, track, mode, harness and action surface. If any requested capability is missing, the
+        target is local or unavailable &mdash; never a hosted do-nothing score. Infrastructure and
+        grader failures remain errors rather than being converted to zero.
       </p>
       <div class="sv-codewrap">
         <span class="sv-lang">python</span>
         <button class="sv-copy" type="button">Copy</button>
-        <pre class="sv-code" data-lang="python"><code>h = client.health()
-print(h["ok"], h["active_sessions"], "live session(s), ttl", h["ttl_sec"], "s")
+        <pre class="sv-code" data-lang="python"><code>print(client.health())
+for target in catalog_targets(client):
+    print(target["dataset"], target["benchmark"],
+          "runnable=", target.get("runnable"),
+          "health=", target.get("health"),
+          "actions=", target.get("action_types"))
 
-# The ALE denominator. Only the tasks a published number can count are served, so this
-# is what an ALE score is divided by -- if the manifest disagrees with the catalog, the
-# score is not comparable to anyone else's.
-m = h["ale_tasks"]
-print(f"ale {m['n_runnable']}/{m['n_suite']} runnable, agrees={m['manifest_agrees']}")
-
-# The rows that matter most: the harnesses that run ON the service. `stopped == "error"`
-# means the harness failed -- treat that as no result, never as a zero.
-t = next(client.tasks("evovling_tools", "eog", 1, "test", "hr", limit=1))
-with t:
-    run = react_agent(t, api_key=os.environ["OPENAI_API_KEY"],
-                      model=LLM_MODEL, max_steps=1)
-    print("react ->", run.stopped, run.n_calls, "tool calls")</code></pre>
+# Hosted is selected only when every requested capability is healthy.
+choice = resolve_target("eog", dataset="evovling_tools",
+                        mode="deployment", harness="react", action_type="mcp",
+                        client=client)
+assert choice["location"] == "hosted", choice
+print(choice["reason"])</code></pre>
       </div>
       <p class="sv-cap">
-        The ALE row is about a subtler kind of wrong. ALE ships 152 tasks, but many need a non-Linux
-        VM and a few die in their own loader on any given host &mdash; and a task that provisions and
-        returns <code>0.0</code> for an environmental reason is indistinguishable from an agent that
-        tried and failed. The service serves only what its exclusion manifest calls measurable, and
-        the check re-derives that count from the catalog and fails if the two have drifted.
+        Catalog health is checked again by the local sidecar. Missing Docker, a source revision,
+        world archive, verifier runtime, or required credential blocks execution before a result is
+        reported. The diagnostic records the adapter and source hashes that were actually used.
       </p>
     </div>
 
     <div class="sv-panel" data-sv-panel="agent">
       <p class="sv-cap">
-        <b>If you just want a quick dry run.</b> Set your eval key, install the skill, then simply ask
-        the current agent to <em>&ldquo;use the evolve-eval skill to evaluate yourself.&rdquo;</em> It can
-        use <code>EVAL_SERVICE_API_KEY</code> to download the skill, start a task, act through the
-        task&rsquo;s tools or files, grade the result, and return the JSON. Its existing model login
-        stays with the agent; the service key only authenticates evaluation calls.
-      </p>
-      <div class="sv-codewrap">
-        <span class="sv-lang">bash</span>
-        <button class="sv-copy" type="button">Copy</button>
-        <pre class="sv-code" data-lang="bash"><code>mkdir -p "${CODEX_HOME:-$HOME/.codex}/skills/evolve-eval"
-: "${EVAL_SERVICE_API_KEY:?Required — sign in at https://mas-orchestra.salesforceresearch.ai/mas_r1/demo/ and open MyAuthtoken}" &amp;&amp;
-curl -fsSL -H "Authorization: Bearer $EVAL_SERVICE_API_KEY" \
-  https://educator-marrow-cultural.ngrok-free.dev/resources/evolve-eval/SKILL.md \
-  -o "${CODEX_HOME:-$HOME/.codex}/skills/evolve-eval/SKILL.md"
-
-# Then tell your coding agent: Use the evolve-eval skill to evaluate yourself.</code></pre>
-      </div>
-      <p class="sv-cap">
-        <b>For a scalable experiment, use the benchmark runner instead.</b> First wrap your method
-        as the callable below, then use <b>Connect any agent</b> to connect it through the EOG tool
+        First wrap your method as the callable below, then use <b>Connect any agent</b> to connect it through the EOG tool
         interface or ALE input/output files. Once both pieces are in place,
         <code>run_benchmark</code> can evaluate fresh, isolated instances across the full task scope.
       </p>
@@ -1890,20 +1888,24 @@ def solve_ale(task):
 
 
 def my_agent(task):
-    """One entry point, both benchmarks. This is the function you swap out."""
-    return solve_eog(task) if task.mcp_servers else solve_ale(task)</code></pre>
+    """One entry point for callable MCP and artifact adapters."""
+    if task.action_type == "mcp":
+        return solve_eog(task)
+    if task.action_type == "sandbox":
+        return solve_ale(task)
+    raise RuntimeError("select the adapter's official managed harness for this action")</code></pre>
       </div>
       <p class="sv-cap">
-        One entry point covers both benchmarks by branching on <code>task.mcp_servers</code>, which
-        is empty on ALE. Swap the bodies for LangGraph, your own planner, a memory scheme or another
-        provider &mdash; the grade neither knows nor cares.
+        Branch on <code>task.action_type</code>, not a benchmark name. Swap the bodies for LangGraph,
+        your planner or another provider. Terminal and managed-runtime adapters can instead run the
+        reviewed official harness with <code>run_benchmark("codex", ...)</code>.
       </p>
     </div>
 
     <div class="sv-panel" data-sv-panel="ports">
       <p class="sv-cap">
         Whatever you already have &mdash; a prompt optimizer, a memory, a multi-agent scaffold, a
-        container, a CLI &mdash; connects through one wrapper and one of two ports. Your policy runs
+        container, a CLI &mdash; connects through one wrapper and one of four ports. Your policy runs
         in <em>your</em> process and calls the service, so its language, framework and runtime stay
         yours; anything reachable from inside a Python function can be scored.
       </p>
@@ -1927,6 +1929,24 @@ mcp   = task.mcp_session(server)
 tools = mcp.list_tools()                # 1. WHAT YOUR POLICY CAN DO   (plain JSON Schema)
 mcp.call_tool(tools[0]["name"], {})     # 2. HOW YOUR POLICY ACTS      (a plain function)
 mcp.close()</code></pre>
+      </div>
+      <p class="sv-cap">
+        <b>Terminal and managed-runtime interfaces.</b> A terminal adapter places the agent in a
+        benchmark-owned isolated task container. A managed adapter invokes the seed benchmark&rsquo;s
+        official end-to-end harness (for example Harbor, Archipelago, or Hyper-&tau;&rsquo;s sealed
+        evaluator). Both are described in <code>task.action</code>; the adapter must enforce the
+        selected resources or the run is diagnostic only.
+      </p>
+      <div class="sv-codewrap">
+        <span class="sv-lang">python</span>
+        <button class="sv-copy" type="button">Copy</button>
+        <pre class="sv-code" data-lang="python"><code>print(task.action_type, task.action)
+
+# The local adapter owns provisioning, the official agent port, and the grader.
+# Infrastructure failure raises; it is never recorded as a zero score.
+report = run_benchmark("codex", "deployment_eval", client=local_client,
+                       dataset="evovling_tools", benchmark="terminal-bench-2",
+                       limit=1, on_error="raise")</code></pre>
       </div>
       <p class="sv-cap">
         <b>ALE artifact-delivery interface &mdash; input/output files.</b>
@@ -2023,8 +2043,9 @@ print(f"floor {floor.accuracy:.3f}   mine {report.accuracy:.3f}")
         <pre class="sv-code" data-lang="python"><code># The SDK runs both benchmarks, aggregates repeats, and returns leaderboard JSON.
 # A limited rehearsal is stamped `partial`; token telemetry stays None if unreported.
 row = run_leaderboard(my_agent, "My Method", client=client,
-                      cat="memory", seeds=1, limit=2)
+                      benchmarks=["eog", "ale"], cat="memory", seeds=1, limit=2)
 print(json.dumps(row, indent=2))
+print(row["benchmark_results"])       # dynamic map: hosted or local benchmark ids
 
 #   Pass %    mean(r.success_rate)          strict -- every verifier on the task passed
 #   Score     mean(r.accuracy)              partial credit -- mean verifier pass rate
@@ -2035,6 +2056,7 @@ print(json.dumps(row, indent=2))
 
 # A publishable no-limit run is expensive and requires explicit acknowledgement:
 # row = run_leaderboard(my_agent, "My Method", client=client, seeds=3,
+#                       benchmarks=["eog", "ale", "another-hosted-benchmark"],
 #                       confirm_full_cost=True)
 
 # Two switches worth knowing before you commit:
@@ -2113,9 +2135,9 @@ print(evolve.bwt, evolve.fwt)           # FWT is None in deployment mode; here i
 
     <h3 class="sv-h3">Run it yourself, at three levels</h3>
     <p class="sv-cap sv-cap--mid">
-      All three notebooks talk to the same live deployment and carry the current service endpoint, so
-      none of them needs anything stood up. They share a Setup cell and a health check, and then each
-      answers one question &mdash; pick by how far you intend to go.
+      All three notebooks use the same client and session API. Point their client at the healthy
+      hosted deployment or a loopback sidecar; the evaluation cells do not change. They share setup
+      and health checks, then each answers one question &mdash; pick by how far you intend to go.
     </p>
     <div class="sv-tuts">
       <a class="sv-tut is-first" href="https://colab.research.google.com/drive/1xJEpRf_s0zG-M9QynS3MBk7Nkr-xB11r"
@@ -2161,12 +2183,29 @@ print(evolve.bwt, evolve.fwt)           # FWT is None in deployment mode; here i
 
     <div class="ev-panel" data-ev-panel="local">
       <p class="sv-cap">
-        The corpus is public today. Three datasets, one per axis of harness evolution, Apache-2.0,
-        one row per task: the prompts the agent receives, the staged tool lists that
-        <code>resource_mode</code> selects between, and the verifier definitions the task is graded
-        against. That is enough to read the benchmark, filter it, count it, and build against its
-        layout without asking anyone for access.
+        Local evaluation is available through the same SDK. A versioned adapter binds three dataset
+        roots to the seed benchmark&rsquo;s official runtime and verifier. The skill inspects it without
+        importing code, shows the manifest and entrypoint hashes for approval, and then starts a
+        loopback-only sidecar. Adapters and results are never uploaded automatically.
+        Check <code>comparable_tracks</code> in the inspection result: a bounded diagnostic smoke
+        may run on other tracks, but the CLI rejects a full leaderboard run unless the official
+        runtime physically enforces that track&rsquo;s selected resources.
       </p>
+
+      <div class="sv-codewrap">
+        <span class="sv-lang">bash &middot; automatic hosted/local selection</span>
+        <button class="sv-copy" type="button">Copy</button>
+        <pre class="sv-code" data-lang="bash"><code># Check source pins, runtime policy, tracks, smoke task and both hashes first.
+evolve-eval inspect-adapter ./adapter.json
+
+# If no healthy hosted target supports the request, this starts a loopback sidecar,
+# runs one bounded task, and tears it down with the CLI process.
+evolve-eval leaderboard --benchmarks my-benchmark --dataset evovling_tools \
+  --adapter codex --runtime-adapter ./adapter.json \
+  --approve-sha256 '&lt;manifest_sha256 from inspection&gt;' \
+  --approve-sha256 '&lt;entrypoint_sha256 from inspection&gt;' \
+  --name 'My Agent' --output ./eval-run</code></pre>
+      </div>
 
       <div class="ev-ds">
         <a class="ev-dcard" href="https://huggingface.co/datasets/ZixuanKe/evovling_tools"
@@ -2223,19 +2262,19 @@ row["gym_servers_config"]  # JSON: which gym to seed, and from which snapshot</c
         database state.
       </p>
 
-      <div class="ev-soon">
-        <span class="ev-badge">Coming soon</span>
+      <div class="ev-soon ev-ready">
+        <span class="ev-badge">Available now</span>
         <div class="ev-soon-tx">
-          <h3>The local runner</h3>
+          <h3>Bring a new verifier-backed benchmark</h3>
           <p>
-            What the rows reference but do not ship is the environment itself: the seeded gym
-            databases behind <code>gym_servers_config</code>, the staged blobs behind
-            <code>input_files</code>, and the code that turns a verifier definition into a pass or a
-            fail. Until that is released, a local <em>grade</em> is not something you can produce
-            &mdash; reading and analysing the corpus is. To score an agent today, use the hosted
-            service.
+            The adapter contract covers task discovery, <code>create</code>, <code>run_agent</code>,
+            <code>grade</code> and <code>teardown</code>, plus isolation, network, credentials,
+            timeout, smoke selection and resource enforcement. Terminal-Bench 2, APEX-Agents and
+            Hyper-&tau;-bench are reviewed examples; they are not hard-coded prerequisites. If a
+            verifier or resource fence cannot run, the skill reports a blocked or diagnostic run
+            instead of manufacturing a zero score.
           </p>
-          <button class="ev-jump" type="button" data-ev="api">Show the hosted API path</button>
+          <button class="ev-jump" type="button" data-ev="api">Show the hosted workflow</button>
         </div>
       </div>
     </div><!-- /local panel -->
@@ -2398,10 +2437,12 @@ curl -fsSL -H "Authorization: Bearer $EVAL_SERVICE_API_KEY" \
 
     <h3 class="sv-h3">Detailed build</h3>
     <p class="sv-cap sv-cap--mid">
-      Choose either <a href="https://github.com/harbor-framework/terminal-bench-2/tree/2fd12b88aafdd04a52c298e3940bcb189f9766d6"
-         target="_blank" rel="noopener"><b>Terminal-Bench 2</b></a> or
+      Choose <a href="https://github.com/harbor-framework/terminal-bench-2/tree/2fd12b88aafdd04a52c298e3940bcb189f9766d6"
+         target="_blank" rel="noopener"><b>Terminal-Bench 2</b></a>,
       <a href="https://huggingface.co/datasets/mercor/apex-agents"
-         target="_blank" rel="noopener"><b>APEX-Agents</b></a> as a complete worked example.
+         target="_blank" rel="noopener"><b>APEX-Agents</b></a>, or
+      <a href="https://github.com/sierra-research/hyper-tau-bench/tree/6e9f34c685d40fa7a9f5935d8970af6fd9d5f118"
+         target="_blank" rel="noopener"><b>Hyper-&tau;-Bench</b></a> as a worked example.
       Each tab downloads a fixed seed snapshot, constructs all three tracks, and shows the expected output.
     </p>
 
@@ -2409,6 +2450,7 @@ curl -fsSL -H "Authorization: Bearer $EVAL_SERVICE_API_KEY" \
       <div class="sv-tabs" role="tablist" aria-label="Seed benchmark examples">
         <button class="sv-tab is-active" type="button" role="tab" data-sv="tb2-seed">Terminal-Bench 2</button>
         <button class="sv-tab" type="button" role="tab" data-sv="apex-seed">APEX-Agents</button>
+        <button class="sv-tab" type="button" role="tab" data-sv="hyper-seed">Hyper-&tau;-Bench</button>
       </div>
 
       <div class="sv-panel is-active" data-sv-panel="tb2-seed">
@@ -2796,6 +2838,204 @@ curl -fsSL -H "Authorization: Bearer $EVAL_SERVICE_API_KEY" \
           </div>
         </div>
       </div>
+
+      <div class="sv-panel" data-sv-panel="hyper-seed">
+        <div class="sv-group" data-sv-group="hyper-sections">
+          <div class="sv-tabs" role="tablist" aria-label="Hyper-Tau-Bench construction sections">
+            <button class="sv-tab is-active" type="button" role="tab" data-sv="hyper-download">Download seed data</button>
+            <button class="sv-tab" type="button" role="tab" data-sv="hyper-tools">Tools · derive the operations</button>
+            <button class="sv-tab" type="button" role="tab" data-sv="hyper-skills">Skills · mine the prompts</button>
+            <button class="sv-tab" type="button" role="tab" data-sv="hyper-agents">Agents · partition the tools</button>
+            <button class="sv-tab" type="button" role="tab" data-sv="hyper-output">Expected output</button>
+          </div>
+
+          <div class="sv-panel is-active" data-sv-panel="hyper-download">
+            <h4 class="title is-5">Download the Hyper-&tau;-Bench seed</h4>
+            <p class="sv-cap">
+              This creates a fresh work directory, checks out the public 53-task snapshot at its
+              pinned commit, and installs the shared construction engine. The source benchmark is
+              left unchanged and the new evolving datasets are written separately.
+            </p>
+            <div data-hyper-exact="setup"></div>
+          </div>
+
+          <div class="sv-panel" data-sv-panel="hyper-tools">
+            <p class="sv-cap">
+              Hyper-&tau;-Bench does not ship ordinary per-task <code>oracle_tools</code>. The approved
+              deterministic adapter treats the exact customer-service API operations that the constructed
+              agent must implement as tools. This is recorded as a capability-definition deviation; the
+              ranking, release, accumulation, and task-assignment pipeline remains unchanged.
+            </p>
+            <div class="sv-group" data-sv-group="hyper-tools-steps">
+              <div class="sv-tabs" role="tablist" aria-label="Hyper-Tau-Bench tools-track steps">
+                <button class="sv-tab is-active" type="button" role="tab" data-sv="hyper-tools-annotate">Step 1 · annotate</button>
+                <button class="sv-tab" type="button" role="tab" data-sv="hyper-tools-release">Step 2 · rank and release</button>
+                <button class="sv-tab" type="button" role="tab" data-sv="hyper-tools-write">Steps 3 and 4 · accumulate and write</button>
+              </div>
+              <div class="sv-panel is-active" data-sv-panel="hyper-tools-annotate">
+                <p class="sv-cap">
+                  Parse public <code>@is_tool</code> and <code>@is_discoverable_tool</code> operation
+                  schemas, combine them with each task&rsquo;s public domain or journey scope, and retain
+                  evidence for every label. Framework wrappers, generic helpers, customer-only controls,
+                  and verifier-only operations are excluded. The frozen adapter below also constructs the
+                  skill catalog and ownership partition used by the other two tracks.
+                </p>
+                <div data-hyper-exact="annotate"></div>
+                <div data-hyper-guide="tools-annotate"></div>
+              </div>
+              <div class="sv-panel" data-sv-panel="hyper-tools-release">
+                <p class="sv-cap">
+                  Inspect the annotations, then rank the 91 active operations by task frequency. Release
+                  the frequent core first, keep the long tail, and merge thin adjacent stages without
+                  weakening the two-adaptation and five-test floors.
+                </p>
+                <div data-hyper-exact="stage"></div>
+                <div data-hyper-guide="tools-release"></div>
+              </div>
+              <div class="sv-panel" data-sv-panel="hyper-tools-write">
+                <p class="sv-cap">
+                  Accumulate the operation allowlist and assign every task to the earliest stage covering
+                  all of its oracle operations. Write fresh canonical JSONL and manifests, then build twice
+                  and require identical files. The candidate is not called validated until runtime smoke passes.
+                </p>
+                <div data-hyper-exact="build"></div>
+                <div data-hyper-guide="tools-write"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sv-panel" data-sv-panel="hyper-skills">
+            <p class="sv-cap">
+              The skills track mines reusable procedures from the full public construction prompt and
+              description. Nine fixed procedural atoms are frozen before labeling; the adapter then matches
+              all tasks deterministically without reading hidden inner-task gold actions, rubrics, or verifier state.
+            </p>
+            <div class="sv-group" data-sv-group="hyper-skills-steps">
+              <div class="sv-tabs" role="tablist" aria-label="Hyper-Tau-Bench skills-track steps">
+                <button class="sv-tab is-active" type="button" role="tab" data-sv="hyper-skills-annotate">Step 1 · annotate</button>
+                <button class="sv-tab" type="button" role="tab" data-sv="hyper-skills-release">Step 2 · rank and release</button>
+                <button class="sv-tab" type="button" role="tab" data-sv="hyper-skills-write">Steps 3 and 4 · accumulate and write</button>
+              </div>
+              <div class="sv-panel is-active" data-sv-panel="hyper-skills-annotate">
+                <p class="sv-cap">
+                  Render the task description together with developer-visible kit requirements, then match
+                  frozen prompt signatures for evidence synthesis, API implementation, greenfield or brownfield
+                  construction, hardening, elicitation, live-pilot use, response phrasing, and credit budgeting.
+                  Every one of the 253 task-skill labels is grounded in that public rendered prompt.
+                </p>
+                <div data-hyper-guide="skills-annotate"></div>
+              </div>
+              <div class="sv-panel" data-sv-panel="hyper-skills-release">
+                <p class="sv-cap">
+                  Rank the nine procedures by task frequency and run the established skill sequencer. This
+                  curriculum is independent of the tools curriculum, so it receives its own five stage
+                  boundaries and deterministic train/test membership.
+                </p>
+                <div data-hyper-guide="skills-release"></div>
+              </div>
+              <div class="sv-panel" data-sv-panel="hyper-skills-write">
+                <p class="sv-cap">
+                  Assign tasks to their earliest covered skill stage, retain universal execution rules as
+                  visible house rules, and materialize each hidden reference procedure as a held-out
+                  <code>SKILL.md</code> with its index and provenance.
+                </p>
+                <div data-hyper-guide="skills-write"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sv-panel" data-sv-panel="hyper-agents">
+            <p class="sv-cap">
+              The agents track is derived from tools, not from free-form personas. Every active operation
+              belongs to exactly one of 17 owner families, and each task&rsquo;s <code>oracle_agents</code>
+              is the unique set of owners of its oracle operations.
+            </p>
+            <div class="sv-group" data-sv-group="hyper-agents-steps">
+              <div class="sv-tabs" role="tablist" aria-label="Hyper-Tau-Bench agents-track steps">
+                <button class="sv-tab is-active" type="button" role="tab" data-sv="hyper-agents-annotate">Step 1 · annotate</button>
+                <button class="sv-tab" type="button" role="tab" data-sv="hyper-agents-release">Step 2 · rank and release</button>
+                <button class="sv-tab" type="button" role="tab" data-sv="hyper-agents-write">Steps 3 and 4 · accumulate and write</button>
+              </div>
+              <div class="sv-panel is-active" data-sv-panel="hyper-agents-annotate">
+                <p class="sv-cap">
+                  Verify that all 91 operations have one and only one owner, derive task owners from the tool
+                  annotation, and propagate each task&rsquo;s approved <code>oracle_skills</code> into the agent row.
+                  The lead remains tool-less; specialists receive owned operations and the reusable procedures.
+                </p>
+                <div data-hyper-guide="agents-annotate"></div>
+              </div>
+              <div class="sv-panel" data-sv-panel="hyper-agents-release">
+                <p class="sv-cap">
+                  Rank owner families by the frequency with which their operations are needed. Build an
+                  independent cumulative owner curriculum while preserving the tools-track train/test assignment.
+                </p>
+                <div data-hyper-guide="agents-release"></div>
+              </div>
+              <div class="sv-panel" data-sv-panel="hyper-agents-write">
+                <p class="sv-cap">
+                  Materialize owner capability skills, shared procedures, portable Codex agent TOMLs, routing
+                  descriptions, owned-operation lists, and per-stage manifests. No approved skill procedure is dropped.
+                </p>
+                <div data-hyper-guide="agents-write"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sv-panel" data-sv-panel="hyper-output">
+            <h4 class="title is-5">Expected growth from the pinned Hyper-&tau;-Bench seed</h4>
+            <p class="sv-cap">
+              All three tracks retain all 53 tasks. Bars show the adaptation and held-out test tasks arriving
+              at each stage; the curve shows the cumulative operation, skill, or specialist pool. Hover or
+              focus a stage to inspect every count.
+            </p>
+            <div class="tb2-chart-legend" aria-label="Chart legend">
+              <span><i class="tb2-key tb2-key--train"></i>Adaptation tasks</span>
+              <span><i class="tb2-key tb2-key--test"></i>Test tasks</span>
+              <span><i class="tb2-key tb2-key--line"></i>Available harness</span>
+            </div>
+            <div class="tb2-chart-grid">
+              <article class="tb2-chart-card">
+                <div class="tb2-chart-head">
+                  <h5>Tools</h5><span>53 tasks · 91 operations</span>
+                </div>
+                <div class="tb2-stage-chart" data-stage-chart data-axis="operations"
+                     data-train="2,8,5" data-test="6,19,13"
+                     data-added="14,45,32" data-cumulative="14,59,91"></div>
+              </article>
+              <article class="tb2-chart-card">
+                <div class="tb2-chart-head">
+                  <h5>Skills</h5><span>53 tasks · 9 skills</span>
+                </div>
+                <div class="tb2-stage-chart" data-stage-chart data-axis="skills"
+                     data-train="5,2,3,2,3" data-test="12,5,7,6,8"
+                     data-added="4,1,1,1,2" data-cumulative="4,5,6,7,9"></div>
+              </article>
+              <article class="tb2-chart-card">
+                <div class="tb2-chart-head">
+                  <h5>Agents</h5><span>53 tasks · 17 specialists</span>
+                </div>
+                <div class="tb2-stage-chart" data-stage-chart data-axis="specialists"
+                     data-train="5,5,5" data-test="10,15,13"
+                     data-added="4,3,10" data-cumulative="4,7,17"></div>
+              </article>
+            </div>
+            <p class="sv-cap">
+              Static schema, coverage, ownership, feasibility, new-capability pressure, and two-build
+              reproducibility checks pass. The current local result remains <b>preflight-only</b>: its three
+              official Hyper-&tau; smoke runs require both OpenAI and OpenRouter credentials and have not
+              completed, so the page does not claim runtime validation or rewards.
+            </p>
+
+            <h4 class="title is-5 tb2-build-title">Run verifier smoke</h4>
+            <p class="sv-cap">
+              This block installs the pinned environment and runs one official sealed outer-task verifier per
+              tools stage. It performs real agent construction and evaluation, so it is intentionally expensive.
+              Review the report before separately approving promotion.
+            </p>
+            <div data-hyper-exact="validate"></div>
+          </div>
+        </div>
+      </div>
     </div><!-- /seed benchmarks -->
   </div>
 </section>
@@ -2833,6 +3073,7 @@ curl -fsSL -H "Authorization: Bearer $EVAL_SERVICE_API_KEY" \
   <script src="db.js"></script>
   <script src="tb2-public-blocks.js?v=20260913-construction-4"></script>
   <script src="apex-public-blocks.js?v=20260913-construction-4"></script>
+  <script src="hyper-tau-public-blocks.js?v=20260913-construction-1"></script>
   <script src="app.js?v=20260913-stats-5"></script>
 </body>
 </html>

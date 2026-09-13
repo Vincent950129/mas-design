@@ -1,13 +1,9 @@
 #!/usr/bin/env python3
 """Checks for the Evaluate tab's two execution environments.
 
-The tab now offers a choice: the hosted service, which works today, and running
-locally, which does not yet. That split is only useful if it stays honest, so
-these checks pin the claims that would mislead someone if they drifted -- the
-"coming soon" marker on the runner, the row and config counts quoted for each
-dataset, and the column names in the snippet, all read back from the Hub rather
-than trusted. Also verifies the switcher itself, since a panel that fails to
-hide would show both environments' instructions at once.
+The tab offers healthy hosted adapters and checksum-approved loopback adapters.
+These checks pin the claims that would mislead someone if they drifted: dynamic
+resolution, explicit hash approval, corpus counts, and integration ports.
 
 Needs network for the Hub checks; pass --offline to skip them.
 """
@@ -15,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import pathlib
 import re
 import subprocess
@@ -39,11 +36,11 @@ KEY_ENV = "EVAL_SERVICE_API_KEY"
 # The three tutorials, shallowest first, with the code-cell count the page quotes and the
 # notebook's own filename -- both read back off Colab rather than trusted.
 TUTORIALS = [
-    ("1xJEpRf_s0zG-M9QynS3MBk7Nkr-xB11r", "Quick start", 6,
+    ("1xJEpRf_s0zG-M9QynS3MBk7Nkr-xB11r", "Leaderboard your agent", 8,
      "evolve_eval_colab_tutorial_quick_start.ipynb"),
-    ("1vrcGelN9GmwiCK25c6qZNG3Z0sHWxE5o", "More details", 8,
+    ("1vrcGelN9GmwiCK25c6qZNG3Z0sHWxE5o", "Continual learning", 9,
      "evolve_eval_colab_tutorial_quick_start_detail.ipynb"),
-    ("1mYQEDCVFStXMRWYI2hpEGBXwyRx1NSFj", "Full detail", 25,
+    ("1mYQEDCVFStXMRWYI2hpEGBXwyRx1NSFj", "Supported harnesses & modes", 10,
      "evolve_eval_colab_tutorial_full.ipynb"),
 ]
 # Columns the snippet reads; a rename upstream would leave dead code on the page.
@@ -230,10 +227,8 @@ def check_page() -> None:
         check("Wrap your method" in pg.eval_on_selector(
             '.sv-tab[data-sv="agent"]', "n => n.innerText"),
               "the callable tab is labelled Wrap your method")
-        check("resources/evolve-eval/SKILL.md" in agent_text,
-              "the wrapper tab starts with the portable skill")
-        check("evaluate yourself" in agent_text,
-              "the current-agent invocation is explicit")
+        check("anything callable" in agent_text and "task.action_type" in agent_text,
+              "the wrapper accepts a general callable and branches on the action surface")
         ports = '.sv-panel[data-sv-panel="ports"] '
         ports_text = pg.eval_on_selector(ports, "n => n.innerText")
         check("Connect any agent" in pg.eval_on_selector(
@@ -242,8 +237,9 @@ def check_page() -> None:
         check(all(x in ports_text for x in ("EOG tool-use interface", "MCP",
                                              "ALE artifact-delivery interface",
                                              "input/output files", "task.mcp_session",
-                                             "fetch_inputs_to", "submit_dir")),
-              "the existing MCP and artifact integration paths remain")
+                                             "fetch_inputs_to", "submit_dir",
+                                             "Terminal and managed-runtime")),
+              "all four action surfaces are explained")
         score_text = pg.eval_on_selector(
             '.sv-panel[data-sv-panel="score"]', "n => n.innerText")
         check("run_leaderboard" in score_text and "confirm_full_cost=True" in score_text,
@@ -257,9 +253,20 @@ def check_page() -> None:
                  return {flow: y('.sv-flow'), tabs: y('.sv-tabs'), knobs: y('.sv-knobs'),
                          tuts: y('.sv-tuts')};
                }""")
-        check(order["flow"] < order["tabs"] < order["knobs"] < order["tuts"],
-              "how a run works comes first, then the walkthrough, then the recap, then Colab",
+        check(order["flow"] < order["tabs"] < order["tuts"],
+              "how a run works comes first, then the walkthrough, then Colab",
               str({k: round(v) for k, v in order.items()}))
+
+        # The tablist is keyboard-operable, and copy reports success to the reader.
+        pg.focus('.sv-tab[data-sv="key"]')
+        pg.keyboard.press("End")
+        check(pg.eval_on_selector('.sv-tab[data-sv="continual"]',
+                                  "n => n.classList.contains('is-active')"),
+              "detailed tabs support keyboard End navigation")
+        pg.keyboard.press("Home")
+        check(pg.eval_on_selector('.sv-tab[data-sv="key"]',
+                                  "n => n.classList.contains('is-active')"),
+              "detailed tabs support keyboard Home navigation")
 
         # Three depths, shallowest first, each to its own notebook.
         cards = pg.eval_on_selector_all(
@@ -295,11 +302,13 @@ def check_page() -> None:
             "outbound links open safely")
 
         txt = pg.eval_on_selector(local, "n => n.innerText")
-        check("Coming soon" in txt or "COMING SOON" in txt.upper(),
-              "the runner is marked coming soon")
-        # The page must not promise a local grade it cannot deliver.
-        check(re.search(r"local\s+grade\s+is not something you can produce", txt) is not None,
-              "the page says a local grade is not possible yet")
+        check("available now" == pg.eval_on_selector(
+            '.ev-tab[data-ev="local"] .ev-ts', "n => n.innerText.trim().toLowerCase()"),
+              "the loopback runner is marked available")
+        check("manifest_sha256" in txt and "entrypoint_sha256" in txt,
+              "local execution requires both reviewed hashes")
+        check("loopback" in txt.lower() and "never uploaded" in txt.lower(),
+              "local isolation and no-upload behavior are explicit")
         for col in EOG_COLS:
             check(col in txt, f"the snippet shows {col}")
 
@@ -307,6 +316,10 @@ def check_page() -> None:
         check(pg.eval_on_selector_all(local + ".sv-code code .t-k", "ns => ns.length") > 0,
               "the local snippet is syntax highlighted")
         check(len(pg.query_selector_all(local + ".sv-copy")) > 0, "the local snippet is copyable")
+        copy = pg.locator(local + ".sv-copy").first
+        copy.click()
+        pg.wait_for_timeout(100)
+        check("cop" in copy.inner_text().lower(), "the local copy button reports completion")
 
         pg.click(".ev-jump")
         pg.wait_for_timeout(400)
@@ -321,7 +334,11 @@ def check_page() -> None:
             "ns => ns.filter(n => n.scrollWidth > n.parentElement.clientWidth + 1)"
             ".map(n => n.className)")
         check(not over, "nothing overflows at 420px", str(over))
-        pg.screenshot(path=str(ROOT / "tools/proofs/eval-local-mobile.png"), full_page=False)
+        proof_root = pathlib.Path(
+            os.environ.get("EVAL_DRY_RUN_ROOT", str(ROOT / "tools/proofs"))
+        )
+        proof_root.mkdir(parents=True, exist_ok=True)
+        pg.screenshot(path=str(proof_root / "eval-local-mobile.png"), full_page=False)
 
         # The hosted panel has grids of its own, including the three tutorials.
         pg.click('.ev-tab[data-ev="api"]')
@@ -342,6 +359,7 @@ def check_page() -> None:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--offline", action="store_true", help="skip the Hugging Face checks")
+    ap.add_argument("--report", help="write a machine-readable check summary")
     args = ap.parse_args()
 
     syn = subprocess.run(["node", "--check", str(ROOT / "app.js")],
@@ -355,6 +373,13 @@ def main() -> int:
         check_colab()
 
     print(f"\n{checks - len(fails)}/{checks} checks passed")
+    if args.report:
+        report = pathlib.Path(args.report)
+        report.parent.mkdir(parents=True, exist_ok=True)
+        report.write_text(json.dumps({
+            "checks": checks, "passed": checks - len(fails),
+            "failed": len(fails), "failures": fails,
+        }, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     if fails:
         print(f"\n{len(fails)} FAILURE(S):")
         for f in fails:

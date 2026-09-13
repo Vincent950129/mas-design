@@ -1701,6 +1701,7 @@ const SV = (() => {
       const on = t.dataset.sv === key;
       t.classList.toggle("is-active", on);
       t.setAttribute("aria-selected", String(on));
+      t.tabIndex = on ? 0 : -1;
     });
     owned(".sv-panel", scope).forEach((p) =>
       p.classList.toggle("is-active", p.dataset.svPanel === key));
@@ -1713,8 +1714,21 @@ const SV = (() => {
       const on = t.dataset.ev === key;
       t.classList.toggle("is-active", on);
       t.setAttribute("aria-selected", String(on));
+      t.tabIndex = on ? 0 : -1;
     });
     $$(".ev-panel").forEach((p) => p.classList.toggle("is-active", p.dataset.evPanel === key));
+  }
+
+  function keyboardTabs(event, tabs, activate) {
+    if (!tabs.length || !["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+    event.preventDefault();
+    const current = Math.max(0, tabs.indexOf(event.currentTarget));
+    let next = current;
+    if (event.key === "Home") next = 0;
+    else if (event.key === "End") next = tabs.length - 1;
+    else next = (current + (event.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
+    tabs[next].focus();
+    activate(tabs[next]);
   }
 
   function init() {
@@ -1733,6 +1747,10 @@ const SV = (() => {
       $$("[data-ev]").forEach((t) => {
         if (t.classList.contains("ev-tab")) t.setAttribute("aria-controls", `ev-panel-${t.dataset.ev}`);
         t.addEventListener("click", () => showEnv(t.dataset.ev));
+        if (t.classList.contains("ev-tab")) {
+          t.addEventListener("keydown", (event) =>
+            keyboardTabs(event, $$(".ev-tab"), (tab) => showEnv(tab.dataset.ev)));
+        }
       });
       showEnv($$(".ev-tab")[0]?.dataset.ev || "api");
     }
@@ -1756,6 +1774,8 @@ const SV = (() => {
         t.id = `${ns}-tab-${t.dataset.sv}`;
         t.setAttribute("aria-controls", `${ns}-panel-${t.dataset.sv}`);
         t.addEventListener("click", () => show(t.dataset.sv, scope));
+        t.addEventListener("keydown", (event) =>
+          keyboardTabs(event, owned(".sv-tab", scope), (tab) => show(tab.dataset.sv, scope)));
       });
       show(owned(".sv-tab", scope)[0].dataset.sv, scope);
     });

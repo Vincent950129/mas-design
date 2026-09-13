@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Checks the construction guide and its exact TB2 and APEX-Agents routes.
+"""Checks the construction guide and its TB2, APEX-Agents, and Hyper-Tau routes.
 
 Every public block is lifted from the rendered DOM and compared with its private reference
 source. The rest guards nested seed, section, and track-step tabs so opening one branch never
@@ -45,7 +45,7 @@ TABS = [("overview", "Overview"), ("benchmark", "Benchmark"), ("tasks", "Tasks")
         ("construction", "Create Your Benchmark")]
 # The detailed route is a hierarchy: seed -> section -> one track's pipeline step.
 GROUPS = {
-    "seed-benchmarks": ["tb2-seed", "apex-seed"],
+    "seed-benchmarks": ["tb2-seed", "apex-seed", "hyper-seed"],
     "tb2-sections": ["tb2-download", "tb2-tools", "tb2-skills", "tb2-agents", "tb2-output"],
     "tools-steps": ["tools-annotate", "tools-release", "tools-write"],
     "skills-steps": ["skills-annotate", "skills-release", "skills-write"],
@@ -54,6 +54,10 @@ GROUPS = {
     "apex-tools-steps": ["apex-tools-annotate", "apex-tools-release", "apex-tools-write"],
     "apex-skills-steps": ["apex-skills-annotate", "apex-skills-release", "apex-skills-write"],
     "apex-agents-steps": ["apex-agents-annotate", "apex-agents-release", "apex-agents-write"],
+    "hyper-sections": ["hyper-download", "hyper-tools", "hyper-skills", "hyper-agents", "hyper-output"],
+    "hyper-tools-steps": ["hyper-tools-annotate", "hyper-tools-release", "hyper-tools-write"],
+    "hyper-skills-steps": ["hyper-skills-annotate", "hyper-skills-release", "hyper-skills-write"],
+    "hyper-agents-steps": ["hyper-agents-annotate", "hyper-agents-release", "hyper-agents-write"],
     "evaluate": None,
 }
 PARENTS = {
@@ -65,10 +69,15 @@ PARENTS = {
     "apex-tools-steps": [("seed-benchmarks", "apex-seed"), ("apex-sections", "apex-tools")],
     "apex-skills-steps": [("seed-benchmarks", "apex-seed"), ("apex-sections", "apex-skills")],
     "apex-agents-steps": [("seed-benchmarks", "apex-seed"), ("apex-sections", "apex-agents")],
+    "hyper-sections": [("seed-benchmarks", "hyper-seed")],
+    "hyper-tools-steps": [("seed-benchmarks", "hyper-seed"), ("hyper-sections", "hyper-tools")],
+    "hyper-skills-steps": [("seed-benchmarks", "hyper-seed"), ("hyper-sections", "hyper-skills")],
+    "hyper-agents-steps": [("seed-benchmarks", "hyper-seed"), ("hyper-sections", "hyper-agents")],
 }
 SEEDS = {
     "https://github.com/harbor-framework/terminal-bench-2/tree/2fd12b88aafdd04a52c298e3940bcb189f9766d6": "Terminal-Bench 2",
     "https://huggingface.co/datasets/mercor/apex-agents": "APEX-Agents",
+    "https://github.com/sierra-research/hyper-tau-bench/tree/6e9f34c685d40fa7a9f5935d8970af6fd9d5f118": "Hyper-τ-Bench",
 }
 SKILL_URL = "https://educator-marrow-cultural.ngrok-free.dev/resources/evolve-benchmark/SKILL.md"
 CHARTS = {
@@ -97,6 +106,20 @@ APEX_CHARTS = {
     "specialists": {
         "train": [66, 38, 14], "test": [146, 93, 35],
         "added": [2, 2, 6], "cumulative": [2, 4, 10],
+    },
+}
+HYPER_CHARTS = {
+    "operations": {
+        "train": [2, 8, 5], "test": [6, 19, 13],
+        "added": [14, 45, 32], "cumulative": [14, 59, 91],
+    },
+    "skills": {
+        "train": [5, 2, 3, 2, 3], "test": [12, 5, 7, 6, 8],
+        "added": [4, 1, 1, 1, 2], "cumulative": [4, 5, 6, 7, 9],
+    },
+    "specialists": {
+        "train": [5, 5, 5], "test": [10, 15, 13],
+        "added": [4, 3, 10], "cumulative": [4, 7, 17],
     },
 }
 
@@ -158,6 +181,12 @@ def exact_apex_blocks(pg) -> list[tuple[str, str]]:
     return [tuple(b) for b in pg.evaluate("""() => [...document.querySelectorAll(
       '[data-pv-view="construction"] [data-apex-executable]')].map((pre) => [
         pre.dataset.apexExecutable, pre.querySelector('code').textContent])""")]
+
+
+def exact_hyper_blocks(pg) -> list[tuple[str, str]]:
+    return [tuple(item) for item in pg.evaluate("""() => [...document.querySelectorAll(
+      '[data-pv-view="construction"] [data-hyper-executable]')].map((pre) => [
+        pre.dataset.hyperExecutable, pre.querySelector('code').textContent])""")]
 
 
 def run(src: str, label: str, ns: dict | None = None) -> dict:
@@ -658,7 +687,7 @@ def main() -> int:
 
         print("\nOpening it")
         st = strips(pg)
-        check(set(st) == set(GROUPS), "ten tab strips, each scoped to its own group",
+        check(set(st) == set(GROUPS), "fourteen tab strips, each scoped to its own group",
               " ".join(sorted(st)))
         check(all(len(s["tab"]) == 1 and s["panel"] == s["tab"] for s in st.values()),
               "and each opens on exactly one of its own panels", str(st))
@@ -708,8 +737,9 @@ def main() -> int:
               and "execution-tested" in properties[0]["text"],
               "both formal conditions render, with feasibility scoped precisely",
               str(properties))
-        check("Terminal-Bench 2" in body and "APEX-Agents" in body,
-              "both seed routes are unmistakable")
+        check("Terminal-Bench 2" in body and "APEX-Agents" in body
+              and "Hyper-τ-Bench" in body,
+              "all three seed routes are unmistakable")
         check("The recipe, in four steps" not in body and "seed_apex_agents.py" not in body
               and "application names only guard availability" in body.lower(),
               "stale application-as-tool and rubric-mining guidance is gone")
@@ -784,10 +814,15 @@ def main() -> int:
             key: host.dataset.apexGuide,
             code: host.querySelector('code')?.textContent.length || 0,
           })),
+          hyper: [...document.querySelectorAll('[data-hyper-guide]')].map((host) => ({
+            key: host.dataset.hyperGuide,
+            code: host.querySelector('code')?.textContent.length || 0,
+          })),
         })""")
         for seed, items in guides.items():
-            check(len(items) == 6 and all(item["code"] >= 250 for item in items),
-                  f"{seed}: all six skills/agents step guides render exact builder code",
+            expected_guides = 9 if seed == "hyper" else 6
+            check(len(items) == expected_guides and all(item["code"] >= 250 for item in items),
+                  f"{seed}: all track-step guides render corresponding construction code",
                   str(items))
 
         print("\nTB2 expected output is a stage picture, not a checksum table")
@@ -883,6 +918,55 @@ def main() -> int:
                        "9 operations available", "+4 operations released")),
               "APEX hover reveals its full task and harness counts", tip_text)
 
+        print("\nHyper-Tau expected output reflects the repaired general-skill run")
+        pg.click('[data-sv-group="seed-benchmarks"] .sv-tab[data-sv="hyper-seed"]')
+        pg.click('[data-sv-group="hyper-sections"] .sv-tab[data-sv="hyper-output"]')
+        pg.wait_for_timeout(180)
+        hyper_state = pg.evaluate("""() => {
+          const panel = document.querySelector('[data-sv-panel="hyper-output"]');
+          return {
+            text: panel.textContent,
+            charts: [...panel.querySelectorAll('[data-stage-chart]')].map((node) => ({
+              axis: node.dataset.axis,
+              train: node.dataset.train.split(',').map(Number),
+              test: node.dataset.test.split(',').map(Number),
+              added: node.dataset.added.split(',').map(Number),
+              cumulative: node.dataset.cumulative.split(',').map(Number),
+              stages: node.querySelectorAll('.tb2-stage').length,
+              tooltip: node.querySelectorAll('.tb2-chart-tooltip[role="tooltip"]').length,
+              label: node.querySelector('svg')?.getAttribute('aria-label') || '',
+            })),
+          };
+        }""")
+        hyper_data = {chart.pop("axis"): chart for chart in hyper_state["charts"]}
+        check(set(hyper_data) == set(HYPER_CHARTS),
+              "operations, skills, and specialists each have a Hyper-Tau chart",
+              str(sorted(hyper_data)))
+        for axis, expected in HYPER_CHARTS.items():
+            actual = hyper_data.get(axis, {})
+            series = {key: actual.get(key) for key in expected}
+            check(series == expected,
+                  f"Hyper-Tau {axis}: chart data matches the repaired output", str(series))
+            check(actual.get("stages") == len(expected["train"])
+                  and actual.get("tooltip") == 1 and bool(actual.get("label")),
+                  f"Hyper-Tau {axis}: its independent stage count renders accessibly",
+                  str(actual))
+        check("preflight-only" in hyper_state["text"]
+              and "does not claim runtime validation or rewards" in hyper_state["text"],
+              "Hyper-Tau runtime status is stated without a false validation claim")
+        hyper_h2 = pg.locator('[data-sv-panel="hyper-output"] [data-axis="operations"] '
+                              '.tb2-stage[data-stage="H2"]')
+        hyper_tip = pg.locator('[data-sv-panel="hyper-output"] [data-axis="operations"] '
+                               '.tb2-chart-tooltip')
+        hyper_h2.hover()
+        pg.wait_for_timeout(120)
+        tip_text = hyper_tip.inner_text()
+        check(hyper_tip.is_visible()
+              and all(part in tip_text for part in
+                      ("H2", "8 adaptation", "19 test", "27 tasks",
+                       "59 operations available", "+45 operations released")),
+              "Hyper-Tau hover reveals its full task and harness counts", tip_text)
+
         pg.screenshot(path=str(OUT / "construction.png"), full_page=True)
 
         print("\nAnd the service strip is still independent of construction")
@@ -908,6 +992,7 @@ def main() -> int:
         code = blocks(pg)
         exact = exact_tb2_blocks(pg)
         exact_apex = exact_apex_blocks(pg)
+        exact_hyper = exact_hyper_blocks(pg)
         pg.context.grant_permissions(["clipboard-read", "clipboard-write"],
                                      origin="http://127.0.0.1:8777")
         setup_pre = pg.locator('[data-tb2-executable="setup"]')
@@ -922,6 +1007,13 @@ def main() -> int:
         apex_copied = pg.evaluate("navigator.clipboard.readText()")
         check(apex_copied == dict(exact_apex)["setup"],
               "the APEX copy button copies every rendered byte")
+        pg.click('[data-sv-group="seed-benchmarks"] .sv-tab[data-sv="hyper-seed"]')
+        pg.click('[data-sv-group="hyper-sections"] .sv-tab[data-sv="hyper-download"]')
+        hyper_setup_pre = pg.locator('[data-hyper-executable="setup"]')
+        hyper_setup_pre.locator("xpath=..").locator(".sv-copy").click()
+        hyper_copied = pg.evaluate("navigator.clipboard.readText()")
+        check(hyper_copied == dict(exact_hyper)["setup"],
+              "the Hyper-Tau copy button copies every rendered byte")
 
         mobile = b.new_page(viewport={"width": 390, "height": 844})
         mobile.goto(BASE, wait_until="load")
@@ -952,6 +1044,15 @@ def main() -> int:
     check(len(exact) == 8, "the complete TB2 route is shown once", str([n for n, _ in exact]))
     check(len(exact_apex) == 8, "the complete APEX route is shown once",
           str([n for n, _ in exact_apex]))
+    check(len(exact_hyper) == 5, "the Hyper-Tau route is shown once",
+          str([n for n, _ in exact_hyper]))
+    hyper_joined = "\n".join(source for _, source in exact_hyper)
+    check("/export/" not in hyper_joined and "hyper_tau_bench_builder" not in hyper_joined,
+          "the Hyper-Tau blocks contain no private builder path")
+    check("evolve_core.py" in hyper_joined
+          and "run_verifier.py" in hyper_joined
+          and "--run-smoke" in hyper_joined,
+          "the Hyper-Tau route uses the public engine and real verifier wrapper")
     with tempfile.TemporaryDirectory() as td:
         tmp = pathlib.Path(td)
         check_public_tb2_path(exact, tmp)
