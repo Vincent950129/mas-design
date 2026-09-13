@@ -1323,6 +1323,18 @@ footer.footer { background: none; }
   font: 700 11px 'Google Sans', 'Noto Sans', sans-serif;
   text-anchor: middle;
 }
+.bs-stage-added {
+  fill: #0f766e;
+  font: 750 10px 'Google Sans', 'Noto Sans', sans-serif;
+  text-anchor: middle;
+}
+.bs-stage-added--eog { fill: #d97706; }
+.bs-stage-added--ale { fill: #4f46e5; }
+.bs-release-label {
+  font: 800 10px 'Google Sans', 'Noto Sans', sans-serif;
+}
+.bs-release-label--eog { fill: #d97706; }
+.bs-release-label--ale { fill: #4f46e5; }
 .bs-line {
   fill: none;
   stroke-width: 2.25;
@@ -1375,14 +1387,6 @@ footer.footer { background: none; }
 .bs-tooltip strong { display: block; color: #1f2a44; font-size: 0.86rem; }
 .bs-tooltip span { display: block; margin-top: 4px; }
 .bs-tooltip span b { display: inline; color: #3a3f73; }
-.bs-readout {
-  min-height: 1.2rem;
-  margin: -0.15rem 0 0;
-  color: #71809a;
-  font-size: 0.8rem;
-  text-align: center;
-}
-.bs-readout b { color: #3a3f73; }
 .bs-figure figcaption {
   margin-top: 0.85rem;
   color: #71809a;

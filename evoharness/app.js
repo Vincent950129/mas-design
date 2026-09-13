@@ -3195,11 +3195,11 @@ function initBenchmarkFigure() {
   ];
 
   const W = 380;
-  const H = 286;
+  const H = 320;
   const L = 34;
   const R = 14;
   const T = 28;
-  const B = 42;
+  const B = 76;
   const baseline = H - B;
   const plotW = W - L - R;
   const plotH = baseline - T;
@@ -3260,10 +3260,20 @@ function initBenchmarkFigure() {
           `<rect class="bs-bar bs-bar--test"${testHatch} x="${barX(env)}" y="${totalTop}" width="${barW}" height="${adaptTop - totalTop}"></rect>` +
           `<text class="bs-bar-total bs-bar-total--${env}" x="${barX(env) + barW / 2}" y="${Math.max(T + 8, totalTop - 5)}">${total}</text>`;
       }).join("");
+      const released = (env) => {
+        const values = axis[env].harness;
+        return i < values.length ? values[i] - (i ? values[i - 1] : 0) : null;
+      };
+      const selectedRelease = mode === "both" ? null : released(mode);
+      const additions = mode === "both"
+        ? `<tspan class="bs-stage-added--eog" x="${x(i)}">${released("eog") == null ? "—" : `+${released("eog")} ${axis.key}`}</tspan>` +
+          `<tspan class="bs-stage-added--ale" x="${x(i)}" dy="14">${released("ale") == null ? "—" : `+${released("ale")} ${axis.key}`}</tspan>`
+        : `<tspan class="bs-stage-added--${mode}">${selectedRelease == null ? "—" : `+${selectedRelease} ${axis.key}`}</tspan>`;
       return `<g class="bs-stage" data-bs-stage="${i}" tabindex="0" role="group" ` +
         `aria-label="H${i + 1}. ${aria}">` +
         `<rect class="bs-stage-hit" x="${L + cellW * i}" y="${T}" width="${cellW}" height="${baseline - T}"></rect>` +
-        `${bars}<text class="bs-stage-label" x="${x(i)}" y="${baseline + 20}">H${i + 1}</text></g>`;
+        `${bars}<text class="bs-stage-label" x="${x(i)}" y="${baseline + 20}">H${i + 1}</text>` +
+        `<text class="bs-stage-added" x="${x(i)}" y="${baseline + 39}">${additions}</text></g>`;
     }).join("");
 
     const availableLine = (env) => {
@@ -3285,6 +3295,11 @@ function initBenchmarkFigure() {
         `<text class="bs-required-value" text-anchor="end" x="${end.x - 5}" y="${end.y - 6}">${values[values.length - 1]}</text>`;
     };
     const refPoints = axis.referenceTrend.map((n, i) => ({ x: x(i), y: yReference(n) }));
+    const refLabelPoint = refPoints.at(-2);
+    const releaseRowLabels = mode === "both"
+      ? `<text class="bs-release-label bs-release-label--eog" text-anchor="end" x="${L - 3}" y="${baseline + 39}">EOG:</text>` +
+        `<text class="bs-release-label bs-release-label--ale" text-anchor="end" x="${L - 3}" y="${baseline + 53}">ALE:</text>`
+      : `<text class="bs-release-label bs-release-label--${mode}" text-anchor="end" x="${L - 3}" y="${baseline + 39}">${mode.toUpperCase()}:</text>`;
 
     const svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" role="img" ` +
       `aria-label="${axis.title} by harness stage: stacked adaptation and test tasks, cumulative EOG and ALE harnesses, and required capabilities per task.">` +
@@ -3294,16 +3309,16 @@ function initBenchmarkFigure() {
         `<pattern id="${pattern}-test" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(35)"><rect width="5" height="5" fill="#e1e5ee"></rect><line y2="5" stroke="#ffffff" stroke-width="1.5"></line></pattern>` +
       `</defs>` +
       `<text class="bs-axis-label" x="${L}" y="15">tasks</text>${gridLines}${stages}` +
+      releaseRowLabels +
       `<path class="bs-line bs-line--reference" d="${smoothPath(refPoints)}"></path>` +
       refPoints.map((p) => `<circle class="bs-point bs-point--reference" cx="${p.x}" cy="${p.y}" r="2.6"></circle>`).join("") +
-      `<text class="bs-reference-label" text-anchor="end" x="${refPoints.at(-1).x - 4}" y="${refPoints.at(-1).y - 7}">${axis.reference}</text>` +
+      `<text class="bs-reference-label" text-anchor="middle" x="${refLabelPoint.x}" y="${refLabelPoint.y - 10}">${axis.reference}</text>` +
       availableLine("eog") + availableLine("ale") + requiredLine("eog") + requiredLine("ale") +
       `</svg>`;
 
     return `<article class="bs-chart-card" data-bs-axis="${axis.key}">` +
       `<header><h4>${axis.title}</h4><span>${axis.meta}</span></header>` +
       `<div class="bs-chart-wrap">${svg}<div class="bs-tooltip" role="tooltip"></div></div>` +
-      `<p class="bs-readout" aria-live="polite">Hover or focus a stage to inspect its counts.</p>` +
       `</article>`;
   }
 
@@ -3311,8 +3326,7 @@ function initBenchmarkFigure() {
     const card = root.querySelector(`[data-bs-axis="${axis.key}"]`);
     const wrap = card?.querySelector(".bs-chart-wrap");
     const tip = card?.querySelector(".bs-tooltip");
-    const readout = card?.querySelector(".bs-readout");
-    if (!card || !wrap || !tip || !readout) return;
+    if (!card || !wrap || !tip) return;
     const visible = mode === "both" ? ["eog", "ale"] : [mode];
 
     const show = (i) => {
@@ -3329,15 +3343,10 @@ function initBenchmarkFigure() {
       tip.style.left = `${((i + 0.5) * 100) / 6}%`;
       tip.dataset.edge = i === 0 ? "left" : i === 5 ? "right" : "center";
       tip.classList.add("is-visible");
-      readout.innerHTML = `<b>H${i + 1}</b> · ${visible.map((env) => {
-        const s = axis[env];
-        return i < s.harness.length ? `${env.toUpperCase()} harness ${s.harness[i]}` : `${env.toUpperCase()} —`;
-      }).join(" · ")}`;
     };
     const hide = () => {
       card.querySelectorAll(".bs-stage.is-highlighted").forEach((node) => node.classList.remove("is-highlighted"));
       tip.classList.remove("is-visible");
-      readout.textContent = "Hover or focus a stage to inspect its counts.";
     };
     card.querySelectorAll(".bs-stage").forEach((node) => {
       const i = Number(node.dataset.bsStage);
