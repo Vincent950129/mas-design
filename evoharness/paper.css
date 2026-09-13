@@ -935,7 +935,7 @@ footer.footer { background: none; }
   gap: 1.6rem;
 }
 .diff-h {
-  flex: 0 0 17.2rem;
+  flex: 0 0 13.5rem;
   font-family: 'Google Sans', 'Noto Sans', sans-serif;
   font-size: 1.4rem;
   font-weight: 700;
@@ -944,11 +944,14 @@ footer.footer { background: none; }
   color: #1f2a44;
   margin: 0;
 }
+.diff-h > span,
+.diff-h > b { display: block; }
 .diff-h b { font-weight: 700; color: var(--accent); }
 .diff-pills {
   flex: 1 1 auto;
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: flex-start;
   gap: 0.6rem;
   list-style: none;
   margin: 0;
@@ -980,16 +983,37 @@ footer.footer { background: none; }
   background: #eef0fb;
 }
 .diff-ico svg { width: 15px; height: 15px; }
+.diff-copy { min-width: 0; }
+.diff-pill:nth-child(3) .diff-copy,
+.diff-pill:nth-child(4) .diff-copy { white-space: nowrap; }
+.diff-cta {
+  color: var(--accent);
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  text-decoration: underline;
+  text-decoration-color: #c7ccf3;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: color .15s ease, text-decoration-color .15s ease;
+}
+.diff-cta:hover,
+.diff-cta:focus-visible {
+  color: #3f46b5;
+  text-decoration-color: currentColor;
+}
 @media (max-width: 900px) {
   .diff-top { flex-direction: column; align-items: stretch; gap: 1rem; }
   .diff-h { flex: none; text-align: center; }
-  .diff-pills { justify-content: center; }
+  .diff-pills { align-items: center; }
 }
 @media (max-width: 640px) {
   .diff-h { font-size: 1.25rem; }
   /* Narrow enough that the longer claims run to two lines: hold every pill to the full
      width so the wrapped ones and the short one keep the same edges. */
-  .diff-pill { font-size: 0.8rem; width: 100%; }
+  .diff-pill { width: 100%; }
+  .diff-pill:nth-child(3) .diff-copy,
+  .diff-pill:nth-child(4) .diff-copy { white-space: normal; }
 }
 
 /* ---------- Cards used by MAS-Zero / MAS-Orchestra ---------- */

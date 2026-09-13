@@ -22,7 +22,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
   <link rel="stylesheet" href="./static/css/index.css">
   <link rel="stylesheet" href="obs.css">
-  <link rel="stylesheet" href="paper.css?v=20260913-stats-5">
+  <link rel="stylesheet" href="paper.css?v=20260913-overview-6">
   <link rel="icon" href="./static/images/favicon.svg">
   <script defer src="./static/js/fontawesome.all.min.js"></script>
 </head>
@@ -195,7 +195,7 @@
 <section class="section diff-sec" id="different">
   <div class="container is-max-desktop">
     <div class="diff-top">
-      <h2 class="diff-h">What makes <b>EvoHarnessBench</b> different</h2>
+      <h2 class="diff-h"><span>What makes</span><b>EvoHarnessBench</b><span>different</span></h2>
       <ul class="diff-pills">
         <li class="diff-pill">
           <span class="diff-ico" aria-hidden="true">
@@ -226,7 +226,9 @@
               <rect x="13.6" y="4.4" width="7.6" height="15.2" rx="2"/>
               <path d="M16 15.4v-2.6M18.4 15.4V9.8"/>
             </svg>
-          </span>Two evaluation modes: deployment and self-evolving adaptation
+          </span>
+          <span class="diff-copy">Two evaluation modes: deployment and self-evolving adaptation.
+            <a class="diff-cta" href="#evaluate">Install evolve-eval skill in 10s</a></span>
         </li>
         <li class="diff-pill">
           <span class="diff-ico" aria-hidden="true">
@@ -236,7 +238,9 @@
               <path d="M15.4 3.7c2.5 0 2 7.3 4.5 8.3-2.5 1-2 8.3-4.5 8.3"/>
               <path d="M10.4 12.2l1.7 1.7 3.3-3.6"/>
             </svg>
-          </span>Deterministic and widely applicable construction, with no LLM in the loop
+          </span>
+          <span class="diff-copy">Deterministic and widely applicable construction, with no LLM in the loop.
+            <a class="diff-cta" href="#construction">Install evolve-benchmark skill in 10s</a></span>
         </li>
       </ul>
     </div>
@@ -1658,7 +1662,12 @@
       <em>&ldquo;use the evolve-eval skill to evaluate yourself on my dataset.&rdquo;</em> It guides you through
       four approvals: suitability and hosted/local resolution; runtime and deviations; exact smoke
       and cost plan; then results and optional reporting. It can use a healthy hosted target or help
-      validate and start a local adapter. Credentials stay in environment variables.
+      validate and start a local adapter. For a local track, it proposes how to enable only the
+      selected resources, asks you to approve the design and negative controls, and tests that an
+      unreleased tool, skill, or agent is inaccessible before calling the result comparable. You can
+      also ask it focused API questions such as
+      <em>&ldquo;How do I get per-verifier results?&rdquo;</em>; it will give the matching SDK or HTTP access
+      path without starting a run. Credentials stay in environment variables.
     </p>
     <div class="sv-codewrap">
       <span class="sv-lang">bash &middot; install evolve-eval</span>
@@ -2189,13 +2198,15 @@ print(evolve.bwt, evolve.fwt)           # FWT is None in deployment mode; here i
         loopback-only sidecar. Adapters and results are never uploaded automatically.
         Check <code>comparable_tracks</code> in the inspection result: a bounded diagnostic smoke
         may run on other tracks, but the CLI rejects a full leaderboard run unless the official
-        runtime physically enforces that track&rsquo;s selected resources.
+        runtime physically enforces that track&rsquo;s selected resources and a checksum-bound
+        negative-control report proves forbidden resources are inaccessible. The skill presents
+        the enforcement design and tests at its runtime checkpoint and waits for your approval.
       </p>
 
       <div class="sv-codewrap">
         <span class="sv-lang">bash &middot; automatic hosted/local selection</span>
         <button class="sv-copy" type="button">Copy</button>
-        <pre class="sv-code" data-lang="bash"><code># Check source pins, runtime policy, tracks, smoke task and both hashes first.
+        <pre class="sv-code" data-lang="bash"><code># Check source pins, runtime policy, tracks, negative-control proof and hashes first.
 evolve-eval inspect-adapter ./adapter.json
 
 # If no healthy hosted target supports the request, this starts a loopback sidecar,
@@ -2269,7 +2280,9 @@ row["gym_servers_config"]  # JSON: which gym to seed, and from which snapshot</c
           <p>
             The adapter contract covers task discovery, <code>create</code>, <code>run_agent</code>,
             <code>grade</code> and <code>teardown</code>, plus isolation, network, credentials,
-            timeout, smoke selection and resource enforcement. Terminal-Bench 2, APEX-Agents and
+            timeout, smoke selection and tested resource enforcement. The guided skill asks you to
+            approve the fence and its negative controls, then verifies allowed resources work while
+            forbidden resources cannot be discovered, read, called, or spawned. Terminal-Bench 2, APEX-Agents and
             Hyper-&tau;-bench are reviewed examples; they are not hard-coded prerequisites. If a
             verifier or resource fence cannot run, the skill reports a blocked or diagnostic run
             instead of manufacturing a zero score.
