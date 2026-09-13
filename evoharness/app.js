@@ -1124,7 +1124,7 @@ function paintAxis(axis) {
 function showResults(axis) {
   $$(".rs-tab").forEach((t) => t.classList.toggle("is-active", t.dataset.rs === axis));
   $$(".rs-panel").forEach((p) => p.classList.toggle("is-active", p.dataset.rsPanel === axis));
-  if (axis !== "overview") paintAxis(axis);
+  if (["tools", "skills", "agents"].includes(axis)) paintAxis(axis);
 }
 
 function initResults() {
@@ -1140,7 +1140,7 @@ function initResults() {
       });
     });
   });
-  showResults("overview");
+  showResults("protocol");
 }
 
 function initNav() {
@@ -1688,18 +1688,22 @@ const SV = (() => {
     return out + esc(src.slice(last));
   }
 
-  /* Several strips of these are on the page now -- the service quickstart, and the steps,
-   * axes and seeds of the construction recipe -- and they switch independently, so a strip
-   * is scoped to the container that owns it. Unscoped, a click in one would blank another's
-   * panels, which is invisible on the strip you are looking at and obvious on the one you
-   * are not. */
+  /* Several strips of these are on the page now -- including a seed chooser nested inside
+   * the download step -- and they switch independently. Only tabs and panels whose nearest
+   * owner is the current scope belong to it. */
+  function owned(selector, scope) {
+    return $$(selector, scope).filter((el) =>
+      el.closest("[data-sv-group], .pv-view") === scope);
+  }
+
   function show(key, scope) {
-    $$(".sv-tab", scope).forEach((t) => {
+    owned(".sv-tab", scope).forEach((t) => {
       const on = t.dataset.sv === key;
       t.classList.toggle("is-active", on);
       t.setAttribute("aria-selected", String(on));
     });
-    $$(".sv-panel", scope).forEach((p) => p.classList.toggle("is-active", p.dataset.svPanel === key));
+    owned(".sv-panel", scope).forEach((p) =>
+      p.classList.toggle("is-active", p.dataset.svPanel === key));
   }
 
   /* Which execution environment the reader is being shown: the hosted service or running it
@@ -1743,17 +1747,17 @@ const SV = (() => {
     scopes.forEach((scope) => {
       /* Panel keys repeat across groups, so the ARIA ids are namespaced by the group. */
       const ns = scope.dataset.svGroup || scope.dataset.pvView || "sv";
-      $$(".sv-panel", scope).forEach((p) => {
+      owned(".sv-panel", scope).forEach((p) => {
         p.id = `${ns}-panel-${p.dataset.svPanel}`;
         p.setAttribute("role", "tabpanel");
         p.setAttribute("aria-labelledby", `${ns}-tab-${p.dataset.svPanel}`);
       });
-      $$(".sv-tab", scope).forEach((t) => {
+      owned(".sv-tab", scope).forEach((t) => {
         t.id = `${ns}-tab-${t.dataset.sv}`;
         t.setAttribute("aria-controls", `${ns}-panel-${t.dataset.sv}`);
         t.addEventListener("click", () => show(t.dataset.sv, scope));
       });
-      show($$(".sv-tab", scope)[0].dataset.sv, scope);
+      show(owned(".sv-tab", scope)[0].dataset.sv, scope);
     });
 
     $$(".sv-copy").forEach((btn) => {
@@ -3142,6 +3146,351 @@ const LB = (() => {
   return { init };
 })();
 
+/* Interactive rendering of the paper's Figure 2. The task bars come from the appendix
+ * trajectory table; the harness curves use the cumulative releases shown in the figure.
+ * The real-world curves are deliberately relative trends because the cited ecosystems use
+ * different units from EvoHarnessBench. */
+function initBenchmarkFigure() {
+  const root = document.querySelector("[data-benchmark-figure]");
+  const grid = root?.querySelector("[data-bs-grid]");
+  if (!root || !grid) return;
+
+  const axes = [
+    {
+      key: "tools", title: "Tools", meta: "799 staged task instances · 520 unique tools",
+      reference: "AgentForce", referenceTrend: [0.17, 0.31, 0.49, 0.66, 0.83, 1],
+      eog: {
+        adapt: [74, 37, 39, 34, 7, 3], test: [175, 88, 90, 81, 15, 6],
+        harness: [245, 334, 428, 507, 522, 532], required: [6.9, 7.6, 7.9, 8.0, 6.3, 5.8],
+      },
+      ale: {
+        adapt: [22, 4, 4, 4, 12], test: [52, 8, 8, 8, 28],
+        harness: [45, 72, 99, 127, 178], required: [2.7, 2.5, 2.3, 4.8, 3.9],
+      },
+    },
+    {
+      key: "skills", title: "Skills", meta: "353 staged task instances · 42 latent skills",
+      reference: "openai/skills", referenceTrend: [0.10, 0.28, 0.48, 0.68, 0.86, 1],
+      eog: {
+        adapt: [14, 22, 19, 5], test: [36, 55, 46, 11],
+        harness: [7, 13, 26, 29], required: [1.3, 2.8, 4.0, 4.4],
+      },
+      ale: {
+        adapt: [5, 4, 6, 11, 8, 9], test: [13, 11, 15, 25, 17, 21],
+        harness: [4, 6, 7, 9, 10, 13], required: [1.7, 3.4, 3.3, 4.6, 3.7, 5.6],
+      },
+    },
+    {
+      key: "agents", title: "Agents", meta: "358 staged task instances · 62 specialist agents",
+      reference: "AgentForce", referenceTrend: [0.15, 0.29, 0.46, 0.64, 0.82, 1],
+      eog: {
+        adapt: [9, 11, 19, 21], test: [20, 30, 54, 44],
+        harness: [20, 29, 40, 51], required: [4.4, 4.8, 5.9, 5.5],
+      },
+      ale: {
+        adapt: [12, 9, 5, 10, 4, 6], test: [24, 18, 17, 13, 17, 15],
+        harness: [2, 5, 8, 12, 16, 24], required: [1.3, 3.2, 2.1, 2.5, 2.9, 2.7],
+      },
+    },
+  ];
+
+  const W = 380;
+  const H = 286;
+  const L = 34;
+  const R = 14;
+  const T = 28;
+  const B = 42;
+  const baseline = H - B;
+  const plotW = W - L - R;
+  const plotH = baseline - T;
+  let mode = "both";
+
+  const smoothPath = (points) => points.slice(1).reduce((path, point, i) => {
+    const prev = points[i];
+    const reach = (point.x - prev.x) * 0.38;
+    return `${path} C ${prev.x + reach} ${prev.y}, ${point.x - reach} ${point.y}, ${point.x} ${point.y}`;
+  }, `M ${points[0].x} ${points[0].y}`);
+
+  const niceTick = (largest) => {
+    const raw = Math.max(largest, 1) / 4;
+    const magnitude = 10 ** Math.floor(Math.log10(raw));
+    const normalized = raw / magnitude;
+    return (normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 5 ? 5 : 10) * magnitude;
+  };
+
+  function renderAxis(axis) {
+    const count = 6;
+    const x = (i) => L + plotW * ((i + 0.5) / count);
+    const allTotals = [axis.eog, axis.ale].flatMap((series) =>
+      series.adapt.map((n, i) => n + series.test[i]));
+    const tick = niceTick(Math.max(...allTotals));
+    const ceiling = Math.ceil(Math.max(...allTotals) / tick) * tick;
+    const yTask = (n) => baseline - (n / ceiling) * plotH;
+    const maxHarness = Math.max(...axis.eog.harness, ...axis.ale.harness);
+    const maxRequired = Math.max(...axis.eog.required, ...axis.ale.required);
+    const yHarness = (n) => baseline - (0.22 + 0.73 * Math.sqrt(n / maxHarness)) * plotH;
+    const yRequired = (n) => baseline - (0.05 + 0.23 * (n / maxRequired)) * plotH;
+    const yReference = (n) => baseline - (0.23 + 0.72 * n) * plotH;
+    const pattern = `bs-hatch-${axis.key}`;
+    const visible = mode === "both" ? ["eog", "ale"] : [mode];
+
+    const gridLines = Array.from({ length: 5 }, (_, i) => (ceiling / 4) * i).map((n) =>
+      `<g class="bs-gridline"><line x1="${L}" y1="${yTask(n)}" x2="${W - R}" y2="${yTask(n)}"></line>` +
+      `<text x="${L - 7}" y="${yTask(n) + 3}">${Math.round(n)}</text></g>`).join("");
+
+    const stages = Array.from({ length: count }, (_, i) => {
+      const cellW = plotW / count;
+      const barW = mode === "both" ? 11 : 20;
+      const barX = (env) => mode === "both" ? x(i) + (env === "eog" ? -12 : 1) : x(i) - 10;
+      const aria = visible.map((env) => {
+        const s = axis[env];
+        if (i >= s.adapt.length) return `${env.toUpperCase()}: no stage`;
+        return `${env.toUpperCase()}: ${s.adapt[i]} adaptation and ${s.test[i]} test tasks, ` +
+          `${s.harness[i]} available ${axis.key}, ${s.required[i]} required per task`;
+      }).join(". ");
+      const bars = visible.map((env) => {
+        const s = axis[env];
+        if (i >= s.adapt.length) return "";
+        const total = s.adapt[i] + s.test[i];
+        const adaptTop = yTask(s.adapt[i]);
+        const totalTop = yTask(total);
+        const hatch = env === "ale" ? ` fill="url(#${pattern}-adapt)"` : "";
+        const testHatch = env === "ale" ? ` fill="url(#${pattern}-test)"` : "";
+        return `<rect class="bs-bar bs-bar--adapt"${hatch} x="${barX(env)}" y="${adaptTop}" width="${barW}" height="${baseline - adaptTop}"></rect>` +
+          `<rect class="bs-bar bs-bar--test"${testHatch} x="${barX(env)}" y="${totalTop}" width="${barW}" height="${adaptTop - totalTop}"></rect>` +
+          `<text class="bs-bar-total bs-bar-total--${env}" x="${barX(env) + barW / 2}" y="${Math.max(T + 8, totalTop - 5)}">${total}</text>`;
+      }).join("");
+      return `<g class="bs-stage" data-bs-stage="${i}" tabindex="0" role="group" ` +
+        `aria-label="H${i + 1}. ${aria}">` +
+        `<rect class="bs-stage-hit" x="${L + cellW * i}" y="${T}" width="${cellW}" height="${baseline - T}"></rect>` +
+        `${bars}<text class="bs-stage-label" x="${x(i)}" y="${baseline + 20}">H${i + 1}</text></g>`;
+    }).join("");
+
+    const availableLine = (env) => {
+      if (!visible.includes(env)) return "";
+      const values = axis[env].harness;
+      const points = values.map((n, i) => ({ x: x(i), y: yHarness(n) }));
+      const end = points[points.length - 1];
+      return `<path class="bs-line bs-line--${env}" d="${smoothPath(points)}"></path>` +
+        points.map((p) => `<circle class="bs-point bs-point--${env}" cx="${p.x}" cy="${p.y}" r="3.2"></circle>`).join("") +
+        `<text class="bs-line-value bs-line-value--${env}" text-anchor="end" x="${end.x - 5}" y="${end.y - 7}">${values[values.length - 1]}</text>`;
+    };
+    const requiredLine = (env) => {
+      if (!visible.includes(env)) return "";
+      const values = axis[env].required;
+      const points = values.map((n, i) => ({ x: x(i), y: yRequired(n) }));
+      const end = points[points.length - 1];
+      return `<path class="bs-line bs-line--required bs-line--required-${env}" d="${smoothPath(points)}"></path>` +
+        points.map((p) => `<circle class="bs-required-point bs-required-point--${env}" cx="${p.x}" cy="${p.y}" r="2.8"></circle>`).join("") +
+        `<text class="bs-required-value" text-anchor="end" x="${end.x - 5}" y="${end.y - 6}">${values[values.length - 1]}</text>`;
+    };
+    const refPoints = axis.referenceTrend.map((n, i) => ({ x: x(i), y: yReference(n) }));
+
+    const svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" role="img" ` +
+      `aria-label="${axis.title} by harness stage: stacked adaptation and test tasks, cumulative EOG and ALE harnesses, and required capabilities per task.">` +
+      `<title>${axis.title}: benchmark tasks and harness growth by stage</title>` +
+      `<defs>` +
+        `<pattern id="${pattern}-adapt" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(35)"><rect width="5" height="5" fill="#858da3"></rect><line y2="5" stroke="#f8fafc" stroke-width="1.5"></line></pattern>` +
+        `<pattern id="${pattern}-test" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(35)"><rect width="5" height="5" fill="#e1e5ee"></rect><line y2="5" stroke="#ffffff" stroke-width="1.5"></line></pattern>` +
+      `</defs>` +
+      `<text class="bs-axis-label" x="${L}" y="15">tasks</text>${gridLines}${stages}` +
+      `<path class="bs-line bs-line--reference" d="${smoothPath(refPoints)}"></path>` +
+      refPoints.map((p) => `<circle class="bs-point bs-point--reference" cx="${p.x}" cy="${p.y}" r="2.6"></circle>`).join("") +
+      `<text class="bs-reference-label" text-anchor="end" x="${refPoints.at(-1).x - 4}" y="${refPoints.at(-1).y - 7}">${axis.reference}</text>` +
+      availableLine("eog") + availableLine("ale") + requiredLine("eog") + requiredLine("ale") +
+      `</svg>`;
+
+    return `<article class="bs-chart-card" data-bs-axis="${axis.key}">` +
+      `<header><h4>${axis.title}</h4><span>${axis.meta}</span></header>` +
+      `<div class="bs-chart-wrap">${svg}<div class="bs-tooltip" role="tooltip"></div></div>` +
+      `<p class="bs-readout" aria-live="polite">Hover or focus a stage to inspect its counts.</p>` +
+      `</article>`;
+  }
+
+  function wireAxis(axis) {
+    const card = root.querySelector(`[data-bs-axis="${axis.key}"]`);
+    const wrap = card?.querySelector(".bs-chart-wrap");
+    const tip = card?.querySelector(".bs-tooltip");
+    const readout = card?.querySelector(".bs-readout");
+    if (!card || !wrap || !tip || !readout) return;
+    const visible = mode === "both" ? ["eog", "ale"] : [mode];
+
+    const show = (i) => {
+      card.querySelectorAll(".bs-stage").forEach((node, j) =>
+        node.classList.toggle("is-highlighted", i === j));
+      const rows = visible.map((env) => {
+        const s = axis[env];
+        if (i >= s.adapt.length) return `<span><b>${env.toUpperCase()}</b> — no H${i + 1} stage</span>`;
+        const total = s.adapt[i] + s.test[i];
+        return `<span><b>${env.toUpperCase()}</b> ${s.adapt[i]} adapt + ${s.test[i]} test = ${total} tasks<br>` +
+          `${s.harness[i]} ${axis.key} available · ${s.required[i]} required/task</span>`;
+      }).join("");
+      tip.innerHTML = `<strong>H${i + 1}</strong>${rows}`;
+      tip.style.left = `${((i + 0.5) * 100) / 6}%`;
+      tip.dataset.edge = i === 0 ? "left" : i === 5 ? "right" : "center";
+      tip.classList.add("is-visible");
+      readout.innerHTML = `<b>H${i + 1}</b> · ${visible.map((env) => {
+        const s = axis[env];
+        return i < s.harness.length ? `${env.toUpperCase()} harness ${s.harness[i]}` : `${env.toUpperCase()} —`;
+      }).join(" · ")}`;
+    };
+    const hide = () => {
+      card.querySelectorAll(".bs-stage.is-highlighted").forEach((node) => node.classList.remove("is-highlighted"));
+      tip.classList.remove("is-visible");
+      readout.textContent = "Hover or focus a stage to inspect its counts.";
+    };
+    card.querySelectorAll(".bs-stage").forEach((node) => {
+      const i = Number(node.dataset.bsStage);
+      node.addEventListener("pointerenter", () => show(i));
+      node.addEventListener("focus", () => show(i));
+      node.addEventListener("click", () => show(i));
+      node.addEventListener("blur", hide);
+    });
+    wrap.addEventListener("pointerleave", hide);
+  }
+
+  function render() {
+    grid.innerHTML = axes.map(renderAxis).join("");
+    axes.forEach(wireAxis);
+    root.querySelectorAll("[data-bs-env]").forEach((button) => {
+      const on = button.dataset.bsEnv === mode;
+      button.classList.toggle("is-active", on);
+      button.setAttribute("aria-pressed", String(on));
+    });
+  }
+
+  root.querySelectorAll("[data-bs-env]").forEach((button) => {
+    button.addEventListener("click", () => {
+      mode = button.dataset.bsEnv;
+      render();
+    });
+  });
+  render();
+}
+
+/* Expected-output charts for every public construction route. They use the same visual
+ * grammar as Figure 2: a stacked task bar at every harness stage and a cumulative capability
+ * curve across stages. Tracks may emit different numbers of stages, so the renderer derives
+ * its geometry from each node's data rather than assuming a fixed five-stage stream. */
+function initStageCharts() {
+  const values = (node, key) => (node.dataset[key] || "").split(",").map(Number);
+  const W = 352;
+  const H = 270;
+  const L = 34;
+  const R = 34;
+  const T = 26;
+  const B = 55;
+  const baseline = H - B;
+  const plotW = W - L - R;
+  const plotH = baseline - T;
+  const barW = 25;
+
+  function niceTick(largest) {
+    const raw = Math.max(largest, 1) / 6;
+    const magnitude = 10 ** Math.floor(Math.log10(raw));
+    const normalized = raw / magnitude;
+    const step = normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 5 ? 5 : 10;
+    return step * magnitude;
+  }
+
+  function smoothPath(points) {
+    return points.slice(1).reduce((path, point, i) => {
+      const prev = points[i];
+      const reach = (point.x - prev.x) * 0.38;
+      return `${path} C ${prev.x + reach} ${prev.y}, ${point.x - reach} ${point.y}, ${point.x} ${point.y}`;
+    }, `M ${points[0].x} ${points[0].y}`);
+  }
+
+  $$('[data-stage-chart]').forEach((node) => {
+    const train = values(node, "train");
+    const test = values(node, "test");
+    const added = values(node, "added");
+    const cumulative = values(node, "cumulative");
+    const count = train.length;
+    if (count < 1 || ![train, test, added, cumulative].every((series) =>
+      series.length === count && series.every(Number.isFinite))) return;
+
+    const axis = node.dataset.axis;
+    const totals = train.map((n, i) => n + test[i]);
+    const taskTick = niceTick(Math.max(...totals));
+    const taskCeiling = Math.ceil(Math.max(...totals) / taskTick) * taskTick;
+    const capabilityTick = niceTick(Math.max(...cumulative));
+    const capabilityCeiling = Math.ceil(Math.max(...cumulative) / capabilityTick) * capabilityTick;
+    const yTask = (n) => baseline - (n / taskCeiling) * plotH;
+    const yCapability = (n) => baseline - (n / capabilityCeiling) * plotH;
+    const x = (i) => L + plotW * ((i + 0.5) / count);
+    const points = cumulative.map((n, i) => ({ x: x(i), y: yCapability(n) }));
+    const details = cumulative.map((n, i) =>
+      `H${i + 1}: ${train[i]} adaptation, ${test[i]} test, ${n} cumulative ${axis}`).join("; ");
+
+    const grid = Array.from({ length: taskCeiling / taskTick + 1 }, (_, i) => i * taskTick).map((n) =>
+      `<g class="tb2-gridline"><line x1="${L}" y1="${yTask(n)}" x2="${W - R}" y2="${yTask(n)}"></line>` +
+      `<text x="${L - 7}" y="${yTask(n) + 3}">${n}</text></g>`).join("");
+    const capabilityTicks = Array.from(
+      { length: capabilityCeiling / capabilityTick + 1 }, (_, i) => i * capabilityTick,
+    ).map((n) => `<text class="tb2-cap-tick" x="${W - R + 7}" ` +
+      `y="${yCapability(n) + 3}">${n}</text>`).join("");
+
+    const bars = totals.map((total, i) => {
+      const trainTop = yTask(train[i]);
+      const totalTop = yTask(total);
+      const pointAnchor = i === count - 1 ? "end" : "start";
+      const pointX = points[i].x + (i === count - 1 ? -7 : 7);
+      const stageLabel = `H${i + 1}: ${train[i]} adaptation tasks, ${test[i]} test tasks, ` +
+        `${total} total, ${cumulative[i]} ${axis} available, ${added[i]} newly released`;
+      const cellW = plotW / count;
+      return `<g class="tb2-stage" data-stage="H${i + 1}" data-stage-index="${i}" ` +
+        `tabindex="0" role="group" aria-label="${stageLabel}">` +
+        `<rect class="tb2-stage-hit" x="${x(i) - cellW / 2}" y="${T}" width="${cellW}" height="${baseline - T}"></rect>` +
+        `<rect class="tb2-bar-train" x="${x(i) - barW / 2}" y="${trainTop}" width="${barW}" height="${baseline - trainTop}"></rect>` +
+        `<rect class="tb2-bar-test" x="${x(i) - barW / 2}" y="${totalTop}" width="${barW}" height="${trainTop - totalTop}"></rect>` +
+        `<text class="tb2-total" x="${x(i)}" y="${Math.max(T + 8, totalTop - 5)}">${total}</text>` +
+        `<text class="tb2-cumulative" text-anchor="${pointAnchor}" x="${pointX}" y="${points[i].y + 3}">${cumulative[i]}</text>` +
+        `<text class="tb2-stage-name" x="${x(i)}" y="${baseline + 18}">H${i + 1}</text>` +
+        `<text class="tb2-stage-added" x="${x(i)}" y="${baseline + 35}">+${added[i]} ${axis}</text>` +
+      `</g>`;
+    }).join("");
+
+    node.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${axis} stage chart. ${details}" preserveAspectRatio="xMidYMid meet">` +
+      `<title>${axis[0].toUpperCase() + axis.slice(1)}: tasks and available harness by stage</title>` +
+      `<text class="tb2-axis-label" x="${L}" y="14">tasks</text>` +
+      `<text class="tb2-axis-label tb2-axis-label--right" x="${W - R}" y="14">harness</text>` +
+      `${grid}${capabilityTicks}${bars}` +
+      `<path class="tb2-harness-line" data-cumulative-curve d="${smoothPath(points)}"><title>Cumulative available ${axis}: ${cumulative.join(", ")}</title></path>` +
+      points.map((p) => `<circle class="tb2-harness-point" cx="${p.x}" cy="${p.y}" r="3.7"></circle>`).join("") +
+      `</svg>`;
+
+    const tooltip = document.createElement("div");
+    tooltip.className = "tb2-chart-tooltip";
+    tooltip.setAttribute("role", "tooltip");
+    node.appendChild(tooltip);
+
+    const showStage = (i) => {
+      node.querySelectorAll(".tb2-stage").forEach((stage, j) =>
+        stage.classList.toggle("is-highlighted", i === j));
+      tooltip.style.left = `${((i + 0.5) * 100) / count}%`;
+      tooltip.dataset.edge = i === 0 ? "left" : (i === count - 1 ? "right" : "center");
+      tooltip.innerHTML = `<b>H${i + 1}</b>` +
+        `<span><strong>${train[i]}</strong> adaptation + <strong>${test[i]}</strong> test = <strong>${totals[i]}</strong> tasks</span>` +
+        `<span><strong>${cumulative[i]}</strong> ${axis} available</span>` +
+        `<span class="tb2-tip-added">+${added[i]} ${axis} released at this stage</span>`;
+      tooltip.classList.add("is-visible");
+    };
+    const hideStage = () => {
+      node.querySelectorAll(".tb2-stage.is-highlighted").forEach((stage) =>
+        stage.classList.remove("is-highlighted"));
+      tooltip.classList.remove("is-visible");
+    };
+    node.querySelectorAll(".tb2-stage").forEach((stage) => {
+      const i = Number(stage.dataset.stageIndex);
+      stage.addEventListener("pointerenter", () => showStage(i));
+      stage.addEventListener("focus", () => showStage(i));
+      stage.addEventListener("blur", hideStage);
+    });
+    node.addEventListener("pointerleave", hideStage);
+  });
+}
+
 /* Page-level tabs. Each .pv-view owns the sections inside it, so an existing
    in-page link like #results keeps working: it opens the owning view first. */
 const PV = (() => {
@@ -3232,6 +3581,8 @@ initHubNav();
 FW.init();
 CS.init();
 SV.init();
+initBenchmarkFigure();
+initStageCharts();
 TG.init();
 LB.init();
 PV.init();

@@ -22,7 +22,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
   <link rel="stylesheet" href="./static/css/index.css">
   <link rel="stylesheet" href="obs.css">
-  <link rel="stylesheet" href="paper.css">
+  <link rel="stylesheet" href="paper.css?v=20260913-stats-2">
   <link rel="icon" href="./static/images/favicon.svg">
   <script defer src="./static/js/fontawesome.all.min.js"></script>
 </head>
@@ -1240,45 +1240,8 @@
   </div>
 </section>
 
-<section class="section" id="protocol">
-  <div class="container is-max-desktop">
-    <div class="highlight-card" style="margin-bottom: 0;">
-      <h2 class="title is-3 section-heading">Evaluation Protocol</h2>
-      <p style="line-height: 1.8; margin-bottom: 1.5rem;">
-        A harness stream is a nested sequence H<sub>1</sub> ⊆ H<sub>2</sub> ⊆ ⋯ ⊆ H<sub>T</sub>.
-        Each task is feasible at its assigned stage and requires at least one newly introduced capability.
-        At test time the system receives the <strong>full cumulative harness</strong> — earlier capabilities remain as affordances or distractors.
-      </p>
-      <div class="columns is-variable is-6">
-        <div class="column">
-          <div class="feature-card">
-            <h4>Deployment evaluation</h4>
-            <p>No persistent state across stages. A fresh instance is evaluated on the cumulative eval set under H<sub>t</sub>. Isolates the direct effect of harness expansion: can the agent exploit new capabilities while withstanding distraction from the growing pool?</p>
-          </div>
-        </div>
-        <div class="column">
-          <div class="feature-card">
-            <h4>Self-evolving adaptation</h4>
-            <p>Persistent state z<sub>t</sub> (memory, learned skills, prompts, or code) may be updated from an adaptation split and carried forward. Measures whether accumulated experience supports new capabilities — or goes stale and misdirects execution.</p>
-          </div>
-        </div>
-      </div>
-      <p style="margin: 1.2rem 0 0.4rem;">We report pass rate and cost, plus transfer metrics that separate new-task adaptation from retention:</p>
-      <div class="pill-row">
-        <span class="pill">FWT · forward transfer on newly introduced tasks</span>
-        <span class="pill">BWT · backward transfer on earlier cohorts</span>
-        <span class="pill">SAS · ReAct, Codex, Claude Code</span>
-        <span class="pill">MAS · AutoGen, DeLM</span>
-        <span class="pill">Memory · Raw, ReasoningBank, MemToolAgent, G-Memory, LEGOMem</span>
-        <span class="pill">Prompt · GEPA</span>
-        <span class="pill">Code · Meta-Harness</span>
-      </div>
-    </div>
-  </div>
-</section>
-
 <section class="section" id="stats">
-  <div class="container is-max-desktop">
+  <div class="container is-max-widescreen">
     <h2 class="title is-3 section-heading has-text-centered">Benchmark Statistics</h2>
     <p class="has-text-centered" style="max-width: 720px; margin: 0 auto 0.5rem; line-height: 1.7;">
       17 streams from two seed benchmarks, constructed deterministically from EnterpriseOps-Gym
@@ -1291,38 +1254,35 @@
       <div class="masbench-stat"><div class="stat-number">42</div><div class="stat-sub">latent skills</div></div>
       <div class="masbench-stat"><div class="stat-number">62</div><div class="stat-sub">specialist agents</div></div>
     </div>
-    <div class="stream-grid" style="margin-top: 1.6rem;">
-      <article class="stream">
-        <h4>Tools</h4>
-        <dl>
-          <dt>Executable tools</dt><dd>520</dt>
-          <dt>EOG eval tasks</dt><dd>454</dt>
-          <dt>ALE eval tasks</dt><dd>63</dt>
-          <dt>Domains</dt><dd>Calendar, CSM, Drive, Email, HR, Hybrid, ITSM, Teams, ALE</dt>
-          <dt>Bottleneck</dt><dd>Extracting useful tool experience</dt>
-        </dl>
-      </article>
-      <article class="stream">
-        <h4>Skills</h4>
-        <dl>
-          <dt>Latent reference skills</dt><dd>42</dt>
-          <dt>EOG eval tasks</dt><dd>148</dt>
-          <dt>ALE eval tasks</dt><dd>68</dt>
-          <dt>Domains</dt><dd>CSM, HR, ITSM, ALE</dt>
-          <dt>Bottleneck</dt><dd>Engaging the right skills</dt>
-        </dl>
-      </article>
-      <article class="stream">
-        <h4>Agents</h4>
-        <dl>
-          <dt>Specialist agents</dt><dd>62</dt>
-          <dt>EOG eval tasks</dt><dd>148</dt>
-          <dt>ALE eval tasks</dt><dd>63</dt>
-          <dt>Domains</dt><dd>CSM, HR, ITSM, ALE</dt>
-              <dt>Bottleneck</dt><dd>Balancing delegation coverage and selectivity</dt>
-        </dl>
-      </article>
-    </div>
+    <figure class="bs-figure" data-benchmark-figure>
+      <div class="bs-figure-head">
+        <div>
+          <p class="bs-eyebrow">Figure 2 · harness growth</p>
+          <h3>Tasks stay focused while the available harness grows</h3>
+          <p>Each stage adds adaptation and held-out test tasks. The curves track the cumulative
+            tools, skills, or agents the system must navigate.</p>
+        </div>
+        <div class="bs-env-toggle" role="group" aria-label="Benchmark source shown">
+          <button class="is-active" type="button" data-bs-env="both">EOG + ALE</button>
+          <button type="button" data-bs-env="eog">EOG</button>
+          <button type="button" data-bs-env="ale">ALE</button>
+        </div>
+      </div>
+      <div class="bs-legend" aria-label="Chart legend">
+        <span><i class="bs-key bs-key--adapt"></i>adaptation tasks</span>
+        <span><i class="bs-key bs-key--test"></i>test tasks</span>
+        <span><i class="bs-key bs-key--eog"></i>EOG available harness</span>
+        <span><i class="bs-key bs-key--ale"></i>ALE available harness</span>
+        <span><i class="bs-key bs-key--required"></i>required per task</span>
+        <span><i class="bs-key bs-key--reference"></i>real-world release trend</span>
+      </div>
+      <div class="bs-chart-grid" data-bs-grid></div>
+      <figcaption>
+        Interactive rendering of <a href="https://arxiv.org/pdf/2609.04280" target="_blank" rel="noopener">Figure 2 in the paper</a>.
+        Hover or focus a stage for its task and harness counts. EOG bars are solid and ALE bars are
+        hatched; the green curve is the paper's real-world release reference, shown as a relative growth trend.
+      </figcaption>
+    </figure>
   </div>
 </section>
 
@@ -1409,17 +1369,51 @@
     <div class="highlight-card" style="margin-bottom: 0;">
       <h2 class="title is-3 section-heading">Results</h2>
       <p style="line-height: 1.8; margin-bottom: 1.4rem;">
-        Pass rates are verifier success on the held-out evaluation split under the cumulative harness.
-        Switch axes to see deployment vs. self-evolving methods, and EOG vs. ALE.
+        Start with the evaluation protocol, then switch axes to compare deployment and self-evolving
+        methods on EOG and ALE. Pass rates are verifier success on the held-out cumulative evaluation split.
       </p>
         <div class="rs-tabs">
-          <button class="rs-tab is-active" type="button" data-rs="overview">Overview</button>
+          <button class="rs-tab is-active" type="button" data-rs="protocol">Evaluation Protocol</button>
+          <button class="rs-tab" type="button" data-rs="overview">Overview</button>
           <button class="rs-tab" type="button" data-rs="tools">Tools</button>
           <button class="rs-tab" type="button" data-rs="skills">Skills</button>
           <button class="rs-tab" type="button" data-rs="agents">Agents</button>
         </div>
 
-        <div class="rs-panel is-active" data-rs-panel="overview">
+        <section class="rs-panel rs-protocol is-active" id="protocol" data-rs-panel="protocol">
+          <h3>Evaluation Protocol</h3>
+          <p class="rs-protocol-lead">
+            A harness stream is a nested sequence H<sub>1</sub> ⊆ H<sub>2</sub> ⊆ ⋯ ⊆ H<sub>T</sub>.
+            Each task is feasible at its assigned stage and requires at least one newly introduced capability.
+            At test time the system receives the <strong>full cumulative harness</strong> — earlier capabilities remain as affordances or distractors.
+          </p>
+          <div class="columns is-variable is-6">
+            <div class="column">
+              <div class="feature-card">
+                <h4>Deployment evaluation</h4>
+                <p>No persistent state across stages. A fresh instance is evaluated on the cumulative eval set under H<sub>t</sub>. Isolates the direct effect of harness expansion: can the agent exploit new capabilities while withstanding distraction from the growing pool?</p>
+              </div>
+            </div>
+            <div class="column">
+              <div class="feature-card">
+                <h4>Self-evolving adaptation</h4>
+                <p>Persistent state z<sub>t</sub> (memory, learned skills, prompts, or code) may be updated from an adaptation split and carried forward. Measures whether accumulated experience supports new capabilities — or goes stale and misdirects execution.</p>
+              </div>
+            </div>
+          </div>
+          <p class="rs-protocol-metrics">We report pass rate and cost, plus transfer metrics that separate new-task adaptation from retention:</p>
+          <div class="pill-row">
+            <span class="pill">FWT · forward transfer on newly introduced tasks</span>
+            <span class="pill">BWT · backward transfer on earlier cohorts</span>
+            <span class="pill">SAS · ReAct, Codex, Claude Code</span>
+            <span class="pill">MAS · AutoGen, DeLM</span>
+            <span class="pill">Memory · Raw, ReasoningBank, MemToolAgent, G-Memory, LEGOMem</span>
+            <span class="pill">Prompt · GEPA</span>
+            <span class="pill">Code · Meta-Harness</span>
+          </div>
+        </section>
+
+        <div class="rs-panel" data-rs-panel="overview">
           <div class="table-card">
             <h3>Cross-axis comparison</h3>
             <div class="table-scroll">
@@ -1734,8 +1728,12 @@ os.environ["OPENAI_API_KEY"]       = getpass.getpass("OpenAI API key: ")</code><
         <span class="sv-lang">bash</span>
         <button class="sv-copy" type="button">Copy</button>
         <pre class="sv-code" data-lang="bash"><code>SDK_BASE="https://educator-marrow-cultural.ngrok-free.dev"
-WHEEL_URL=$(curl -fsSL "$SDK_BASE/sdk" | python -c 'import json,sys; d=json.load(sys.stdin); print(d["base_url"] + d["path"])')
-python -m pip install "$WHEEL_URL"</code></pre>
+: "${EVAL_SERVICE_API_KEY:?Required — get it from MyAuthtoken first}" &amp;&amp;
+WHEEL=$(curl -sSL -H "Authorization: Bearer $EVAL_SERVICE_API_KEY" "$SDK_BASE/sdk" \
+  | python -c 'import json,sys; d=json.load(sys.stdin); print(d["path"]) if "path" in d else sys.exit("SDK download denied: " + d.get("detail", "unknown error"))') &amp;&amp;
+curl -fsSL -H "Authorization: Bearer $EVAL_SERVICE_API_KEY" \
+  "$SDK_BASE$WHEEL" -o "/tmp/${WHEEL##*/}" &amp;&amp;
+python -m pip install "/tmp/${WHEEL##*/}"</code></pre>
       </div>
       <p class="sv-cap">
         Install the wheel the deployment is <em>currently</em> serving, not merely <em>a</em> wheel: a
@@ -1799,9 +1797,9 @@ with t:
 
     <div class="sv-panel" data-sv-panel="agent">
       <p class="sv-cap">
-        <b>If you just want a quick dry run.</b> Install the public skill, then simply ask
+        <b>If you just want a quick dry run.</b> Set your eval key, install the skill, then simply ask
         the current agent to <em>&ldquo;use the evolve-eval skill to evaluate yourself.&rdquo;</em> It can
-        ask for <code>EVAL_SERVICE_API_KEY</code> if it is missing, start a task, act through the
+        use <code>EVAL_SERVICE_API_KEY</code> to download the skill, start a task, act through the
         task&rsquo;s tools or files, grade the result, and return the JSON. Its existing model login
         stays with the agent; the service key only authenticates evaluation calls.
       </p>
@@ -1809,7 +1807,9 @@ with t:
         <span class="sv-lang">bash</span>
         <button class="sv-copy" type="button">Copy</button>
         <pre class="sv-code" data-lang="bash"><code>mkdir -p "${CODEX_HOME:-$HOME/.codex}/skills/evolve-eval"
-curl -fsSL https://educator-marrow-cultural.ngrok-free.dev/resources/evolve-eval/SKILL.md \
+: "${EVAL_SERVICE_API_KEY:?Required — sign in at https://mas-orchestra.salesforceresearch.ai/mas_r1/demo/ and open MyAuthtoken}" &amp;&amp;
+curl -fsSL -H "Authorization: Bearer $EVAL_SERVICE_API_KEY" \
+  https://educator-marrow-cultural.ngrok-free.dev/resources/evolve-eval/SKILL.md \
   -o "${CODEX_HOME:-$HOME/.codex}/skills/evolve-eval/SKILL.md"
 
 # Then tell your coding agent: Use the evolve-eval skill to evaluate yourself.</code></pre>
@@ -2321,657 +2321,482 @@ row["gym_servers_config"]  # JSON: which gym to seed, and from which snapshot</c
       it gives you an evolving benchmark on the same terms.
     </p>
 
-    <h3 class="sv-h3">What your seed has to have</h3>
+    <p class="sv-cap sv-cap--mid">
+      <b>If you just want a fast, interactive build.</b> Install the authenticated
+      <a href="https://educator-marrow-cultural.ngrok-free.dev/resources/evolve-benchmark/SKILL.md"
+         target="_blank" rel="noopener"><code>evolve-benchmark</code> skill</a>, then simply ask your
+      coding agent to <i>“use the evolve-benchmark skill to convert my benchmark.”</i> It will inspect
+      any verifier-backed seed and guide you through four short checkpoints: suitability, annotations,
+      staging, and final promotion. It builds each supported track only after you confirm its choices.
+    </p>
+    <div class="sv-codewrap">
+      <span class="sv-lang">bash &middot; install evolve-benchmark</span>
+      <button class="sv-copy" type="button">Copy</button>
+      <pre class="sv-code" data-lang="bash"><code>: "${EVAL_SERVICE_API_KEY:?Required — sign in at https://mas-orchestra.salesforceresearch.ai/mas_r1/demo/ and open MyAuthtoken}" &amp;&amp;
+curl -fsSL -H "Authorization: Bearer $EVAL_SERVICE_API_KEY" \
+  https://educator-marrow-cultural.ngrok-free.dev/resources/evolve-benchmark/install.sh | bash
+
+# Then ask your coding agent: Use evolve-benchmark to convert my seed benchmark.</code></pre>
+    </div>
+
+    <h3 class="sv-h3">When the pipeline fits your seed</h3>
+    <p class="sv-cap sv-cap--mid">
+      A seed dataset with <b>tool annotations, rich explanations, and procedural prompts</b>
+      can be converted into evolving tools, skills, and agents. Each signal supplies one capability
+      view to the same four-step construction pipeline.
+    </p>
     <div class="sv-knobs">
       <article class="sv-knob">
-        <span class="sv-kn">a grader, not a judge</span>
+        <span class="sv-kn">tool annotations</span>
         <p>
-          Each task needs a <b>verifier-checkable</b> outcome: something that reads the end state and
-          returns pass or fail. If a model scores the answers instead, drift in the grader and drift
-          in the harness draw the same curve &mdash; and attributing the change to the harness is the
-          entire purpose.
+          Per-task oracle tool labels provide the hidden capability sets for the
+          <b>tools track</b>. Their frequencies determine when tools enter the cumulative harness.
         </p>
       </article>
       <article class="sv-knob">
-        <span class="sv-kn">a record of what each task takes</span>
+        <span class="sv-kn">rich explanations</span>
         <p>
-          Per task, the set of capabilities a solution needs. On the tool axis most seeds already ship
-          it as an oracle tool list; on the other two axes you derive it, deterministically, from
-          material the seed already carries. It is construction and analysis material: the agent is
-          never shown it.
+          Tool descriptions, interfaces, and software metadata reveal what each capability operates
+          on. The <b>agents track</b> uses that structure to form disjoint owner-based specialists.
         </p>
       </article>
       <article class="sv-knob">
-        <span class="sv-kn">capabilities that repeat</span>
+        <span class="sv-kn">procedural prompts</span>
         <p>
-          Release order comes from frequency, so a suite where every task needs its own private
-          capability has no core and no tail and cannot be staged. What works is the ordinary shape:
-          a few capabilities most tasks touch, a long tail only a handful do.
+          Reusable operating procedures in system or task prompts become hidden reference skills.
+          General role, behavior, and output rules remain visible in the <b>skills track</b>.
         </p>
       </article>
     </div>
+
+    <h3 class="sv-h3">Two properties hold by construction</h3>
     <p class="sv-cap sv-cap--mid">
-      <b>What you do not need: new tasks, an LLM, a human pass, or a GPU.</b> Construction is parsing,
-      counting and substitution. It runs on a laptop, and anyone holding your seed can reproduce your
-      stream exactly &mdash; which is the property that makes a moving harness measurable at all.
+      For every retained task, the four-step pipeline assigns the task to the earliest cumulative
+      harness that contains all of its annotated required capabilities. This gives the two formal
+      properties defined in the paper.
     </p>
-
-    <h3 class="sv-h3">The recipe, in four steps</h3>
-    <ol class="sv-flow">
-      <li><b>annotate</b><i>what each task needs, out of one universe of capabilities</i></li>
-      <li><b>rank and release</b><i>frequent first; each capability gets the stage it arrives at</i></li>
-      <li><b>accumulate</b><i>a stage holds everything released so far &mdash; nothing is withdrawn</i></li>
-      <li><b>date the tasks</b><i>each task lands at the first stage that covers it</i></li>
-    </ol>
-
-    <div class="sv-cards bc-inv">
+    <div class="sv-cards bc-inv" data-construction-properties>
       <article class="sv-card">
-        <span class="sv-tag">Solvable on arrival</span>
-        <h3>Nothing is impossible when it appears</h3>
+        <span class="sv-tag">Feasibility</span>
+        <h3>Every task is capability-covered on arrival</h3>
         <p>
-          A task is dated to a stage whose harness already contains everything the task needs, so a
-          failure is the system&rsquo;s and never the schedule&rsquo;s. That is what makes a score at
-          stage <code>t</code> comparable to a score at stage <code>t+1</code>.
+          All capabilities required by a retained task are available at its assigned stage:
+          <code>Cᵢ ⊆ Hₜᵢ</code>. Here, <i>feasible</i> means covered by the annotated capability set;
+          it does not claim that every task has been execution-tested successfully.
         </p>
       </article>
       <article class="sv-card">
-        <span class="sv-tag">And no stage is a rerun</span>
-        <h3>Every task needs something that just arrived</h3>
+        <span class="sv-tag">New-capability pressure</span>
+        <h3>Every task requires a capability that just arrived</h3>
         <p>
-          Because a task lands at the <em>first</em> stage that covers it, its latest-arriving
-          capability is one the stage just introduced. Growth is therefore load-bearing: a system that
-          ignores what appeared cannot pass by repeating what worked last stage.
+          At least one required capability is introduced at the task&rsquo;s assigned stage:
+          <code>Cᵢ ∩ (Hₜᵢ ∖ Hₜᵢ₋₁) ≠ ∅</code>. Because this is the earliest covering stage, the
+          previous harness cannot already cover the whole task.
         </p>
       </article>
     </div>
 
-    <p class="sv-cap">
-      Both properties fall out of the arithmetic rather than being audited afterwards, which is why the
-      steps are short enough to print whole. What follows is one small module &mdash; four steps, no
-      dependency outside the standard library &mdash; and then the two public seeds run through it.
-    </p>
-
-    <h3 class="sv-h3">The four steps, as one small module</h3>
+    <h3 class="sv-h3">Detailed build</h3>
     <p class="sv-cap sv-cap--mid">
-      Three panels, one file: <code>evolve.py</code>, standard library only, and every axis and every
-      seed goes through it unchanged. Pick a step.
+      Choose either <a href="https://github.com/harbor-framework/terminal-bench-2/tree/2fd12b88aafdd04a52c298e3940bcb189f9766d6"
+         target="_blank" rel="noopener"><b>Terminal-Bench 2</b></a> or
+      <a href="https://huggingface.co/datasets/mercor/apex-agents"
+         target="_blank" rel="noopener"><b>APEX-Agents</b></a> as a complete worked example.
+      Each tab downloads a fixed seed snapshot, constructs all three tracks, and shows the expected output.
     </p>
 
-    <div class="sv-group" data-sv-group="steps">
-    <div class="sv-tabs" role="tablist" aria-label="The four steps, as code">
-      <button class="sv-tab is-active" type="button" role="tab" data-sv="annotate">Step 1 &middot; annotate</button>
-      <button class="sv-tab" type="button" role="tab" data-sv="release">Step 2 &middot; rank and release</button>
-      <button class="sv-tab" type="button" role="tab" data-sv="package">Steps 3 and 4 &middot; accumulate and write</button>
-    </div>
-
-    <div class="sv-panel is-active" data-sv-panel="annotate">
-    <p class="sv-cap">
-      Everything downstream reads one dictionary: <code>{task_id: capabilities it needs}</code>. Where
-      that comes from is the only part specific to your seed &mdash; the axis panels below and the two
-      worked examples at the end are all about producing it. This is the part in between, and it earns a
-      function of its own for one reason: <b>two labels that mean one capability have to become one
-      string</b>, or the ranking splits a capability most tasks need into two that nobody does.
-    </p>
-    <div class="sv-codewrap">
-      <span class="sv-lang">python &middot; evolve.py</span>
-      <button class="sv-copy" type="button">Copy</button>
-      <pre class="sv-code" data-lang="python"><code>import json, random
-from collections import Counter
-from math import ceil
-from pathlib import Path
-
-
-def annotate(tasks, capabilities_of, canonical=lambda c: c.strip().lower()):
-    """Step 1, for any axis and any seed: {task_id: frozenset(capabilities)}.
-
-    `capabilities_of` is the one function you write. `canonical` folds aliases
-    together, and it has to happen here, before anything is counted: frequency is
-    what decides release order, and a split label lands in the tail twice.
-    """
-    ann = {}
-    for task in tasks:
-        caps = frozenset(canonical(c) for c in capabilities_of(task) if c)
-        if caps:                    # unannotated: skip it rather than guess a stage
-            ann[str(task["task_id"])] = caps
-    return ann</code></pre>
-    </div>
-    </div><!-- /step 1 -->
-
-    <div class="sv-panel" data-sv-panel="release">
-    <p class="sv-cap">
-      Equal buckets over the ranking are the obvious schedule and the wrong one. Two things go wrong on
-      a real frequency distribution, and both are cheaper to handle here than to discover later: a
-      capability two tasks in the suite need cannot carry a stage, and a stage nobody lands on is a
-      rerun of the one before it. The first bucket is also deliberately the largest, and grows further
-      if too little turns out to be covered by it alone &mdash; it is the harness that already exists,
-      and a stream starting from three capabilities measures a cold start rather than growth.
-    </p>
-    <div class="sv-codewrap">
-      <span class="sv-lang">python &middot; evolve.py</span>
-      <button class="sv-copy" type="button">Copy</button>
-      <pre class="sv-code" data-lang="python"><code>def release_schedule(ann, stages=5, first_frac=0.45, min_uses=2, min_new=5):
-    """Give every capability the stage it arrives at: {capability: stage}.
-
-    Hands back the annotation as well, because dropping a capability drops the
-    tasks that needed it -- the two have to stay in step.
-    """
-    ann = dict(ann)
-    while True:                     # a rare capability is noise, and so is its task
-        freq = Counter(c for caps in ann.values() for c in caps)
-        rare = {c for c, n in freq.items() if n &lt; min_uses}
-        if not rare:
-            break
-        ann = {i: caps for i, caps in ann.items() if not (caps &amp; rare)}
-    if not freq:      # the third precondition failing, not a bug: this seed has no core
-        raise ValueError("nothing survives min_uses: no capability repeats across tasks")
-
-    # Core first, long tail last; the name breaks ties so the order can never
-    # depend on the iteration order of a dict.
-    order = sorted(freq, key=lambda c: (-freq[c], c))
-    head = max(1, round(len(order) * first_frac))
-    tail = order[head:]
-    per = max(1, ceil(len(tail) / max(stages - 1, 1)))
-    buckets = [order[:head]] + [tail[i:i + per] for i in range(0, len(tail), per)]
-    release = {c: t for t, bucket in enumerate(buckets, 1) for c in bucket}
-
-    return ann, _merge_thin(ann, release, min_new)
-
-
-def _merge_thin(ann, release, min_new):
-    """Fold away a stage too few tasks land on: it is a rerun of the one before it.
-
-    The floor gives way to the stage count, since three stages is the least that is
-    still a stream -- but a stage nothing at all lands on is folded whatever the
-    count, because zero is not a judgment call. Folding the first stage forward is
-    how the initial anchor grows when too little turns out to be covered by it.
-    """
-    while True:
-        landed = Counter(date_tasks(ann, release).values())   # step 3, same module
-        live = sorted(set(release.values()))
-        floor = min_new if len(live) &gt; 3 else 1
-        thin = next((t for t in live if landed[t] &lt; floor), None)
-        if thin is None or len(live) == 1:
-            break
-        into = next((t for t in live if t &gt; thin), live[live.index(thin) - 1])
-        release = {c: (into if r == thin else r) for c, r in release.items()}
-
-    renumber = {r: t for t, r in enumerate(sorted(set(release.values())), 1)}
-    return {c: renumber[r] for c, r in release.items()}</code></pre>
-    </div>
-    </div><!-- /step 2 -->
-
-    <div class="sv-panel" data-sv-panel="package">
-    <p class="sv-cap">
-      The rest is arithmetic. A stage offers everything released up to it, a task is dated to the first
-      stage that covers it, and the two invariants above are asserted where each row is made rather
-      than audited after the fact. What it writes is the layout the published corpora use, so a stream
-      you build this way loads with the same <code>load_dataset</code> call and scores through the same
-      client as ours &mdash; the <a href="#service">Evaluate Your Agent</a> tab.
-    </p>
-    <div class="sv-codewrap">
-      <span class="sv-lang">python &middot; evolve.py</span>
-      <button class="sv-copy" type="button">Copy</button>
-      <pre class="sv-code" data-lang="python"><code>def date_tasks(ann, release):
-    """Each task lands at the first stage that covers it, which is the release
-    stage of its latest-arriving capability."""
-    return {i: max(release[c] for c in caps) for i, caps in ann.items() if caps}
-
-
-def harness(release):
-    """What a stage offers: everything released so far, distractors included. This
-    is what the agent is handed -- never the oracle set, which makes growth free."""
-    return {t: frozenset(c for c, r in release.items() if r &lt;= t)
-            for t in range(1, max(release.values()) + 1)}
-
-
-def stream(ann, release, domain, adapt_ratio=0.3, seed=0, min_adapt=1, min_test=3):
-    """One row per task, in the layout the published datasets use."""
-    H, at, rng = harness(release), date_tasks(ann, release), random.Random(seed)
-    rows = []
-    for t in sorted(H):
-        here = sorted(i for i, s in at.items() if s == t)
-        rng.shuffle(here)
-        # Floors on both sides: a stage scored on two tasks says nothing, and a
-        # stage with nothing to adapt on cannot be adapted to.
-        k = min(max(round(len(here) * adapt_ratio), min_adapt),
-                max(len(here) - min_test, 0))
-        for n, i in enumerate(here):
-            assert ann[i] &lt;= H[t]                               # solvable on arrival
-            assert ann[i] &amp; (H[t] - H.get(t - 1, frozenset()))  # needs what arrived
-            rows.append({"domain": domain, "version": f"v{t}",
-                         "split": "train" if n &lt; k else "test", "task_id": i,
-                         "oracle": sorted(ann[i]), "cumulative": sorted(H[t])})
-    return rows
-
-
-def manifest(ann, release, rows, **provenance):
-    """What lets anyone check your stream without rerunning your build: what arrived
-    when, what landed where, and the knobs you used. If a model is any part of your
-    grader, pin its exact snapshot in here as provenance."""
-    return {"stages": max(release.values()), "release": dict(sorted(release.items())),
-            "dated": dict(sorted(date_tasks(ann, release).items())),
-            "splits": {v: sorted(r["task_id"] for r in rows if r["version"] == v)
-                       for v in sorted({r["version"] for r in rows})}, **provenance}
-
-
-def write(rows, out: Path, meta=None):
-    """v_k/train.jsonl, v_k/test.jsonl and the manifest beside them. That is the
-    whole of the layout."""
-    for row in rows:
-        f = out / row["version"] / f"{row['split']}.jsonl"
-        f.parent.mkdir(parents=True, exist_ok=True)
-        with f.open("a") as fh:
-            fh.write(json.dumps(row) + "\n")
-    if meta:
-        (out / "manifest.json").write_text(json.dumps(meta, indent=2, default=list))</code></pre>
-    </div>
-    </div><!-- /steps 3 and 4 -->
-    </div><!-- /steps -->
-
-    <h3 class="sv-h3">What that leaves you holding</h3>
-    <div class="sv-knobs">
-      <article class="sv-knob">
-        <span class="sv-kn">one manifest</span>
-        <p>
-          The release stage of every capability, the stage each task is dated to, and the split ids.
-          Build twice and diff it: anything that moves is an unseeded shuffle or a missing tie-break,
-          and means your stream is not a fixed object.
-        </p>
-      </article>
-      <article class="sv-knob">
-        <span class="sv-kn">two views of every task</span>
-        <p>
-          The <code>oracle</code> column, the gold capability set, for analysis; and
-          <code>cumulative</code>, what the agent is actually given &mdash; the accumulated pool with
-          its distractors. Report the gap: it is the cost of growth, and what makes streams comparable.
-        </p>
-      </article>
-      <article class="sv-knob">
-        <span class="sv-kn">versioned splits</span>
-        <p>
-          <code>{domain}_v{stage}</code> with <code>train</code> and <code>test</code>, one row per
-          task &mdash; the shape the <a href="#service">Evaluate Your Agent</a> tab already reads.
-        </p>
-      </article>
-    </div>
-
-    <h3 class="sv-h3">Three axes, one recipe &mdash; what changes is the annotation</h3>
-    <p class="sv-cap sv-cap--mid">
-      The four steps above are axis-blind: they only ever see <code>{task &rarr; capabilities}</code>.
-      What differs per axis is where that mapping comes from, and it gets progressively less free.
-      Tools are usually already labelled; skills have to be mined out of the prompts; agents are
-      induced from the tool namespace.
-    </p>
-
-    <div class="sv-group" data-sv-group="axes">
-    <div class="sv-tabs" role="tablist" aria-label="Construction by axis">
-      <button class="sv-tab is-active" type="button" role="tab" data-sv="tools">Tools &middot; annotation exists</button>
-      <button class="sv-tab" type="button" role="tab" data-sv="skills">Skills &middot; mine the prompts</button>
-      <button class="sv-tab" type="button" role="tab" data-sv="agents">Agents &middot; partition the tools</button>
-    </div>
-
-    <div class="sv-panel is-active" data-sv-panel="tools">
-      <p class="sv-cap">
-        The cheap axis, and the one to start with. Most agentic suites already record which tools a
-        task is supposed to need &mdash; an oracle list, a required-software field, a manifest of MCP
-        servers. That field <em>is</em> the annotation, so there is nothing to derive and step 1 is a
-        field read. Everything else about your task rides along untouched.
-      </p>
-      <div class="sv-codewrap">
-        <span class="sv-lang">python &middot; tools_axis.py</span>
-        <button class="sv-copy" type="button">Copy</button>
-        <pre class="sv-code" data-lang="python"><code>from evolve import annotate, release_schedule, stream
-
-FIELDS = ("required_tools", "oracle_tools", "tools", "required_software", "apis")
-
-
-def tool_capabilities(task):
-    """Whichever field your suite records the need in -- one of them will be it."""
-    for f in FIELDS:
-        if task.get(f):
-            return task[f] if isinstance(task[f], list) else [task[f]]
-    return []                    # unannotated: annotate() drops it rather than guess
-
-
-def as_given(task, row, catalog):
-    """The substitution that makes the axis bite, and the easiest thing to get
-    wrong: what the agent receives at this stage is the CUMULATIVE pool, oracle
-    tools and distractors together. Selection is part of the task.
-    """
-    return dict(task, selected_tools=row["cumulative"],
-                tool_specs=[catalog[c] for c in row["cumulative"]])</code></pre>
+    <div class="sv-group" data-sv-group="seed-benchmarks">
+      <div class="sv-tabs" role="tablist" aria-label="Seed benchmark examples">
+        <button class="sv-tab is-active" type="button" role="tab" data-sv="tb2-seed">Terminal-Bench 2</button>
+        <button class="sv-tab" type="button" role="tab" data-sv="apex-seed">APEX-Agents</button>
       </div>
-      <p class="sv-cap">
-        Handing a task its own oracle list instead would make a growing catalog free, and is why the
-        published rows carry both columns: the gold set for analysis, the accumulated pool for the
-        agent. If your seed defines tools per task rather than in one shared catalog, build the catalog
-        first &mdash; a capability has to mean the same thing in every stage that offers it.
-      </p>
-    </div>
 
-    <div class="sv-panel" data-sv-panel="skills">
-      <p class="sv-cap">
-        No seed we have seen ships skill annotations, so this axis is mined &mdash; and mined without
-        a model, because a skill invented by an LLM is a skill whose necessity nobody can check. What
-        the seed does carry is procedural knowledge sitting in plain sight, in the prompts. Which
-        route you take depends on whether your tasks share a policy.
-      </p>
-      <div class="sv-cards">
-        <article class="sv-card sv-card--eog">
-          <span class="sv-tag">Route A &middot; a shared policy in the prompt</span>
-          <h3>Split it, then take it away</h3>
-          <p>
-            Long system prompts carry a procedural policy. Cut it on its own section structure:
-            general instructions stay in the prompt, each procedural section becomes a reference
-            skill, and the prompt is <b>stripped</b> of what was extracted. That removal is what makes
-            the axis real &mdash; the procedure is no longer in front of the agent, it has to be
-            found in the pool. A prompt that will not decompose is not a skill stream, which is why
-            only three of our eight enterprise domains have one.
-          </p>
-        </article>
-        <article class="sv-card sv-card--ale">
-          <span class="sv-tag">Route B &middot; no shared policy</span>
-          <h3>Name the recurring atoms</h3>
-          <p>
-            Heterogeneous suites have no common policy to divide. Instead define a small closed
-            catalog of procedural atoms &mdash; a canonical procedure plus the fixed lexical patterns
-            and software anchors that identify it. Nothing is removed from the prompt here, so the
-            skills are additive: the question becomes whether the system picks up an offered
-            procedure, not whether it can recover one that was taken away.
-          </p>
-        </article>
+      <div class="sv-panel is-active" data-sv-panel="tb2-seed">
+        <div class="sv-group" data-sv-group="tb2-sections">
+          <div class="sv-tabs" role="tablist" aria-label="Terminal-Bench 2 construction sections">
+            <button class="sv-tab is-active" type="button" role="tab" data-sv="tb2-download">Download seed data</button>
+            <button class="sv-tab" type="button" role="tab" data-sv="tb2-tools">Tools · annotation exists</button>
+            <button class="sv-tab" type="button" role="tab" data-sv="tb2-skills">Skills · mine the prompts</button>
+            <button class="sv-tab" type="button" role="tab" data-sv="tb2-agents">Agents · partition the tools</button>
+            <button class="sv-tab" type="button" role="tab" data-sv="tb2-output">Expected output</button>
+          </div>
+
+          <div class="sv-panel is-active" data-sv-panel="tb2-download">
+            <h4 class="title is-5">Download the Terminal-Bench 2 seed</h4>
+            <p class="sv-cap">
+              This creates a fresh work directory, downloads the public repository, checks out the pinned
+              89-task snapshot, and verifies its commit. It does not download a private builder.
+            </p>
+            <div data-tb2-exact="setup"></div>
+          </div>
+
+          <div class="sv-panel" data-sv-panel="tb2-tools">
+            <p class="sv-cap">
+              The tools track treats task-facing software as the capability universe. Terminal-Bench 2
+              does not provide that annotation directly, so Step 1 accepts only software explicitly
+              required by the task or invoked by its oracle and records the matching evidence.
+            </p>
+            <div class="sv-group" data-sv-group="tools-steps">
+              <div class="sv-tabs" role="tablist" aria-label="Terminal-Bench 2 tools-track steps">
+                <button class="sv-tab is-active" type="button" role="tab" data-sv="tools-annotate">Step 1 · annotate</button>
+                <button class="sv-tab" type="button" role="tab" data-sv="tools-release">Step 2 · rank and release</button>
+                <button class="sv-tab" type="button" role="tab" data-sv="tools-write">Steps 3 and 4 · accumulate and write</button>
+              </div>
+              <div class="sv-panel is-active" data-sv-panel="tools-annotate">
+                <p class="sv-cap">
+                  Download the versioned software catalog, validate its aliases, then discover tasks and
+                  produce <code>oracle_tools</code> with source-path, line, and matching-rule evidence.
+                  The shared implementation begins here and is extended once in the next two tabs.
+                </p>
+                <div data-tb2-exact="tools"></div>
+                <div data-tb2-exact="annotate"></div>
+              </div>
+              <div class="sv-panel" data-sv-panel="tools-release">
+                <p class="sv-cap">
+                  Rank canonical tools by task frequency, release the frequent core first, retain the
+                  long tail, and merge only adjacent stages that cannot satisfy the split floors.
+                </p>
+                <div data-tb2-exact="release"></div>
+              </div>
+              <div class="sv-panel" data-sv-panel="tools-write">
+                <p class="sv-cap">
+                  Form the cumulative allowlist, assign each task to the first stage covering all of its
+                  tools, write disjoint train/test JSONL, and validate the resulting trees. This final
+                  shared chunk is reused by the skills and agents tracks rather than printed again.
+                </p>
+                <div data-tb2-exact="package"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sv-panel" data-sv-panel="tb2-skills">
+            <p class="sv-cap">
+              The skills track deterministically mines procedural atoms from task instructions,
+              descriptions, keywords, tags, and software anchors. Universal execution and output rules
+              remain visible as fixed house rules rather than becoming staged skills.
+            </p>
+            <div class="sv-group" data-sv-group="skills-steps">
+              <div class="sv-tabs" role="tablist" aria-label="Terminal-Bench 2 skills-track steps">
+                <button class="sv-tab is-active" type="button" role="tab" data-sv="skills-annotate">Step 1 · annotate</button>
+                <button class="sv-tab" type="button" role="tab" data-sv="skills-release">Step 2 · rank and release</button>
+                <button class="sv-tab" type="button" role="tab" data-sv="skills-write">Steps 3 and 4 · accumulate and write</button>
+              </div>
+              <div class="sv-panel is-active" data-sv-panel="skills-annotate">
+                <p class="sv-cap">
+                  Download the fixed 26-skill catalog, validate its procedural schema, and associate
+                  skills with tasks using deterministic term and software matches.
+                </p>
+                <div data-tb2-exact="skills"></div>
+                <div data-tb2-guide="skills-annotate"></div>
+              </div>
+              <div class="sv-panel" data-sv-panel="skills-release">
+                <p class="sv-cap">
+                  Rank matched skills by frequency with the established skill sequencer. Singleton
+                  skills stay in the long tail, and the skill curriculum gets its own stage boundaries,
+                  assignments, and deterministic train/test split.
+                </p>
+                <div data-tb2-guide="skills-release"></div>
+              </div>
+              <div class="sv-panel" data-sv-panel="skills-write">
+                <p class="sv-cap">
+                  Build cumulative skill libraries, assign tasks to their earliest covered stage, and
+                  write held-out <code>SKILL.md</code> files, indexes, evidence, and train/test rows.
+                  The exact row and library functions used by the generated builder are shown below.
+                </p>
+                <div data-tb2-guide="skills-write"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sv-panel" data-sv-panel="tb2-agents">
+            <p class="sv-cap">
+              The agents track maps each accepted software capability to exactly one owner family.
+              Each owner becomes a specialist with its own software bundle; task annotations are the
+              owners of that task&rsquo;s oracle tools.
+            </p>
+            <div class="sv-group" data-sv-group="agents-steps">
+              <div class="sv-tabs" role="tablist" aria-label="Terminal-Bench 2 agents-track steps">
+                <button class="sv-tab is-active" type="button" role="tab" data-sv="agents-annotate">Step 1 · annotate</button>
+                <button class="sv-tab" type="button" role="tab" data-sv="agents-release">Step 2 · rank and release</button>
+                <button class="sv-tab" type="button" role="tab" data-sv="agents-write">Steps 3 and 4 · accumulate and write</button>
+              </div>
+              <div class="sv-panel is-active" data-sv-panel="agents-annotate">
+                <p class="sv-cap">
+                  Validate that ownership is a complete disjoint partition, then derive each task&rsquo;s
+                  <code>oracle_agents</code> from the owners of its oracle tools.
+                </p>
+                <div data-tb2-exact="agents"></div>
+                <div data-tb2-guide="agents-annotate"></div>
+              </div>
+              <div class="sv-panel" data-sv-panel="agents-release">
+                <p class="sv-cap">
+                  Rank owner families by task frequency. The exact call below reuses the shared frequency
+                  scheduler, preserves the tools-track split, and builds an independent cumulative agent curriculum.
+                </p>
+                <div data-tb2-guide="agents-release"></div>
+              </div>
+              <div class="sv-panel" data-sv-panel="agents-write">
+                <p class="sv-cap">
+                  Materialize owner skills, portable agent TOMLs, routing descriptions, manifests, and
+                  each stage&rsquo;s cumulative software union. Then write task rows containing both the
+                  available specialist roster and its allowed software.
+                </p>
+                <div data-tb2-guide="agents-write"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sv-panel" data-sv-panel="tb2-output">
+            <h4 class="title is-5">Expected growth across five stages</h4>
+            <p class="sv-cap">
+              Each stacked bar is the set of tasks introduced at that stage: adaptation tasks are
+              available for development and test tasks stay held out. The curve shows how many
+              tools, skills, or agents the evolving harness has accumulated by then.
+            </p>
+            <div class="tb2-chart-legend" aria-label="Chart legend">
+              <span><i class="tb2-key tb2-key--train"></i>Adaptation tasks</span>
+              <span><i class="tb2-key tb2-key--test"></i>Test tasks</span>
+              <span><i class="tb2-key tb2-key--line"></i>Available harness</span>
+            </div>
+            <div class="tb2-chart-grid">
+              <article class="tb2-chart-card">
+                <div class="tb2-chart-head">
+                  <h5>Tools</h5><span>86 tasks · 50 tools</span>
+                </div>
+                <div class="tb2-stage-chart" data-stage-chart data-axis="tools"
+                     data-train="12,3,4,3,4" data-test="28,8,8,8,8"
+                     data-added="13,8,8,8,13" data-cumulative="13,21,29,37,50"></div>
+              </article>
+              <article class="tb2-chart-card">
+                <div class="tb2-chart-head">
+                  <h5>Skills</h5><span>89 tasks · 26 skills</span>
+                </div>
+                <div class="tb2-stage-chart" data-stage-chart data-axis="skills"
+                     data-train="6,4,4,4,8" data-test="15,10,11,10,17"
+                     data-added="8,5,2,3,8" data-cumulative="8,13,15,18,26"></div>
+              </article>
+              <article class="tb2-chart-card">
+                <div class="tb2-chart-head">
+                  <h5>Agents</h5><span>86 tasks · 17 agents</span>
+                </div>
+                <div class="tb2-stage-chart" data-stage-chart data-axis="agents"
+                     data-train="6,8,4,3,5" data-test="14,11,11,16,8"
+                     data-added="3,3,3,3,5" data-cumulative="3,6,9,12,17"></div>
+              </article>
+            </div>
+            <p class="sv-cap">
+              Tools and agents retain 86 tasks; skills retain all 89. The three software-unannotated
+              exclusions are <code>extract-moves-from-video</code>,
+              <code>log-summary-date-ranges</code>, and <code>password-recovery</code>.
+              All five CPU-only Harbor smoke tasks must return reward <code>1.0</code>.
+            </p>
+
+            <h4 class="title is-5 tb2-build-title">Build and validate</h4>
+            <p class="sv-cap">
+              This last block installs the pinned runtime and Harbor adapter, runs two fresh deterministic
+              builds, validates all three tracks, and executes one Harbor oracle smoke task per tools stage.
+              Promotion occurs only when every check passes. Reproducibility is checked automatically,
+              so there is nothing to copy or compare by hand.
+            </p>
+            <div data-tb2-exact="terminal"></div>
+          </div>
+        </div>
       </div>
-      <p class="sv-cap">
-        Then associate skills with tasks, and use the <b>grader</b> as the signal &mdash; whatever the
-        verifier reads is what the task is actually about. Three rules keep that honest, and they are
-        deliberately conservative, since a skill wrongly marked essential inflates every score that
-        follows it.
-      </p>
-      <div class="sv-knobs">
-        <article class="sv-knob">
-          <span class="sv-kn">a checked value decides</span>
-          <p>
-            A specific value the verifier asserts and the skill names is decisive on its own: the
-            task cannot pass without producing exactly what that procedure prescribes.
-          </p>
-        </article>
-        <article class="sv-knob">
-          <span class="sv-kn">a bare field needs corroboration</span>
-          <p>
-            A field name alone is weak evidence &mdash; many procedures touch the same field &mdash;
-            so a field-level match counts only when several constraints agree.
-          </p>
-        </article>
-        <article class="sv-knob">
-          <span class="sv-kn">bookkeeping is ignored</span>
-          <p>
-            Identifiers and audit columns the environment manages are matched by everything and mean
-            nothing. Leave them out or every skill matches every task.
-          </p>
-        </article>
+
+      <div class="sv-panel" data-sv-panel="apex-seed">
+        <div class="sv-group" data-sv-group="apex-sections">
+          <div class="sv-tabs" role="tablist" aria-label="APEX-Agents construction sections">
+            <button class="sv-tab is-active" type="button" role="tab" data-sv="apex-download">Download seed data</button>
+            <button class="sv-tab" type="button" role="tab" data-sv="apex-tools">Tools · derive the operations</button>
+            <button class="sv-tab" type="button" role="tab" data-sv="apex-skills">Skills · mine the prompts</button>
+            <button class="sv-tab" type="button" role="tab" data-sv="apex-agents">Agents · partition the tools</button>
+            <button class="sv-tab" type="button" role="tab" data-sv="apex-output">Expected output</button>
+          </div>
+
+          <div class="sv-panel is-active" data-sv-panel="apex-download">
+            <h4 class="title is-5">Download the APEX-Agents seed</h4>
+            <p class="sv-cap">
+              Accept the dataset terms first. This block securely asks for your Hugging Face token,
+              downloads and verifies the four small metadata files at the pinned snapshot, and checks
+              out the matching Archipelago tool definitions. It does not save your token or download
+              the roughly 9 GB world archives.
+            </p>
+            <div data-apex-exact="setup"></div>
+          </div>
+
+          <div class="sv-panel" data-sv-panel="apex-tools">
+            <p class="sv-cap">
+              APEX-Agents names which applications a world makes available, but does not give each task
+              a minimal oracle operation list. Step 1 therefore derives exact Archipelago MCP operations
+              from task-facing seed evidence. Application names only guard availability; they are not tools.
+            </p>
+            <div class="sv-group" data-sv-group="apex-tools-steps">
+              <div class="sv-tabs" role="tablist" aria-label="APEX-Agents tools-track steps">
+                <button class="sv-tab is-active" type="button" role="tab" data-sv="apex-tools-annotate">Step 1 · annotate</button>
+                <button class="sv-tab" type="button" role="tab" data-sv="apex-tools-release">Step 2 · rank and release</button>
+                <button class="sv-tab" type="button" role="tab" data-sv="apex-tools-write">Steps 3 and 4 · accumulate and write</button>
+              </div>
+              <div class="sv-panel is-active" data-sv-panel="apex-tools-annotate">
+                <p class="sv-cap">
+                  Download the closed 33-operation catalog, verify every namespace owner, then match only
+                  the prompt, world description, expected-output type, and referenced input-file types.
+                  Every accepted operation records evidence, and its owner must exist in the task world.
+                </p>
+                <div data-apex-exact="tools"></div>
+                <div data-apex-exact="annotate"></div>
+              </div>
+              <div class="sv-panel" data-sv-panel="apex-tools-release">
+                <p class="sv-cap">
+                  Rank canonical MCP operations by task frequency, release the frequent core first, retain
+                  the evidenced long tail, and merge adjacent stages until every emitted stage satisfies
+                  the adaptation and test floors.
+                </p>
+                <div data-apex-exact="release"></div>
+              </div>
+              <div class="sv-panel" data-sv-panel="apex-tools-write">
+                <p class="sv-cap">
+                  Build the cumulative operation allowlist, date every task to its earliest covered stage,
+                  write fresh train/test JSONL, and validate source membership, evidence, schemas, cumulative
+                  coverage, and newly introduced capability pressure.
+                </p>
+                <div data-apex-exact="package"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sv-panel" data-sv-panel="apex-skills">
+            <p class="sv-cap">
+              The skills track follows the paper&rsquo;s fixed procedural-atom route. It matches a closed catalog
+              against prompts and world descriptions, expected-output types, and normalized tool anchors.
+              Rubrics and gold responses are never used to annotate tools or skills.
+            </p>
+            <div class="sv-group" data-sv-group="apex-skills-steps">
+              <div class="sv-tabs" role="tablist" aria-label="APEX-Agents skills-track steps">
+                <button class="sv-tab is-active" type="button" role="tab" data-sv="apex-skills-annotate">Step 1 · annotate</button>
+                <button class="sv-tab" type="button" role="tab" data-sv="apex-skills-release">Step 2 · rank and release</button>
+                <button class="sv-tab" type="button" role="tab" data-sv="apex-skills-write">Steps 3 and 4 · accumulate and write</button>
+              </div>
+              <div class="sv-panel is-active" data-sv-panel="apex-skills-annotate">
+                <p class="sv-cap">
+                  Download the fixed 20-skill catalog and associate its canonical procedures with tasks using
+                  deterministic lexical, output-type, and software-anchor matches. Ten tasks with no supported
+                  match are excluded rather than assigned a guessed skill.
+                </p>
+                <div data-apex-exact="skills"></div>
+                <div data-apex-guide="skills-annotate"></div>
+              </div>
+              <div class="sv-panel" data-sv-panel="apex-skills-release">
+                <p class="sv-cap">
+                  Rank the 19 active procedural atoms by task frequency with the established skill sequencer.
+                  The skill curriculum is independent of the tools curriculum and keeps its own stage boundaries,
+                  assignments, and deterministic split.
+                </p>
+                <div data-apex-guide="skills-release"></div>
+              </div>
+              <div class="sv-panel" data-sv-panel="apex-skills-write">
+                <p class="sv-cap">
+                  Accumulate the skill library, assign each retained task to its earliest covered stage, and
+                  materialize held-out <code>SKILL.md</code> files, the stripped house-rules prompt, indexes,
+                  manifests, and deterministic train/test rows.
+                </p>
+                <div data-apex-guide="skills-write"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sv-panel" data-sv-panel="apex-agents">
+            <p class="sv-cap">
+              Applications appear here, as owners—not in the tools track. Every MCP operation maps to exactly
+              one application owner; each owner becomes a specialist, and a task needs the owners of its
+              derived oracle operations.
+            </p>
+            <div class="sv-group" data-sv-group="apex-agents-steps">
+              <div class="sv-tabs" role="tablist" aria-label="APEX-Agents agents-track steps">
+                <button class="sv-tab is-active" type="button" role="tab" data-sv="apex-agents-annotate">Step 1 · annotate</button>
+                <button class="sv-tab" type="button" role="tab" data-sv="apex-agents-release">Step 2 · rank and release</button>
+                <button class="sv-tab" type="button" role="tab" data-sv="apex-agents-write">Steps 3 and 4 · accumulate and write</button>
+              </div>
+              <div class="sv-panel is-active" data-sv-panel="apex-agents-annotate">
+                <p class="sv-cap">
+                  Validate that the 33-operation catalog is partitioned across 11 owners with no missing or
+                  duplicate ownership, then derive each task&rsquo;s <code>oracle_agents</code> from its operation owners.
+                </p>
+                <div data-apex-exact="agents"></div>
+                <div data-apex-guide="agents-annotate"></div>
+              </div>
+              <div class="sv-panel" data-sv-panel="apex-agents-release">
+                <p class="sv-cap">
+                  Rank the 10 active application owners by task frequency using the shared release scheduler.
+                  The cumulative specialist roster evolves independently from both the operation and skill pools.
+                </p>
+                <div data-apex-guide="agents-release"></div>
+              </div>
+              <div class="sv-panel" data-sv-panel="apex-agents-write">
+                <p class="sv-cap">
+                  Materialize owner <code>SKILL.md</code> files, portable Codex agent TOMLs, routing descriptions,
+                  owned-operation lists, stage manifests, and the cumulative software union for every task row.
+                </p>
+                <div data-apex-guide="agents-write"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sv-panel" data-sv-panel="apex-output">
+            <h4 class="title is-5">Expected growth from the pinned APEX-Agents seed</h4>
+            <p class="sv-cap">
+              The three tracks are independently staged, so they do not need the same number of versions.
+              Bars show the tasks introduced at a stage; the curve shows the cumulative operation, skill,
+              or specialist pool available at that stage. Hover or focus a stage for its exact counts.
+            </p>
+            <div class="tb2-chart-legend" aria-label="Chart legend">
+              <span><i class="tb2-key tb2-key--train"></i>Adaptation tasks</span>
+              <span><i class="tb2-key tb2-key--test"></i>Test tasks</span>
+              <span><i class="tb2-key tb2-key--line"></i>Available harness</span>
+            </div>
+            <div class="tb2-chart-grid">
+              <article class="tb2-chart-card">
+                <div class="tb2-chart-head">
+                  <h5>Tools</h5><span>392 tasks · 22 operations</span>
+                </div>
+                <div class="tb2-stage-chart" data-stage-chart data-axis="operations"
+                     data-train="87,12,9,10" data-test="202,28,20,24"
+                     data-added="5,4,3,10" data-cumulative="5,9,12,22"></div>
+              </article>
+              <article class="tb2-chart-card">
+                <div class="tb2-chart-head">
+                  <h5>Skills</h5><span>470 tasks · 19 skills</span>
+                </div>
+                <div class="tb2-stage-chart" data-stage-chart data-axis="skills"
+                     data-train="31,30,23,16,19,22" data-test="72,70,53,37,45,52"
+                     data-added="7,2,2,1,2,5" data-cumulative="7,9,11,12,14,19"></div>
+              </article>
+              <article class="tb2-chart-card">
+                <div class="tb2-chart-head">
+                  <h5>Agents</h5><span>392 tasks · 10 specialists</span>
+                </div>
+                <div class="tb2-stage-chart" data-stage-chart data-axis="specialists"
+                     data-train="66,38,14" data-test="146,93,35"
+                     data-added="2,2,6" data-cumulative="2,4,10"></div>
+              </article>
+            </div>
+            <p class="sv-cap">
+              The tools and agents tracks retain 392 tasks; 88 tasks without supported operation evidence
+              are excluded. The skills track retains 470 tasks and excludes 10 without a deterministic match.
+              The final check runs one source/gold integrity preflight per tools stage—four checks total.
+              It does not execute an agent or judge and does not report rewards.
+            </p>
+
+            <h4 class="title is-5 tb2-build-title">Build and validate</h4>
+            <p class="sv-cap">
+              This block reconstructs the pinned CLI, builds twice in fresh directories, requires identical
+              content, validates all three tracks, and runs the four metadata/gold preflights. Only successful
+              output is promoted to the three <code>apex_agents_validated</code> destinations.
+            </p>
+            <div data-apex-exact="terminal"></div>
+          </div>
+        </div>
       </div>
-      <div class="sv-codewrap">
-        <span class="sv-lang">python &middot; skills_axis.py</span>
-        <button class="sv-copy" type="button">Copy</button>
-        <pre class="sv-code" data-lang="python"><code>import re
-
-BOOKKEEPING = {"id", "uuid", "created_at", "updated_at", "created_by", "status"}
-
-
-def mine_skills(prompt, min_chars=400):
-    """Route A. Cut a shared policy on its own section structure, and hand back the
-    prompt with what you cut REMOVED -- a procedure still sitting in front of the
-    agent is not one it has to retrieve.
-    """
-    parts = re.split(r"\n(?=#{2,3} )", prompt)     # your seed's own headings
-    general, skills = [parts[0]], {}
-    for part in parts[1:]:
-        title = part.splitlines()[0].lstrip("# ").strip()
-        if len(part) &gt;= min_chars:      # thinner than this is not a procedure
-            skills[title.lower().replace(" ", "_")] = part
-        else:
-            general.append(part)
-    return skills, "\n".join(general)
-
-
-def skill_capabilities(task, skills, grader_reads):
-    """Which mined skills a task cannot pass without -- decided by the verifier.
-
-    `grader_reads(task)` is the one function you write: a parse of your own grader
-    into the fields it asserts on and the literal values it asserts. The three rules
-    above are the three lines below.
-    """
-    checked = grader_reads(task)
-    need = set()
-    for sid, body in skills.items():
-        text = body.lower()
-        hits = [v for v in checked["values"] if len(str(v)) &gt; 3 and str(v).lower() in text]
-        fields = [f for f in checked["fields"]
-                  if f.lower() not in BOOKKEEPING and f.lower() in text]
-        if hits or len(fields) &gt; 1:     # a value decides; one bare field does not
-            need.add(sid)
-    return need</code></pre>
-      </div>
-      <p class="sv-cap">
-        Then filter, and expect to lose material: a skill no task needs is dropped, a task no skill
-        matches is dropped, and a domain left with fewer than three non-empty stages is not a stream.
-        Ours kept 76.6% of eligible tasks and 42 skills. What survives goes through the same four
-        steps as any other axis. Worth stating plainly: this is a verifier-grounded heuristic, not a
-        proof of necessity or sufficiency &mdash; the annotation is strong enough to schedule a stream
-        and to analyze one, and we do not claim more for it.
-      </p>
-    </div>
-
-    <div class="sv-panel" data-sv-panel="agents">
-      <p class="sv-cap">
-        The agent axis is not mined from tasks at all: it is induced from the tool axis, so build that
-        one first. The observation it rests on is that a tool namespace already encodes ownership
-        &mdash; a tool belongs to an app, a service, a product, a library. Group by owner and each
-        owner becomes a specialist worth delegating to, with no new content written for it.
-      </p>
-      <ol class="sv-flow">
-        <li><b>own</b><i>every tool maps to exactly one owner &mdash; a disjoint partition</i></li>
-        <li><b>bundle</b><i>an owner becomes a specialist: routing blurb, its tools, its procedures</i></li>
-        <li><b>annotate</b><i>a task needs the owners of the tools it needed</i></li>
-        <li><b>release</b><i>same schedule, over specialists instead of tools</i></li>
-      </ol>
-      <div class="sv-codewrap">
-        <span class="sv-lang">python &middot; agents_axis.py</span>
-        <button class="sv-copy" type="button">Copy</button>
-        <pre class="sv-code" data-lang="python"><code>def owner_of(tool):
-    """A tool namespace already encodes ownership -- split it. Where a seed has no
-    namespace, a flat list of software say, canonicalize into families first so a
-    stack, its CLI and its library all land in one place.
-    """
-    return tool.split(".", 1)[0]              # salesforce.create_case -> salesforce
-
-
-def induce_agents(tool_ann):
-    """{owner: its tools} and {task: the owners it needs}. The second one is the
-    agent-axis annotation, and it goes through the same steps 2-4 as any other."""
-    bundles = {}
-    for caps in tool_ann.values():
-        for tool in caps:
-            bundles.setdefault(owner_of(tool), set()).add(tool)
-    agent_ann = {i: frozenset(owner_of(t) for t in caps) for i, caps in tool_ann.items()}
-
-    # Ownership has to be a partition and not a tagging, and the induced labels have
-    # to cover the axis they came from -- otherwise the annotation means nothing.
-    assert sum(map(len, bundles.values())) == len(set().union(*bundles.values()))
-    for i, owners in agent_ann.items():
-        assert tool_ann[i] &lt;= set().union(*(bundles[o] for o in owners))
-    return bundles, agent_ann</code></pre>
-      </div>
-      <p class="sv-cap">
-        Each bundle then needs a routing blurb the lead agent can read &mdash; the owner&rsquo;s name,
-        what it is for, its tools &mdash; and that is the only text this axis asks you to write.
-      </p>
-      <p class="sv-cap">
-        What makes this the hardest of the three is the one deliberate restriction at evaluation: the
-        lead agent gets no tools of its own, only the cumulative pool of specialists, so the work has
-        to be delegated. Ours land at 62 specialists, and 85.2% of agent-axis tasks need more than one
-        of them &mdash; coordination pressure that comes out of the seed&rsquo;s own tool structure
-        rather than from anything we wrote.
-      </p>
-    </div>
-    </div><!-- /axes -->
-
-    <h3 class="sv-h3">Two popular benchmarks, as examples</h3>
-    <p class="sv-cap sv-cap--mid">
-      Below we take Terminal-Bench and APEX-Agents and construct the EvoHarnessBench version of each:
-      a complete script per seed, importing the module above unchanged.
-    </p>
-
-    <div class="sv-group" data-sv-group="seeds">
-    <div class="sv-tabs" role="tablist" aria-label="Worked examples">
-      <button class="sv-tab is-active" type="button" role="tab" data-sv="tbench">Terminal-Bench &middot; derive the annotation</button>
-      <button class="sv-tab" type="button" role="tab" data-sv="apex">APEX-Agents &middot; settle the grader</button>
-    </div>
-
-    <div class="sv-panel is-active" data-sv-panel="tbench">
-    <p class="sv-cap">
-      <b>The capability is the software.</b>
-      <a href="https://www.tbench.ai/" target="_blank" rel="noopener">Terminal-Bench</a> meets the
-      requirement seeds most often fail: a task carries its own tests and is scored by running them,
-      so pass and fail are settled by execution. What it has no field for is the capability, so that
-      part is derived &mdash; from the two files that already say what a task needs, the Dockerfile
-      that builds its environment and the reference solution that proves it solvable.
-    </p>
-    <div class="sv-codewrap">
-      <span class="sv-lang">python &middot; seed_terminal_bench.py</span>
-      <button class="sv-copy" type="button">Copy</button>
-      <pre class="sv-code" data-lang="python"><code>import re
-from pathlib import Path
-from evolve import annotate, manifest, release_schedule, stream, write
-
-# Two task layouts are in the wild and both carry the two files we read:
-#   task.yaml + Dockerfile + solution.sh          (terminal-bench)
-#   task.toml + environment/ + solution/solve.sh  (Harbor)
-INSTALL = re.compile(r"(?:apt-get|apt|pip3?|npm|cargo|gem)\s+(?:install|add)\s+([^\n&amp;|;]*)")
-INVOKE = re.compile(r"^\s*(?:sudo\s+)?([a-z][\w.+-]*)", re.M)
-FAMILY = {"pip3": "pip", "python3": "python", "apt-get": "apt", "nodejs": "node",
-          "g++": "gcc", "psql": "postgres", "libpq-dev": "postgres"}
-SHELL = {"cd", "echo", "cat", "set", "if", "fi", "for", "do", "done", "then", "exit"}
-
-
-def tb_tasks(root: Path):
-    """One dict per task directory, either layout. The directory name is the id."""
-    for d in sorted(p for p in root.iterdir() if p.is_dir()):
-        env = _first(d / "environment/Dockerfile", d / "Dockerfile")
-        sol = _first(d / "solution/solve.sh", d / "solution.sh")
-        if not (env and sol):     # no reference solution: nothing states the need
-            continue
-        yield {"task_id": d.name, "env": env.read_text(), "solution": sol.read_text()}
-
-
-def _first(*paths):
-    return next((p for p in paths if p.exists()), None)
-
-
-def tb_capabilities(task):
-    """Whatever either file installs, plus what the reference solution invokes.
-
-    Both are needed -- the Dockerfile has the libraries, the solution has the CLIs --
-    and tests/ is deliberately never read: pytest is the grader's dependency, not the
-    agent's, and counting it would put it in every task's annotation.
-    """
-    got = set()
-    for spec in INSTALL.findall(task["env"] + "\n" + task["solution"]):
-        got |= {w.split("==")[0] for w in spec.split() if not w.startswith("-")}
-    got |= set(INVOKE.findall(task["solution"]))
-    return {FAMILY.get(c, c) for c in got} - SHELL
-
-
-ann = annotate(tb_tasks(Path("terminal-bench/tasks")), tb_capabilities)
-ann, release = release_schedule(ann, stages=5, min_uses=3)
-rows = stream(ann, release, domain="terminal_bench")
-write(rows, Path("data/terminal_bench"),
-      manifest(ann, release, rows, enforcement="allowlist-in-instruction"))</code></pre>
-    </div>
-    <p class="sv-cap">
-      Two things are worth doing by hand here. Print the frequency table before you stage anything and
-      read the top forty labels: canonicalization is the whole game on a mined annotation, and
-      <code>FAMILY</code> above is a starting point, not a finished map. Then decide how a stage is
-      <em>enforced</em>, because a container image will happily contain software the stage has not
-      released yet: either build one image per stage from the cumulative pool, which is the strict
-      reading, or state the pool as an allowlist in the instruction and hold the image fixed, which is
-      cheaper and is what our own enterprise track does. Both are defensible. Mixing them across
-      stages is not.
-    </p>
-    </div><!-- /terminal-bench -->
-
-    <div class="sv-panel" data-sv-panel="apex">
-    <p class="sv-cap">
-      <b>The capability is the application.</b>
-      <a href="https://huggingface.co/datasets/mercor/apex-agents" target="_blank" rel="noopener">APEX-Agents</a>
-      arrives with the namespace already given, and with the grader as the part you have to settle:
-      480 long-horizon professional tasks across 33 worlds of files and applications &mdash;
-      mail, spreadsheets, documents, calendar, chat, code execution &mdash; and applications are the
-      shape both the tool axis and the ownership partition want, with 33 worlds supplying the
-      repetition a frequency ranking needs to mean anything.
-    </p>
-    <div class="sv-codewrap">
-      <span class="sv-lang">python &middot; seed_apex_agents.py</span>
-      <button class="sv-copy" type="button">Copy</button>
-      <pre class="sv-code" data-lang="python"><code>from pathlib import Path
-from datasets import load_dataset
-from evolve import annotate, manifest, release_schedule, stream, write
-
-JUDGE = "pin-the-exact-snapshot-here"   # a judge that moves moves every score with it
-
-# A closed catalog of the applications a world exposes, each with the cues that
-# identify it. Lexical and fixed: no model decides what a task needs.
-APPS = {
-    "mail":          ("email", "e-mail", "inbox", "reply to", "sends a message"),
-    "spreadsheets":  ("spreadsheet", "xlsx", "worksheet", "cell", "formula", "tab named"),
-    "documents":     ("document", "docx", "memo", "write-up", "drafts a"),
-    "presentations": ("presentation", "slide", "deck", "pptx"),
-    "calendar":      ("calendar", "meeting", "invite", "schedules a"),
-    "chat":          ("chat", "channel", "direct message"),
-    "code":          ("script", "python", "notebook", "code execution"),
-    "pdfs":          ("pdf", "scanned", "filing"),
-}
-
-
-def apex_tasks():
-    """Take the dataset card's own advice and print ds[0].keys() first -- field names
-    move. What this reads is the id, the world, the prompt and the rubric criteria.
-    """
-    for row in load_dataset("mercor/apex-agents", split="train"):   # gated: accept terms
-        rubric = row.get("rubric") or row.get("rubric_criteria") or []
-        criteria = [c if isinstance(c, str) else c.get("criterion", str(c)) for c in rubric]
-        yield {"task_id": row["task_id"], "world": row["world_id"],
-               "text": " ".join([row["prompt"], *criteria]).lower()}
-
-
-def apex_capabilities(task):
-    """A criterion that says "the email states X" needs Mail. Grade-relevant text is
-    the right thing to read: the rubric is what the task is actually about.
-    """
-    return {app for app, cues in APPS.items() if any(c in task["text"] for c in cues)}
-
-
-ann = annotate(apex_tasks(), apex_capabilities)
-ann, release = release_schedule(ann, stages=4, first_frac=0.5, min_new=12)
-rows = stream(ann, release, domain="apex_agents")
-write(rows, Path("data/apex_agents"), manifest(ann, release, rows, judge=JUDGE))
-
-# The agent axis then comes for free: one specialist per application, since an
-# application owns its own actions. induce_agents(ann), then steps 2-4 again.</code></pre>
-    </div>
-    <p class="sv-cap">
-      Freeze the judge model and the rubric before you stage anything, and record both in the manifest.
-      Scoring here is a rubric of binary criteria adjudicated by a model, so an unpinned judge means a
-      stage-to-stage difference is reporting two movements at once &mdash; and this is the requirement
-      the seed does not meet on its own. Note also what the catalog size costs you: eight applications
-      support three or four stages, not ten, because every stage has to introduce something at least
-      <code>min_new</code> surviving tasks need. For a longer stream, split the namespace finer &mdash;
-      reading a spreadsheet against writing one, searching mail against sending it &mdash; which is
-      exactly what a tool-level namespace hands you for nothing. Their terms also restrict the data to
-      evaluation, so read them before building adaptation splits out of it.
-    </p>
-    </div><!-- /apex-agents -->
-    </div><!-- /seeds -->
+    </div><!-- /seed benchmarks -->
   </div>
 </section>
 
@@ -3006,6 +2831,8 @@ write(rows, Path("data/apex_agents"), manifest(ann, release, rows, judge=JUDGE))
 </footer>
 
   <script src="db.js"></script>
-  <script src="app.js"></script>
+  <script src="tb2-public-blocks.js?v=20260913-construction-4"></script>
+  <script src="apex-public-blocks.js?v=20260913-construction-4"></script>
+  <script src="app.js?v=20260913-stats-1"></script>
 </body>
 </html>
