@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A readable preview of the evolve-eval and evolve-benchmark skills for EvoHarnessBench.">
+  <title>EvoHarnessBench Skills</title>
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans:400,500,600,700|Noto+Sans:400,500,600,700" rel="stylesheet">
+  <link rel="icon" href="../static/images/favicon.svg">
+  <link rel="stylesheet" href="./skill-preview.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="../" aria-label="Back to EvoHarnessBench">
+      <span>EvoHarnessBench</span>
+    </a>
+    <a class="back-link" href="../">
+      <span aria-hidden="true">&larr;</span>
+      Back to the benchmark
+    </a>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="eyebrow">Agent-ready instructions</div>
+      <h1>Inspect the EvoHarnessBench skills</h1>
+      <p>
+        Read the top-level instructions before you install anything.
+      </p>
+      <div class="access-note">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 3.5 20 7v5.4c0 4.3-3 7.1-8 8.6-5-1.5-8-4.3-8-8.6V7l8-3.5Z"/>
+          <path d="m8.8 12.1 2.1 2.1 4.4-4.5"/>
+        </svg>
+        <span>Installing the complete skill package and using the hosted service requires your evaluation key.</span>
+      </div>
+    </section>
+
+    <nav class="skill-tabs" aria-label="Choose a skill">
+      <a class="skill-tab" href="?skill=evolve-eval" data-skill-tab="evolve-eval">
+        <span class="tab-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M8 4.5H5.8A1.8 1.8 0 0 0 4 6.3v11.9A1.8 1.8 0 0 0 5.8 20h11.9a1.8 1.8 0 0 0 1.8-1.8V16"/><path d="m9.3 14.7 2.5-.5 7.1-7.1-2-2-7.1 7.1-.5 2.5Z"/><path d="m15.8 6.2 2 2"/></svg>
+        </span>
+        <span><b>Evaluate an Agent</b><small>evolve-eval</small></span>
+      </a>
+      <a class="skill-tab" href="?skill=evolve-benchmark" data-skill-tab="evolve-benchmark">
+        <span class="tab-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M4 7.5h16M4 12h16M4 16.5h16"/><circle cx="7" cy="7.5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="17" cy="16.5" r="1"/></svg>
+        </span>
+        <span><b>Build a Benchmark</b><small>evolve-benchmark</small></span>
+      </a>
+    </nav>
+
+    <section class="skill-panel" id="evolve-eval" data-skill-panel="evolve-eval">
+      <article class="skill-document">
+        <div class="document-head">
+          <div>
+            <div class="document-kicker">Evaluation skill</div>
+            <h2>Evolve Eval</h2>
+          </div>
+          <code class="skill-name">evolve-eval</code>
+        </div>
+
+        <div class="purpose">
+          <span>What it does</span>
+          <p>Evaluates a shell-capable agent on hosted or local EvoHarnessBench datasets. Use it for guided smoke tests, deployment, self-evolving or task-specific evaluation, continual-learning matrices, and explicitly confirmed leaderboard runs on EOG, ALE, TB2, APEX-Agents, Hyper-tau, and new verifier-backed benchmarks.</p>
+        </div>
+
+        <p>Use <code>__BASE_URL__</code> as the hosted catalog. Keep credentials in environment variables; never print, persist, place them in prompts, or pass them on command lines.</p>
+
+        <p>For an evaluation run, read <code>references/guided-workflow.md</code> and do not skip its four user checkpoints. For a documentation, API, or result question, answer directly without starting an evaluation; read <code>references/http-and-sdk.md</code>, inspect the installed SDK or service schema when needed, and tailor the smallest working query to the field the user wants.</p>
+
+        <h3>Read only what the selected runtime needs</h3>
+        <ul>
+          <li><code>references/adapter-contract.md</code> for a new or local benchmark.</li>
+          <li><code>references/resource-enforcement.md</code> for every local tools, skills, or agents track.</li>
+          <li><code>references/modes-and-metrics.md</code> for track, mode, and matrix choices.</li>
+          <li><code>references/runtime-examples.md</code> for EOG, ALE, TB2, APEX-Agents, or Hyper-tau.</li>
+          <li><code>references/http-and-sdk.md</code> for execution and recovery.</li>
+        </ul>
+
+        <p>The default OpenAI model is <code>gpt-5</code> unless the user explicitly selects another model or an official benchmark fixes a separate simulator, judge, or model-menu seat.</p>
+
+        <h3>Resolve the target before evaluating</h3>
+        <pre><code>evolve-eval targets
+evolve-eval resolve-target BENCHMARK --runtime-adapter ./adapter.json</code></pre>
+
+        <p>Use the hosted endpoint only when its catalog entry says <code>runnable: true</code> and advertises the requested track, mode, action surface, and harness. Otherwise, validate the user-approved adapter and start a loopback sidecar:</p>
+
+        <pre><code>evolve-eval inspect-adapter ./adapter.json
+evolve-eval serve-local --runtime-adapter ./adapter.json --port 8078</code></pre>
+
+        <div class="guardrail">
+          <h3>Before a full run</h3>
+          <p>Run a bounded smoke first. A no-limit or publishable run requires explicit user confirmation after the exact task count, repetitions, expected model cost, credentials, runtime, and smoke plan are shown. Never upload results or adapters automatically. Environment or runtime failures are errors, never zero scores.</p>
+        </div>
+
+        <p>For a local adapter, do not accept <code>enforced_tracks</code> as proof. At checkpoint 2, show how selected resources are physically enabled, propose negative controls for forbidden resources, and ask the user to approve the implementation and tests. Run the approved controls and attach their checksum-bound report. Only tracks verified by <code>inspect-adapter</code> are comparable; otherwise label the smoke diagnostic and do not offer a full leaderboard run.</p>
+      </article>
+    </section>
+
+    <section class="skill-panel" id="evolve-benchmark" data-skill-panel="evolve-benchmark" hidden>
+      <article class="skill-document">
+        <div class="document-head">
+          <div>
+            <div class="document-kicker">Construction skill</div>
+            <h2>Evolve Benchmark</h2>
+          </div>
+          <code class="skill-name">evolve-benchmark</code>
+        </div>
+
+        <div class="purpose">
+          <span>What it does</span>
+          <p>Converts a verifier-backed seed task suite into deterministic EvoHarnessBench-style evolving tools, skills, or agents datasets. Use it to audit an unfamiliar seed interactively, define evidence-backed capability adapters, construct and validate supported tracks, or reproduce the pinned Terminal-Bench 2 and APEX-Agents examples.</p>
+        </div>
+
+        <p>Guide the user from a seed benchmark to locally validated evolving datasets. Preserve the seed, work in a separate output directory, and never publish or upload without a separate explicit request.</p>
+
+        <h3>Route the request</h3>
+        <ul>
+          <li>For Terminal-Bench 2 at commit <code>2fd12b88aafdd04a52c298e3940bcb189f9766d6</code>, read <code>references/terminal-bench-2.md</code> and follow its exact blocks.</li>
+          <li>For APEX-Agents at commit <code>92c86856</code>, read <code>references/apex-agents.md</code> and follow its exact blocks.</li>
+          <li>For every other seed, read <code>references/interactive-workflow.md</code>, then <code>references/adapter-contract.md</code>. Read <code>references/tracks.md</code> while designing annotations and <code>references/validation.md</code> before validation or promotion.</li>
+          <li>Read <code>references/pipeline.md</code> when explaining or checking the paper-aligned construction algorithm.</li>
+        </ul>
+
+        <p>Do not load either exact example reference for an unrelated seed. TB2 and APEX are regression examples, not templates to copy blindly.</p>
+
+        <h3>General workflow</h3>
+        <p>For an unfamiliar seed, pause for four explicit user approvals. Treat every checkpoint as a repair loop: diagnose failures, propose a deterministic correction, regenerate the checkpoint report, and ask again. Do not advance while the report says <code>repair_required</code>, and do not collapse the approvals into one confirmation.</p>
+
+        <ol class="workflow-list">
+          <li><b>Seed suitability</b><span>Inspect read-only and report the source pin, task and grader shape, evidence, repeated capabilities, supported tracks, gaps, and separate output path. Tools and skills may be supported independently; agents require valid tool annotations and ownership.</span></li>
+          <li><b>Annotations</b><span>Propose closed catalogs, deterministic matching rules, evidence samples, exclusions, ambiguous cases, skill procedures, and the exact tool-owner partition. Labels must be grounded in public prompts, descriptions, or approved anchors. The frozen adapter must label every task without model calls.</span></li>
+          <li><b>Ranking and staging</b><span>Use the packaged engine to show frequencies, release order, proposed versions, splits, exclusions, and smoke commands. Ask the user to approve this plan before building.</span></li>
+          <li><b>Validation and promotion</b><span>Build twice, compare every file, run the seed&rsquo;s real verifier, and present the report. Ask separately before promoting or replacing an accepted destination.</span></li>
+        </ol>
+
+        <p>Record each answer in <code>approvals.json</code>; record every user-approved annotation departure in <code>deviations.json</code>. Annotation approval must store the current <code>annotation_input_sha256</code> printed by <code>inspect</code>, and staging approval must store <code>plan_sha256</code>. Any upstream edit invalidates downstream approval and returns the conversation to the affected checkpoint.</p>
+
+        <p>Approval may select a deterministic capability definition, such as APEX MCP operations as tools. It may not waive outcome authority, evidence, determinism, cumulative growth, earliest-solvable assignment, split floors, canonical row or materialization schemas, procedure preservation, or runtime validation.</p>
+
+        <p>Use <code>scripts/evolve_core.py</code> for shared construction mechanics. Seed-specific code should only normalize source data into the adapter contract. A failed or verifier-less build remains <code>preflight-only</code>; do not call it validated or promote it.</p>
+
+        <div class="guardrail">
+          <h3>Boundaries</h3>
+          <ul>
+            <li>Never modify the source benchmark, append to existing JSONL, or expose gold answers, solutions, rubrics, or verifier internals to the evaluated agent.</li>
+            <li>Never invent missing annotations silently. Offer evidence-backed choices: provide source annotations, approve a deterministic adapter, skip the unsupported track, or stop.</li>
+            <li>Keep every active tool under exactly one owner. Agents are derived from tool owners, not independently invented personas.</li>
+            <li>Preserve the schema spellings <code>oracle_tools</code>/<code>cummulative_tools</code>, <code>oracle_skills</code>/<code>cummulative_oracle_skills</code>, and <code>oracle_agents</code>/<code>cumulative_agents</code>.</li>
+            <li>Never promote fewer than three non-empty stages or a stage without both adaptation and test tasks at the configured floors.</li>
+          </ul>
+        </div>
+      </article>
+    </section>
+
+    <p class="page-footnote">Readable preview of the top-level skill instructions. Install the authenticated package to obtain its referenced files and executable helpers.</p>
+  </main>
+
+  <script>
+    (() => {
+      const valid = new Set(['evolve-eval', 'evolve-benchmark']);
+      const tabs = [...document.querySelectorAll('[data-skill-tab]')];
+      const panels = [...document.querySelectorAll('[data-skill-panel]')];
+
+      function openSkill() {
+        const requested = new URLSearchParams(location.search).get('skill');
+        const selected = valid.has(requested) ? requested : 'evolve-eval';
+        tabs.forEach((tab) => {
+          const active = tab.dataset.skillTab === selected;
+          tab.classList.toggle('is-active', active);
+          if (active) tab.setAttribute('aria-current', 'page');
+          else tab.removeAttribute('aria-current');
+        });
+        panels.forEach((panel) => {
+          panel.hidden = panel.dataset.skillPanel !== selected;
+        });
+      }
+
+      tabs.forEach((tab) => {
+        tab.addEventListener('click', (event) => {
+          event.preventDefault();
+          history.pushState({}, '', tab.href);
+          openSkill();
+        });
+      });
+      window.addEventListener('popstate', openSkill);
+      openSkill();
+    })();
+  </script>
+</body>
+</html>
