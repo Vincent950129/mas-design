@@ -31,7 +31,7 @@ CLAIMS = {
 COLLECTION = "https://huggingface.co/collections/ZixuanKe/evoharnessbench"
 # Where a key comes from, and the env var the SDK actually reads for it
 # (``EvalClient.__init__`` in simple_agentic_evals/client.py).
-LOGIN = "https://mas-orchestra.salesforceresearch.ai/mas_r1/demo/"
+LOGIN = "https://ian-sections-none-closest.trycloudflare.com/"
 KEY_ENV = "EVAL_SERVICE_API_KEY"
 # The three tutorials, shallowest first, with the code-cell count the page quotes and the
 # notebook's own filename -- both read back off Colab rather than trusted.

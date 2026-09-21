@@ -21,7 +21,7 @@ BANNER = "run the evolving mode in your browser"
 # The demo the page sends readers to, with the state the paper wants them to land in:
 # the enterprise arm, the CSM gym, evolving mode already on. A quick tunnel, so the
 # hostname is only good for as long as the tunnel runs -- see the reachability check.
-DEMO = ("https://fails-scotland-diagnostic-joy.trycloudflare.com/"
+DEMO = ("https://ian-sections-none-closest.trycloudflare.com/"
         "?mode=enterprise&gym=csm&evolving=1")
 PAPER = "https://huggingface.co/papers/2609.04280"
 
