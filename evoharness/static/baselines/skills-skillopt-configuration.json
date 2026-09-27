@@ -6,36 +6,41 @@
   "harness": "SkillOpt",
   "author": "Ye Liu",
   "kind": "cumulative",
-  "description": "SkillOpt with GPT-5.5, evaluated against the cumulative EOG skill library. This is a different backbone from the GPT-5 systems.",
+  "description": "SkillOpt uses GPT-5.5 with the EOG skills introduced through the current stage. Its task-solving model differs from the GPT-5 baselines.",
   "settings": [
     [
-      "Solver model",
+      "Task-solving model",
       "GPT-5.5",
-      "Registry"
+      "Reported experiment setting"
     ],
     [
       "Optimization budget",
-      "Not recorded with this archived evaluation export",
-      "Unavailable"
+      "Not reported for this experiment",
+      "Not reported"
     ],
     [
-      "Solver limits / concurrency",
-      "Not established by these artifacts",
-      "Unavailable"
+      "Task time limit",
+      "Not reported",
+      "Not reported"
     ],
     [
-      "Held-out evaluation",
-      "Runs 1, 2 and 3 per recorded cell",
-      "Archived snapshot"
+      "Parallel task limit",
+      "Not reported",
+      "Not reported"
     ],
     [
-      "Complete total compute budget",
-      "Not established; evaluation metrics exclude adaptation/search work",
-      "Unavailable"
+      "Held-out evaluation repetitions",
+      "3 runs for each evaluated combination of stream, system stage, and task group; each task is attempted once per run",
+      "Recorded experiment setting"
+    ],
+    [
+      "Total experiment compute",
+      "Not reported; held-out evaluation usage excludes training, memory building and optimization",
+      "Not reported"
     ]
   ],
   "notes": [
-    "EOG only. Recorded trial durations are unavailable; missing time must not be interpreted as zero cost."
+    "Results are available for EOG only. Task durations were not reported; unavailable timing must not be interpreted as zero cost."
   ],
   "sources": [
     "analysis/arms.py",

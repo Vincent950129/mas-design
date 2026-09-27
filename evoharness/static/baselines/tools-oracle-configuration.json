@@ -6,46 +6,56 @@
   "harness": "ReAct (EOG) / Codex (ALE)",
   "author": "Zixuan",
   "kind": "control",
-  "description": "Task-specific reference. Each task receives its selected capability subset; no state accumulates across cohorts.",
+  "description": "Reference system given the capabilities selected for each task. It does not learn or retain experience between stages.",
   "settings": [
     [
-      "Solver model",
+      "Task-solving model",
       "GPT-5",
-      "Recorded"
+      "Recorded experiment setting"
     ],
     [
-      "Capability selection",
-      "Task-specific tools",
-      "Registry / runner"
+      "Capabilities supplied to each task",
+      "The task’s designated tools",
+      "Reported experiment setting"
     ],
     [
-      "Stage search budget",
-      "No stage-level prompt or harness search in this control",
+      "Optimization between stages",
+      "None; no prompt or agent-program search",
       "Experiment design"
     ],
     [
-      "EOG solver limits",
-      "ReAct: 50 iterations; max_tokens 16,384; temperature 0.1",
-      "Reference defaults; historical overrides unverified"
+      "EOG agent loop limit",
+      "50 ReAct iterations per task",
+      "Implementation default; original run setting unknown"
     ],
     [
-      "ALE solver limit",
+      "EOG model response token limit",
+      "16,384 tokens per response",
+      "Implementation default; original run setting unknown"
+    ],
+    [
+      "EOG sampling temperature",
+      "0.1",
+      "Implementation default; original run setting unknown"
+    ],
+    [
+      "ALE task time limit",
       "7,200 seconds per task",
-      "Saved experiment configuration / runner"
+      "Recorded configuration and implementation setting"
     ],
     [
-      "Held-out evaluation",
-      "Runs 1, 2 and 3 per recorded cell",
-      "Archived snapshot"
+      "Held-out evaluation repetitions",
+      "3 runs for each evaluated combination of stream, system stage, and task group; each task is attempted once per run",
+      "Recorded experiment setting"
     ],
     [
-      "Complete total compute budget",
-      "Not established; evaluation metrics exclude adaptation/search work",
-      "Unavailable"
+      "Total experiment compute",
+      "Not reported; held-out evaluation usage excludes training, memory building and optimization",
+      "Not reported"
     ]
   ],
   "notes": [
-    "Each stage point evaluates that cohort only. The benchmark aggregate pools all cohorts; this is not a cumulative adaptation curve."
+    "Each stage result covers that stage’s held-out tasks only. The overall benchmark result combines tasks from all stages. No adaptation takes place between these evaluations."
   ],
   "sources": [
     "analysis/arms.py",

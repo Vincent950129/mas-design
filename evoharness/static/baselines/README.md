@@ -54,536 +54,627 @@ Source paths are relative to the experiment repository; `external/evolving-mas-b
 
 ### tools / Task-specific ReAct/Codex (`oracle`)
 
-Task-specific reference. Each task receives its selected capability subset; no state accumulates across cohorts.
+Reference system given the capabilities selected for each task. It does not learn or retain experience between stages.
 
 | Setting | Value | Evidence |
 |---|---|---|
-| Solver model | GPT-5 | Recorded |
-| Capability selection | Task-specific tools | Registry / runner |
-| Stage search budget | No stage-level prompt or harness search in this control | Experiment design |
-| EOG solver limits | ReAct: 50 iterations; max_tokens 16,384; temperature 0.1 | Reference defaults; historical overrides unverified |
-| ALE solver limit | 7,200 seconds per task | Saved experiment configuration / runner |
-| Held-out evaluation | Runs 1, 2 and 3 per recorded cell | Archived snapshot |
-| Complete total compute budget | Not established; evaluation metrics exclude adaptation/search work | Unavailable |
+| Task-solving model | GPT-5 | Recorded experiment setting |
+| Capabilities supplied to each task | The task’s designated tools | Reported experiment setting |
+| Optimization between stages | None; no prompt or agent-program search | Experiment design |
+| EOG agent loop limit | 50 ReAct iterations per task | Implementation default; original run setting unknown |
+| EOG model response token limit | 16,384 tokens per response | Implementation default; original run setting unknown |
+| EOG sampling temperature | 0.1 | Implementation default; original run setting unknown |
+| ALE task time limit | 7,200 seconds per task | Recorded configuration and implementation setting |
+| Held-out evaluation repetitions | 3 runs for each evaluated combination of stream, system stage, and task group; each task is attempted once per run | Recorded experiment setting |
+| Total experiment compute | Not reported; held-out evaluation usage excludes training, memory building and optimization | Not reported |
 
-- Each stage point evaluates that cohort only. The benchmark aggregate pools all cohorts; this is not a cumulative adaptation curve.
+- Each stage result covers that stage’s held-out tasks only. The overall benchmark result combines tasks from all stages. No adaptation takes place between these evaluations.
 
 Sources: `analysis/arms.py`; `analysis/cache/cells_tools.tsv`; `evolve_tools/src/runner.py`; `evolve_tools/src/ale_eval.py`; `reference/EnterpriseOps-Gym/conf/llm/gpt-5.json (model settings only)`
 
 ### tools / ReAct/Codex (`react`)
 
-Deployment baseline with the benchmark’s accumulating capability pool. No stage-specific prompt or harness optimization.
+Deployment baseline that receives the capabilities introduced up to the current stage. Its prompt and agent program are not optimized between stages.
 
 | Setting | Value | Evidence |
 |---|---|---|
-| Solver model | GPT-5 | Recorded |
-| Stage search budget | No stage-level optimization | Experiment design |
-| Capability pool | Cumulative through the selected stage | Registry / runner |
-| EOG solver limits | ReAct: 50 iterations; max_tokens 16,384; temperature 0.1 | Reference defaults; historical overrides unverified |
-| ALE solver limit | 7,200 seconds per task | Saved experiment configuration / runner |
-| Held-out evaluation | Runs 1, 2 and 3 per recorded cell | Archived snapshot |
-| Complete total compute budget | Not established; evaluation metrics exclude adaptation/search work | Unavailable |
+| Task-solving model | GPT-5 | Recorded experiment setting |
+| Optimization between stages | None | Experiment design |
+| Available capabilities | All capabilities introduced through the selected stage | Reported experiment setting |
+| EOG agent loop limit | 50 ReAct iterations per task | Implementation default; original run setting unknown |
+| EOG model response token limit | 16,384 tokens per response | Implementation default; original run setting unknown |
+| EOG sampling temperature | 0.1 | Implementation default; original run setting unknown |
+| ALE task time limit | 7,200 seconds per task | Recorded configuration and implementation setting |
+| Held-out evaluation repetitions | 3 runs for each evaluated combination of stream, system stage, and task group; each task is attempted once per run | Recorded experiment setting |
+| Total experiment compute | Not reported; held-out evaluation usage excludes training, memory building and optimization | Not reported |
 
-- The separate Codex (ALE, V) experiment provides the ALE deployment control for the tool-memory baselines.
+- The separately listed Codex (ALE, V) experiment is the ALE deployment baseline used for comparison with the tool-memory methods.
 
 Sources: `analysis/arms.py`; `analysis/cache/cells_tools.tsv`; `evolve_tools/src/runner.py`; `evolve_tools/src/ale_eval.py`; `reference/EnterpriseOps-Gym/conf/llm/gpt-5.json (model settings only)`
 
 ### tools / Meta-Harness (`meta`)
 
-Code-based adaptation. A GPT-5 proposer edits the Python harness and learned state, carrying the selected program and state between stages.
+Meta-Harness asks GPT-5 to edit the Python program that controls the agent and its learned state. The selected program and state carry forward between stages.
 
 | Setting | Value | Evidence |
 |---|---|---|
-| Solver model | GPT-5 | Recorded |
-| Search budget | 5 proposer iterations per stage | Launcher configuration |
-| Candidates | 3 requested per iteration | Proposer instruction |
-| EOG search repetitions | 3 trials per task | Recorded |
-| ALE candidate validation repetitions | v1: 3 trials/task; v2: 3 trials/task; v3: 3 trials/task; v4: 3 trials/task; v5: 1 trials/task | Recorded; repetitions per candidate, separate from held-out evaluation |
-| Proposer | GPT-5; 2,400 seconds per iteration | Configuration |
-| Inner learning | Offline; 1 epoch; batch size 1 | Configuration |
-| Concurrency | 8 concurrent trials | Current default |
-| EOG solver limits | ReAct: 50 iterations; max_tokens 16,384; temperature 0.1 | Iteration default / saved model configuration |
-| ALE solver limit | 7,200 seconds per task | Saved experiment configuration / runner |
-| Held-out evaluation | Runs 1, 2 and 3 per recorded cell | Archived snapshot |
-| Complete total compute budget | Not established; evaluation metrics exclude adaptation/search work | Unavailable |
+| Task-solving model | GPT-5 | Recorded experiment setting |
+| Proposal rounds | 5 requested rounds per optimization stage | Configured experiment budget |
+| Candidate programs requested | 3 per proposal round | Proposal instruction; completion not guaranteed |
+| EOG candidate-validation repetitions | 3 attempts per validation task for each candidate | Recorded experiment setting |
+| ALE candidate-validation repetitions | Per validation task, for each candidate: Stage 1: 3 attempts; Stage 2: 3 attempts; Stage 3: 3 attempts; Stage 4: 3 attempts; Stage 5: 1 attempt | Recorded experiment setting |
+| Program-proposal model | GPT-5 | Configured experiment setting |
+| Proposal code-editing time limit | 2,400 seconds (40 minutes) per proposal round; candidate learning and validation take additional time | Configured experiment setting |
+| Candidate learning method | Update the program’s learned state from training examples, then freeze that state for validation (offline learning) | Configured experiment setting |
+| Training passes | 1 pass through the assigned training examples (1 epoch) | Configured experiment setting |
+| Training batch size | 1 example per learning step | Configured experiment setting |
+| Initial comparison programs | The unmodified agent program and a program given all training examples in its prompt; later stages also compare the previous stage’s winner | Implementation default; original run setting unknown |
+| Optimization parallelism | Up to 8 task attempts at once | Implementation default; original run setting unknown |
+| EOG agent loop limit | 50 ReAct iterations per task | Implementation default; original run setting unknown |
+| EOG model response token limit | 16,384 tokens per response | Recorded experiment setting |
+| EOG sampling temperature | 0.1 | Recorded experiment setting |
+| ALE task time limit | 7,200 seconds per task | Recorded configuration and implementation setting |
+| Held-out evaluation repetitions | 3 runs for each evaluated combination of stream, system stage, and task group; each task is attempted once per run | Recorded experiment setting |
+| Total experiment compute | Not reported; held-out evaluation usage excludes training, memory building and optimization | Not reported |
 
-- Each candidate is evaluated on the full validation set. Five iterations do not guarantee 15 evaluated candidates; archived logs include incomplete stages.
-- The current ALE launcher defaults to one search trial/task throughout. The recorded schedule above differs.
-- Validation pools cohorts 1…k, with winners carried forward. Learning uses the new cohort with cumulative-data fallback from the seed.
-- GEPA metric calls and Meta-Harness proposer iterations are different budget units. These searches were not demonstrated to be compute-matched.
-- No complete search token/dollar cap or historical concurrency override was established. Three evaluation runs are not three independent searches.
+- Each candidate is evaluated on the full validation set, using the repetition count shown for its stage. These validation attempts select the candidate; they are separate from the 3 repetitions used to report held-out results.
+- Five proposal rounds requesting 3 candidates each do not guarantee 15 completed candidate evaluations. Some recorded stages stopped before completing the requested work.
+- The implementation now defaults to 1 validation attempt per task throughout ALE. The recorded stage schedule above is the relevant setting for these results.
+- Candidate learning changes program state, not model weights. It reads training examples without requiring the task-solving agent to attempt each training task, although the candidate’s learning code may make model requests.
+- At each stage, validation includes tasks from Stage 1 through the current stage. Learning uses the current stage’s training examples when the previous stage’s learned state is successfully restored; otherwise it uses training examples from all stages seen so far.
+- GEPA counts task evaluations, whereas Meta-Harness counts proposal rounds. These budgets do not establish equal model usage, elapsed time, or monetary cost across methods.
+- The total optimization token or monetary budget and original parallel-task limit were not reported. The 3 held-out evaluation repetitions do not represent 3 independent optimization runs.
 
 Sources: `analysis/arms.py`; `analysis/cache/cells_tools.tsv`; `evolve_tools/src/scripts/run_meta_harness.sh`; `evolve_tools/meta_harness/config.yaml`; `evolve_tools/meta_harness/skills/meta-harness/SKILL.md`; `evolve_tools/meta_harness/logs/run_*/v*/<stream>/<candidate>/gpt-5/val.json`; `evolve_tools/src/runner.py`; `evolve_tools/src/ale_eval.py`; `reference/EnterpriseOps-Gym/conf/llm/gpt-5.json (model settings only)`
 
 ### tools / GEPA (`gepa`)
 
-Reflective prompt optimization. GEPA edits prompt text and carries the selected prompt forward between stages.
+GEPA uses feedback from task attempts to improve prompt text. The selected prompt carries forward to the next stage.
 
 | Setting | Value | Evidence |
 |---|---|---|
-| Solver model | GPT-5 | Recorded |
-| Search budget | 50 metric calls per searched stage | Recorded search.json |
-| Reflection minibatch | 3 tasks | Recorded |
-| Search repetitions | 1 trial per task | Recorded |
-| Reflection model | GPT-5 | Recorded |
-| Reflection response limit | 32,768 tokens; up to 5 API attempts | Current configuration |
-| Concurrency / RNG seed | 8 concurrent trials / seed 0 | Current defaults |
-| EOG solver limits | ReAct: 50 iterations; max_tokens 16,384; temperature 0.1 | Iteration default / saved model configuration |
-| ALE solver limit | 7,200 seconds per task | Saved experiment configuration / runner |
-| Held-out evaluation | Runs 1, 2 and 3 per recorded cell | Archived snapshot |
-| Complete total compute budget | Not established; evaluation metrics exclude adaptation/search work | Unavailable |
+| Task-solving model | GPT-5 | Recorded experiment setting |
+| Optimization budget | 50 task evaluations per optimization stage, counted as GEPA metric calls | Recorded experiment setting |
+| Tasks per feedback batch | 3 tasks | Recorded experiment setting |
+| Optimization repetitions | 1 attempt per task for each candidate being evaluated | Recorded experiment setting |
+| Prompt-improvement model | GPT-5 | Recorded experiment setting |
+| Prompt-improvement response limit | 32,768 completion tokens per response, including reasoning tokens | Implementation default; original run setting unknown |
+| Prompt-improvement request attempts | Up to 5 attempts per response: the initial request and at most 4 retries | Implementation default; original run setting unknown |
+| Optimization parallelism | Up to 8 task attempts at once | Implementation default; original run setting unknown |
+| Random seed for search sampling | 0 | Implementation default; original run setting unknown |
+| Initial prompt | The provided task-solving prompt, before GEPA adds or edits guidance | Implementation default; original run setting unknown |
+| Improvement rule | Accept an edit only when its total score on the sampled comparison batch exceeds its parent prompt’s score; reject ties | Implementation default; original run setting unknown |
+| Candidate selection | Pareto selection: choose among prompts that lead on different validation tasks | Implementation default; original run setting unknown |
+| Prompt-section selection | Edit one named section at a time, cycling through sections for each candidate (round-robin) | Implementation default; original run setting unknown |
+| Combining candidate prompts | Disabled; sections from two parent prompts are not merged | Implementation default; original run setting unknown |
+| Reusing cached evaluation results | Disabled; evaluate a repeated prompt and task again instead of reusing its prior score | Implementation default; original run setting unknown |
+| EOG agent loop limit | 50 ReAct iterations per task | Implementation default; original run setting unknown |
+| EOG model response token limit | 16,384 tokens per response | Recorded experiment setting |
+| EOG sampling temperature | 0.1 | Recorded experiment setting |
+| ALE task time limit | 7,200 seconds per task | Recorded configuration and implementation setting |
+| Held-out evaluation repetitions | 3 runs for each evaluated combination of stream, system stage, and task group; each task is attempted once per run | Recorded experiment setting |
+| Total experiment compute | Not reported; held-out evaluation usage excludes training, memory building and optimization | Not reported |
 
-- 50 calls is a stopping threshold: initial validation consumes calls, batches can overshoot, and retries add work.
-- Library defaults: strict improvement, Pareto selection, round-robin module selection, no merge and no evaluation cache.
-- Validation pools cohorts 1…k. Winners carry forward; learning uses the new cohort with a cumulative-data fallback from the seed.
-- GEPA metric calls and Meta-Harness proposer iterations are different budget units. These searches were not demonstrated to be compute-matched.
-- No complete search token/dollar cap or historical concurrency override was established. Three evaluation runs are not three independent searches.
+- One GEPA metric call evaluates one candidate on one task once. A batch of 3 tasks with 1 repetition uses 3 metric calls; it can contain many model requests and tool calls.
+- The 50-call budget is a stopping threshold. Initial validation counts toward it, a final batch can exceed it, and request retries add compute.
+- At each stage, validation includes tasks from Stage 1 through the current stage. Prompt improvement uses the current stage’s training tasks when continuing an adapted prompt; otherwise it uses training tasks from all stages seen so far.
+- An edit that improves the sampled comparison batch can still reduce full-validation or held-out performance. The random seed controls search sampling; it is separate from the starting prompt.
+- GEPA counts task evaluations, whereas Meta-Harness counts proposal rounds. These budgets do not establish equal model usage, elapsed time, or monetary cost across methods.
+- The total optimization token or monetary budget and original parallel-task limit were not reported. The 3 held-out evaluation repetitions do not represent 3 independent optimization runs.
 
 Sources: `analysis/arms.py`; `analysis/cache/cells_tools.tsv`; `evolve_tools/src/scripts/run_gepa.sh`; `evolve_tools/meta_harness/run_gepa.py`; `evolve_tools/meta_harness/gepa_reflection.py`; `evolve_tools/meta_harness/splits.py`; `evolve_tools/jobs/cumulative_tools_gepa_cumulative_val/<stream>/run_*/v*/search.json`; `evolve_tools/src/runner.py`; `evolve_tools/src/ale_eval.py`; `reference/EnterpriseOps-Gym/conf/llm/gpt-5.json (model settings only)`
 
 ### tools / Codex (ALE, V) (`react-ale-v`)
 
-Deployment baseline with the benchmark’s accumulating capability pool. No stage-specific prompt or harness optimization.
+Deployment baseline that receives the capabilities introduced up to the current stage. Its prompt and agent program are not optimized between stages.
 
 | Setting | Value | Evidence |
 |---|---|---|
-| Solver model | GPT-5 | Recorded |
-| Stage search budget | No stage-level optimization | Experiment design |
-| Capability pool | Cumulative through the selected stage | Registry / runner |
-| ALE solver limit | 7,200 seconds per task | Saved experiment configuration / runner |
-| Held-out evaluation | Runs 1, 2 and 3 per recorded cell | Archived snapshot |
-| Complete total compute budget | Not established; evaluation metrics exclude adaptation/search work | Unavailable |
+| Task-solving model | GPT-5 | Recorded experiment setting |
+| Optimization between stages | None | Experiment design |
+| Available capabilities | All capabilities introduced through the selected stage | Reported experiment setting |
+| ALE task time limit | 7,200 seconds per task | Recorded configuration and implementation setting |
+| Held-out evaluation repetitions | 3 runs for each evaluated combination of stream, system stage, and task group; each task is attempted once per run | Recorded experiment setting |
+| Total experiment compute | Not reported; held-out evaluation usage excludes training, memory building and optimization | Not reported |
 
-- ALE deployment control for the tool-memory baselines. Results are reported separately from the other ReAct / Codex deployment run.
+- This is the ALE deployment baseline used for comparison with the tool-memory methods. Its results are reported separately from the other ReAct / Codex deployment experiment.
 
 Sources: `analysis/arms.py`; `analysis/cache/cells_tools.tsv`; `evolve_tools/src/runner.py`; `evolve_tools/src/ale_eval.py`; `reference/EnterpriseOps-Gym/conf/llm/gpt-5.json (model settings only)`
 
 ### tools / Raw memory (`raw-memory`)
 
-Raw adaptation trajectories are retained across stages and supplied to the solver alongside the accumulating tool pool.
+The system retains records of actions and results from training-task attempts across stages. The agent receives this memory alongside the tools introduced so far.
 
 | Setting | Value | Evidence |
 |---|---|---|
-| Solver model | GPT-5 | Recorded |
-| Memory representation | Raw adaptation trajectories | Registry / saved artifacts |
-| ALE adaptation repetitions | 1 rollout per training task in inspected stage logs | Recorded sample |
-| Search budget | No candidate-search loop; adaptation rollouts and memory induction add work | Runner |
-| ALE retrieval limit | 10 most recent memories; 0 means unlimited | Current launcher default; historical override unknown |
-| EOG solver limits | ReAct: 50 iterations; max_tokens 16,384; temperature 0.1 | Reference defaults; historical overrides unverified |
-| ALE solver limit | 7,200 seconds per task | Saved experiment configuration / runner |
-| Held-out evaluation | Runs 1, 2 and 3 per recorded cell | Archived snapshot |
-| Complete total compute budget | Not established; evaluation metrics exclude adaptation/search work | Unavailable |
+| Task-solving model | GPT-5 | Recorded experiment setting |
+| What the memory stores | Records of actions and results from training-task attempts | Recorded experiment setting |
+| ALE training repetitions | 1 attempt per training task in the available sample of stage records | Recorded sample; not verified for every stage |
+| Candidate search | None; compute is spent on training-task attempts and creating memories | Implementation behavior |
+| Memories supplied to an ALE task | The 10 most recent memories; setting the limit to 0 removes the cap | Implementation default; original run setting unknown |
+| EOG agent loop limit | 50 ReAct iterations per task | Implementation default; original run setting unknown |
+| EOG model response token limit | 16,384 tokens per response | Implementation default; original run setting unknown |
+| EOG sampling temperature | 0.1 | Implementation default; original run setting unknown |
+| ALE task time limit | 7,200 seconds per task | Recorded configuration and implementation setting |
+| Held-out evaluation repetitions | 3 runs for each evaluated combination of stream, system stage, and task group; each task is attempted once per run | Recorded experiment setting |
+| Total experiment compute | Not reported; held-out evaluation usage excludes training, memory building and optimization | Not reported |
 
-- EOG exports can contain eight evaluation runs. These results use runs 1–3 to match the other systems.
-- Codex (ALE, V) is the ALE deployment control for these memory experiments.
-- No complete adaptation token/dollar budget is recorded. Evaluation usage is not a measure of memory-building cost.
+- Some EOG experiments contain 8 evaluation repetitions. These results use repetitions 1–3 for consistency with the other systems.
+- The separately listed Codex (ALE, V) system is the deployment baseline used for comparison with these memory methods on ALE.
+- The total token usage and monetary cost of building memory were not reported. Held-out evaluation usage excludes that work.
 
 Sources: `analysis/arms.py`; `analysis/cache/cells_tools.tsv`; `external/evolving-mas-benchmark/evolve_tools/src/memory.py`; `external/evolving-mas-benchmark/evolve_tools/src/reasoning_induction.py`; `external/evolving-mas-benchmark/evolve_tools/src/scripts/frequent_config/gpt5_evolve_ale_cumulative_tool_memory.sh`; `evolve_tools/src/runner.py`; `evolve_tools/src/ale_eval.py`; `reference/EnterpriseOps-Gym/conf/llm/gpt-5.json (model settings only)`
 
 ### tools / Reasoning bank (`reasoning-bank`)
 
-Induced reasoning memories are retained across stages and supplied to the solver alongside the accumulating tool pool.
+The system retains reasoning guidance generated from training-task attempts across stages. The agent receives this memory alongside the tools introduced so far.
 
 | Setting | Value | Evidence |
 |---|---|---|
-| Solver model | GPT-5 | Recorded |
-| Memory representation | Induced reasoning memories | Registry / saved artifacts |
-| ALE adaptation repetitions | 1 rollout per training task in inspected stage logs | Recorded sample |
-| Search budget | No candidate-search loop; adaptation rollouts and memory induction add work | Runner |
-| Historical retrieval / induction budget | Not recorded in the exported evaluation configuration | Unavailable |
-| EOG solver limits | ReAct: 50 iterations; max_tokens 16,384; temperature 0.1 | Reference defaults; historical overrides unverified |
-| ALE solver limit | 7,200 seconds per task | Saved experiment configuration / runner |
-| Held-out evaluation | Runs 1, 2 and 3 per recorded cell | Archived snapshot |
-| Complete total compute budget | Not established; evaluation metrics exclude adaptation/search work | Unavailable |
+| Task-solving model | GPT-5 | Recorded experiment setting |
+| What the memory stores | Reasoning guidance generated from training-task attempts | Recorded experiment setting |
+| ALE training repetitions | 1 attempt per training task in the available sample of stage records | Recorded sample; not verified for every stage |
+| Candidate search | None; compute is spent on training-task attempts and creating memories | Implementation behavior |
+| Memory generation and retrieval limits | The original experiment’s limits were not reported | Not reported |
+| EOG agent loop limit | 50 ReAct iterations per task | Implementation default; original run setting unknown |
+| EOG model response token limit | 16,384 tokens per response | Implementation default; original run setting unknown |
+| EOG sampling temperature | 0.1 | Implementation default; original run setting unknown |
+| ALE task time limit | 7,200 seconds per task | Recorded configuration and implementation setting |
+| Held-out evaluation repetitions | 3 runs for each evaluated combination of stream, system stage, and task group; each task is attempted once per run | Recorded experiment setting |
+| Total experiment compute | Not reported; held-out evaluation usage excludes training, memory building and optimization | Not reported |
 
-- EOG exports can contain eight evaluation runs. These results use runs 1–3 to match the other systems.
-- Codex (ALE, V) is the ALE deployment control for these memory experiments.
-- No complete adaptation token/dollar budget is recorded. Evaluation usage is not a measure of memory-building cost.
+- Some EOG experiments contain 8 evaluation repetitions. These results use repetitions 1–3 for consistency with the other systems.
+- The separately listed Codex (ALE, V) system is the deployment baseline used for comparison with these memory methods on ALE.
+- The total token usage and monetary cost of building memory were not reported. Held-out evaluation usage excludes that work.
 
 Sources: `analysis/arms.py`; `analysis/cache/cells_tools.tsv`; `external/evolving-mas-benchmark/evolve_tools/src/memory.py`; `external/evolving-mas-benchmark/evolve_tools/src/reasoning_induction.py`; `external/evolving-mas-benchmark/evolve_tools/src/scripts/frequent_config/gpt5_evolve_ale_cumulative_tool_adapt_fwd_reasoning.sh`; `evolve_tools/src/runner.py`; `evolve_tools/src/ale_eval.py`; `reference/EnterpriseOps-Gym/conf/llm/gpt-5.json (model settings only)`
 
 ### tools / MemToolAgent (`memtoolagent`)
 
-Reflections on adaptation trajectories are retained across stages and supplied to the solver alongside the accumulating tool pool.
+The system retains written reflections on training-task attempts across stages. The agent receives this memory alongside the tools introduced so far.
 
 | Setting | Value | Evidence |
 |---|---|---|
-| Solver model | GPT-5 | Recorded |
-| Memory representation | Reflections on adaptation trajectories | Registry / saved artifacts |
-| ALE adaptation repetitions | 1 rollout per training task in inspected stage logs | Recorded sample |
-| Search budget | No candidate-search loop; adaptation rollouts and memory induction add work | Runner |
-| ALE retrieval limit | 10 most recent memories; 0 means unlimited | Current launcher default; historical override unknown |
-| EOG solver limits | ReAct: 50 iterations; max_tokens 16,384; temperature 0.1 | Reference defaults; historical overrides unverified |
-| ALE solver limit | 7,200 seconds per task | Saved experiment configuration / runner |
-| Held-out evaluation | Runs 1, 2 and 3 per recorded cell | Archived snapshot |
-| Complete total compute budget | Not established; evaluation metrics exclude adaptation/search work | Unavailable |
+| Task-solving model | GPT-5 | Recorded experiment setting |
+| What the memory stores | Written reflections on training-task attempts | Recorded experiment setting |
+| ALE training repetitions | 1 attempt per training task in the available sample of stage records | Recorded sample; not verified for every stage |
+| Candidate search | None; compute is spent on training-task attempts and creating memories | Implementation behavior |
+| Memories supplied to an ALE task | The 10 most recent memories; setting the limit to 0 removes the cap | Implementation default; original run setting unknown |
+| EOG agent loop limit | 50 ReAct iterations per task | Implementation default; original run setting unknown |
+| EOG model response token limit | 16,384 tokens per response | Implementation default; original run setting unknown |
+| EOG sampling temperature | 0.1 | Implementation default; original run setting unknown |
+| ALE task time limit | 7,200 seconds per task | Recorded configuration and implementation setting |
+| Held-out evaluation repetitions | 3 runs for each evaluated combination of stream, system stage, and task group; each task is attempted once per run | Recorded experiment setting |
+| Total experiment compute | Not reported; held-out evaluation usage excludes training, memory building and optimization | Not reported |
 
-- EOG exports can contain eight evaluation runs. These results use runs 1–3 to match the other systems.
-- Codex (ALE, V) is the ALE deployment control for these memory experiments.
-- No complete adaptation token/dollar budget is recorded. Evaluation usage is not a measure of memory-building cost.
+- Some EOG experiments contain 8 evaluation repetitions. These results use repetitions 1–3 for consistency with the other systems.
+- The separately listed Codex (ALE, V) system is the deployment baseline used for comparison with these memory methods on ALE.
+- The total token usage and monetary cost of building memory were not reported. Held-out evaluation usage excludes that work.
 
 Sources: `analysis/arms.py`; `analysis/cache/cells_tools.tsv`; `external/evolving-mas-benchmark/evolve_tools/src/memory.py`; `external/evolving-mas-benchmark/evolve_tools/src/reasoning_induction.py`; `external/evolving-mas-benchmark/evolve_tools/src/scripts/frequent_config/gpt5_evolve_ale_cumulative_tool_adapt_fwd_reflection.sh`; `evolve_tools/src/runner.py`; `evolve_tools/src/ale_eval.py`; `reference/EnterpriseOps-Gym/conf/llm/gpt-5.json (model settings only)`
 
 ### skills / Task-specific Codex (`oracle`)
 
-Task-specific reference. Each task receives its selected capability subset; no state accumulates across cohorts.
+Reference system given the capabilities selected for each task. It does not learn or retain experience between stages.
 
 | Setting | Value | Evidence |
 |---|---|---|
-| Solver model | GPT-5 | Recorded |
-| Capability selection | Task-specific skills with oracle tools | Registry / runner |
-| Stage search budget | No stage-level prompt or harness search in this control | Experiment design |
-| EOG solver limit | 900 seconds per task shared across up to 4 episodes | Current default; historical overrides not fully established |
-| ALE solver limit | 7,200 seconds per task | Saved experiment configuration / runner |
-| Held-out evaluation | Runs 1, 2 and 3 per recorded cell | Archived snapshot |
-| Complete total compute budget | Not established; evaluation metrics exclude adaptation/search work | Unavailable |
+| Task-solving model | GPT-5 | Recorded experiment setting |
+| Capabilities supplied to each task | The task’s designated skills and tools | Reported experiment setting |
+| Optimization between stages | None; no prompt or agent-program search | Experiment design |
+| EOG task time limit | 900 seconds in total for each task | Implementation default; original run setting unknown |
+| EOG task continuation limit | Up to 4 episodes in total, including continuations, within the same task time limit; separate from evaluation repetitions | Implementation default; original run setting unknown |
+| ALE task time limit | 7,200 seconds per task | Recorded configuration and implementation setting |
+| Held-out evaluation repetitions | 3 runs for each evaluated combination of stream, system stage, and task group; each task is attempted once per run | Recorded experiment setting |
+| Total experiment compute | Not reported; held-out evaluation usage excludes training, memory building and optimization | Not reported |
 
-- Each stage point evaluates that cohort only. The benchmark aggregate pools all cohorts; this is not a cumulative adaptation curve.
+- Each stage result covers that stage’s held-out tasks only. The overall benchmark result combines tasks from all stages. No adaptation takes place between these evaluations.
 
 Sources: `analysis/arms.py`; `analysis/cache/cells_skills.tsv`; `evovle_skills/src/config.py`; `evovle_skills/src/runner.py`
 
 ### skills / Task-specific Codex (gpt-5.5) (`oracle-gpt55`)
 
-Task-specific reference. Each task receives its selected capability subset; no state accumulates across cohorts.
+Reference system given the capabilities selected for each task. It does not learn or retain experience between stages.
 
 | Setting | Value | Evidence |
 |---|---|---|
-| Solver model | GPT-5.5 | Recorded |
-| Capability selection | Task-specific skills with oracle tools | Registry / runner |
-| Stage search budget | No stage-level prompt or harness search in this control | Experiment design |
-| EOG solver limit | 900 seconds per task shared across up to 4 episodes | Current default; historical overrides not fully established |
-| Held-out evaluation | Runs 1, 2 and 3 per recorded cell | Archived snapshot |
-| Complete total compute budget | Not established; evaluation metrics exclude adaptation/search work | Unavailable |
+| Task-solving model | GPT-5.5 | Recorded experiment setting |
+| Capabilities supplied to each task | The task’s designated skills and tools | Reported experiment setting |
+| Optimization between stages | None; no prompt or agent-program search | Experiment design |
+| EOG task time limit | 900 seconds in total for each task | Implementation default; original run setting unknown |
+| EOG task continuation limit | Up to 4 episodes in total, including continuations, within the same task time limit; separate from evaluation repetitions | Implementation default; original run setting unknown |
+| Held-out evaluation repetitions | 3 runs for each evaluated combination of stream, system stage, and task group; each task is attempted once per run | Recorded experiment setting |
+| Total experiment compute | Not reported; held-out evaluation usage excludes training, memory building and optimization | Not reported |
 
-- Each stage point evaluates that cohort only. The benchmark aggregate pools all cohorts; this is not a cumulative adaptation curve.
-- Model-only swap of the GPT-5 task-specific skills control, run August 26. The registry records the same ACP transport, local backend, concurrency and timeout. EOG only.
+- Each stage result covers that stage’s held-out tasks only. The overall benchmark result combines tasks from all stages. No adaptation takes place between these evaluations.
+- This EOG-only experiment, run on August 26, changes the task-solving model from GPT-5 to GPT-5.5. It reports the same agent communication protocol, local execution setup, parallel-task limit and task time limit as the GPT-5 reference.
 
 Sources: `analysis/arms.py`; `analysis/cache/cells_skills.tsv`; `evovle_skills/src/config.py`; `evovle_skills/src/runner.py`
 
 ### skills / Task-specific Claude Code (`oracle-claude`)
 
-Task-specific reference. Each task receives its selected capability subset; no state accumulates across cohorts.
+Reference system given the capabilities selected for each task. It does not learn or retain experience between stages.
 
 | Setting | Value | Evidence |
 |---|---|---|
-| Solver model | Sonnet-4.6 | Reported |
-| Capability selection | Task-specific skills with oracle tools | Registry / runner |
-| Stage search budget | No stage-level prompt or harness search in this control | Experiment design |
-| EOG solver limit | 900 seconds per task | Export notes / timeout records |
-| ALE solver limit / launch overrides | Not specified in the exported run configuration | Unavailable |
-| Held-out evaluation | Runs 1, 2 and 3 per recorded cell | Archived snapshot |
-| Complete total compute budget | Not established; evaluation metrics exclude adaptation/search work | Unavailable |
+| Task-solving model | Sonnet-4.6 | Reported experiment setting |
+| Capabilities supplied to each task | The task’s designated skills and tools | Reported experiment setting |
+| Optimization between stages | None; no prompt or agent-program search | Experiment design |
+| EOG task time limit | 900 seconds per task | Recorded experiment setting |
+| ALE task time limit | Not reported | Not reported |
+| Held-out evaluation repetitions | 3 runs for each evaluated combination of stream, system stage, and task group; each task is attempted once per run | Recorded experiment setting |
+| Total experiment compute | Not reported; held-out evaluation usage excludes training, memory building and optimization | Not reported |
 
-- Each stage point evaluates that cohort only. The benchmark aggregate pools all cohorts; this is not a cumulative adaptation curve.
-- Some EOG usage comes from a dedicated one-run telemetry pass; accuracy still uses the original three runs. Missing usage means cost totals may be lower bounds.
+- Each stage result covers that stage’s held-out tasks only. The overall benchmark result combines tasks from all stages. No adaptation takes place between these evaluations.
+- Some EOG token-usage measurements come from 1 additional repetition run specifically to measure usage. Accuracy uses the original 3 evaluation repetitions. Missing token counts mean the reported usage may understate total cost.
 
 Sources: `analysis/arms.py`; `analysis/cache/cells_skills.tsv`; `yang_li/results_final/README.md`
 
 ### skills / Claude Code (`claude`)
 
-Deployment baseline with the benchmark’s accumulating capability pool. No stage-specific prompt or harness optimization.
+Deployment baseline that receives the capabilities introduced up to the current stage. Its prompt and agent program are not optimized between stages.
 
 | Setting | Value | Evidence |
 |---|---|---|
-| Solver model | Sonnet-4.6 | Reported |
-| Stage search budget | No stage-level optimization | Experiment design |
-| Capability pool | Cumulative through the selected stage | Registry / runner |
-| EOG solver limit | 900 seconds per task | Export notes / timeout records |
-| ALE solver limit / launch overrides | Not specified in the exported run configuration | Unavailable |
-| Held-out evaluation | Runs 1, 2 and 3 per recorded cell | Archived snapshot |
-| Complete total compute budget | Not established; evaluation metrics exclude adaptation/search work | Unavailable |
+| Task-solving model | Sonnet-4.6 | Reported experiment setting |
+| Optimization between stages | None | Experiment design |
+| Available capabilities | All capabilities introduced through the selected stage | Reported experiment setting |
+| EOG task time limit | 900 seconds per task | Recorded experiment setting |
+| ALE task time limit | Not reported | Not reported |
+| Held-out evaluation repetitions | 3 runs for each evaluated combination of stream, system stage, and task group; each task is attempted once per run | Recorded experiment setting |
+| Total experiment compute | Not reported; held-out evaluation usage excludes training, memory building and optimization | Not reported |
 
-- Some EOG usage comes from a dedicated one-run telemetry pass; accuracy still uses the original three runs. Missing usage means cost totals may be lower bounds.
+- Some EOG token-usage measurements come from 1 additional repetition run specifically to measure usage. Accuracy uses the original 3 evaluation repetitions. Missing token counts mean the reported usage may understate total cost.
 
 Sources: `analysis/arms.py`; `analysis/cache/cells_skills.tsv`; `yang_li/results_final/README.md`
 
 ### skills / Codex (`codex`)
 
-Deployment baseline with the benchmark’s accumulating capability pool. No stage-specific prompt or harness optimization.
+Deployment baseline that receives the capabilities introduced up to the current stage. Its prompt and agent program are not optimized between stages.
 
 | Setting | Value | Evidence |
 |---|---|---|
-| Solver model | GPT-5 | Recorded |
-| Stage search budget | No stage-level optimization | Experiment design |
-| Capability pool | Cumulative through the selected stage | Registry / runner |
-| EOG solver limit | 900 seconds per task shared across up to 4 episodes | Current default; historical overrides not fully established |
-| ALE solver limit | 7,200 seconds per task | Saved experiment configuration / runner |
-| Held-out evaluation | Runs 1, 2 and 3 per recorded cell | Archived snapshot |
-| Complete total compute budget | Not established; evaluation metrics exclude adaptation/search work | Unavailable |
+| Task-solving model | GPT-5 | Recorded experiment setting |
+| Optimization between stages | None | Experiment design |
+| Available capabilities | All capabilities introduced through the selected stage | Reported experiment setting |
+| EOG task time limit | 900 seconds in total for each task | Implementation default; original run setting unknown |
+| EOG task continuation limit | Up to 4 episodes in total, including continuations, within the same task time limit; separate from evaluation repetitions | Implementation default; original run setting unknown |
+| ALE task time limit | 7,200 seconds per task | Recorded configuration and implementation setting |
+| Held-out evaluation repetitions | 3 runs for each evaluated combination of stream, system stage, and task group; each task is attempted once per run | Recorded experiment setting |
+| Total experiment compute | Not reported; held-out evaluation usage excludes training, memory building and optimization | Not reported |
 
 
 Sources: `analysis/arms.py`; `analysis/cache/cells_skills.tsv`; `evovle_skills/src/config.py`; `evovle_skills/src/runner.py`
 
 ### skills / Codex Memory (`memory`)
 
-Codex with native persistent memory. Training rollouts populate a shared memory home that is carried between stages and copied for evaluation.
+Codex builds persistent memory from its attempts at training tasks. The memory carries forward between stages, and held-out tasks receive a copy of the memory learned so far.
 
 | Setting | Value | Evidence |
 |---|---|---|
-| Solver model | GPT-5 | Recorded |
-| Adaptation | Training tasks from versions 1…k; memory carried between stages | Current runner |
-| Memory training concurrency | EOG: 1 (forced); ALE: requested concurrency, with parallel sandbox rollouts | Current runner; historical override unknown |
-| Extraction / consolidation limits | 600 / 900 seconds | Current defaults |
-| Extraction concurrency | 8 | Current default |
-| Stage search budget | No GEPA/Meta-Harness search; training and memory processing add work | Runner |
-| EOG solver limit | 900 seconds per task shared across up to 4 episodes | Current default; historical overrides not fully established |
-| ALE solver limit | 7,200 seconds per task | Saved experiment configuration / runner |
-| Held-out evaluation | Runs 1, 2 and 3 per recorded cell | Archived snapshot |
-| Complete total compute budget | Not established; evaluation metrics exclude adaptation/search work | Unavailable |
+| Task-solving model | GPT-5 | Recorded experiment setting |
+| Training data | Training tasks from Stage 1 through the current stage; learned memory carries forward | Implementation behavior |
+| EOG training parallelism | 1 training task at a time | Required by the current implementation; original run setting unknown |
+| ALE training parallelism | Training tasks can run in parallel in separate environments; the experiment’s parallel-task limit was not reported | Not reported |
+| Memory extraction time limit | 600 seconds per memory-extraction operation | Implementation default; original run setting unknown |
+| Memory consolidation time limit | 900 seconds to combine extracted memories | Implementation default; original run setting unknown |
+| Memory extraction parallelism | Up to 8 extraction operations at once | Implementation default; original run setting unknown |
+| Candidate search | None; compute is spent on training-task attempts and memory processing | Implementation behavior |
+| EOG task time limit | 900 seconds in total for each task | Implementation default; original run setting unknown |
+| EOG task continuation limit | Up to 4 episodes in total, including continuations, within the same task time limit; separate from evaluation repetitions | Implementation default; original run setting unknown |
+| ALE task time limit | 7,200 seconds per task | Recorded configuration and implementation setting |
+| Held-out evaluation repetitions | 3 runs for each evaluated combination of stream, system stage, and task group; each task is attempted once per run | Recorded experiment setting |
+| Total experiment compute | Not reported; held-out evaluation usage excludes training, memory building and optimization | Not reported |
 
-- Historical memory-processing overrides and total adaptation tokens/cost are not recoverable from the evaluation snapshot. Held-out evaluation uses a copy of trained memory.
+- The original memory-processing settings and total training token usage or monetary cost were not reported. Held-out task attempts are kept separate from the memory used to train later stages.
 
 Sources: `analysis/arms.py`; `analysis/cache/cells_skills.tsv`; `evovle_skills/src/scripts/run_cumulative_skill.py`; `evovle_agents/src/config.py:328`; `evovle_skills/src/config.py`; `evovle_skills/src/config.py`; `evovle_skills/src/runner.py`
 
 ### skills / Meta-Harness (`meta`)
 
-Code-based adaptation. A GPT-5 proposer edits the Python harness and learned state, carrying the selected program and state between stages.
+Meta-Harness asks GPT-5 to edit the Python program that controls the agent and its learned state. The selected program and state carry forward between stages.
 
 | Setting | Value | Evidence |
 |---|---|---|
-| Solver model | GPT-5 | Recorded |
-| Search budget | 5 proposer iterations per stage | Launcher configuration |
-| Candidates | 3 requested per iteration | Proposer instruction |
-| EOG search repetitions | 3 trials per task | Recorded |
-| ALE candidate validation repetitions | v1: 3 trials/task; v2: 3 trials/task; v3: 3 trials/task; v4: 3 trials/task; v5: 3 trials/task; v6: 1 trials/task | Recorded; repetitions per candidate, separate from held-out evaluation |
-| Proposer | GPT-5; 2,400 seconds per iteration | Configuration |
-| Inner learning | Offline; 1 epoch; batch size 1 | Configuration |
-| Concurrency | 8 concurrent trials | Current default |
-| EOG solver limit | 900 seconds per task shared across up to 4 episodes | Current default; historical overrides not fully established |
-| ALE solver limit | 7,200 seconds per task | Saved experiment configuration / runner |
-| Held-out evaluation | Runs 1, 2 and 3 per recorded cell | Archived snapshot |
-| Complete total compute budget | Not established; evaluation metrics exclude adaptation/search work | Unavailable |
+| Task-solving model | GPT-5 | Recorded experiment setting |
+| Proposal rounds | 5 requested rounds per optimization stage | Configured experiment budget |
+| Candidate programs requested | 3 per proposal round | Proposal instruction; completion not guaranteed |
+| EOG candidate-validation repetitions | 3 attempts per validation task for each candidate | Recorded experiment setting |
+| ALE candidate-validation repetitions | Per validation task, for each candidate: Stage 1: 3 attempts; Stage 2: 3 attempts; Stage 3: 3 attempts; Stage 4: 3 attempts; Stage 5: 3 attempts; Stage 6: 1 attempt | Recorded experiment setting |
+| Program-proposal model | GPT-5 | Configured experiment setting |
+| Proposal code-editing time limit | 2,400 seconds (40 minutes) per proposal round; candidate learning and validation take additional time | Configured experiment setting |
+| Candidate learning method | Update the program’s learned state from training examples, then freeze that state for validation (offline learning) | Configured experiment setting |
+| Training passes | 1 pass through the assigned training examples (1 epoch) | Configured experiment setting |
+| Training batch size | 1 example per learning step | Configured experiment setting |
+| Initial comparison programs | The unmodified agent program and a program given all training examples in its prompt; later stages also compare the previous stage’s winner | Implementation default; original run setting unknown |
+| Optimization parallelism | Up to 8 task attempts at once | Implementation default; original run setting unknown |
+| EOG task time limit | 900 seconds in total for each task | Implementation default; original run setting unknown |
+| EOG task continuation limit | Up to 4 episodes in total, including continuations, within the same task time limit; separate from evaluation repetitions | Implementation default; original run setting unknown |
+| ALE task time limit | 7,200 seconds per task | Recorded configuration and implementation setting |
+| Held-out evaluation repetitions | 3 runs for each evaluated combination of stream, system stage, and task group; each task is attempted once per run | Recorded experiment setting |
+| Total experiment compute | Not reported; held-out evaluation usage excludes training, memory building and optimization | Not reported |
 
-- Each candidate is evaluated on the full validation set. Five iterations do not guarantee 15 evaluated candidates; archived logs include incomplete stages.
-- The current ALE launcher defaults to one search trial/task throughout. The recorded schedule above differs.
-- Validation pools cohorts 1…k, with winners carried forward. Learning uses the new cohort with cumulative-data fallback from the seed.
-- GEPA metric calls and Meta-Harness proposer iterations are different budget units. These searches were not demonstrated to be compute-matched.
-- No complete search token/dollar cap or historical concurrency override was established. Three evaluation runs are not three independent searches.
+- Each candidate is evaluated on the full validation set, using the repetition count shown for its stage. These validation attempts select the candidate; they are separate from the 3 repetitions used to report held-out results.
+- Five proposal rounds requesting 3 candidates each do not guarantee 15 completed candidate evaluations. Some recorded stages stopped before completing the requested work.
+- The implementation now defaults to 1 validation attempt per task throughout ALE. The recorded stage schedule above is the relevant setting for these results.
+- Candidate learning changes program state, not model weights. It reads training examples without requiring the task-solving agent to attempt each training task, although the candidate’s learning code may make model requests.
+- At each stage, validation includes tasks from Stage 1 through the current stage. Learning uses the current stage’s training examples when the previous stage’s learned state is successfully restored; otherwise it uses training examples from all stages seen so far.
+- GEPA counts task evaluations, whereas Meta-Harness counts proposal rounds. These budgets do not establish equal model usage, elapsed time, or monetary cost across methods.
+- The total optimization token or monetary budget and original parallel-task limit were not reported. The 3 held-out evaluation repetitions do not represent 3 independent optimization runs.
 
 Sources: `analysis/arms.py`; `analysis/cache/cells_skills.tsv`; `evovle_skills/src/scripts/run_meta_harness.sh`; `evovle_skills/meta_harness/config.yaml`; `evovle_skills/meta_harness/skills/meta-harness/SKILL.md`; `evovle_skills/meta_harness/logs/run_*/v*/<stream>/<candidate>/gpt-5/val.json`; `evovle_skills/src/config.py`; `evovle_skills/src/runner.py`
 
 ### skills / GEPA (`gepa`)
 
-Reflective prompt optimization. GEPA edits prompt text and carries the selected prompt forward between stages.
+GEPA uses feedback from task attempts to improve prompt text. The selected prompt carries forward to the next stage.
 
 | Setting | Value | Evidence |
 |---|---|---|
-| Solver model | GPT-5 | Recorded |
-| Search budget | 50 metric calls per searched stage | Recorded search.json |
-| Reflection minibatch | 3 tasks | Recorded |
-| Search repetitions | 1 trial per task | Recorded |
-| Reflection model | GPT-5 | Recorded |
-| Reflection response limit | 32,768 tokens; up to 5 API attempts | Current configuration |
-| Concurrency / RNG seed | 8 concurrent trials / seed 0 | Current defaults |
-| EOG solver limit | 900 seconds per task shared across up to 4 episodes | Current default; historical overrides not fully established |
-| ALE solver limit | 7,200 seconds per task | Saved experiment configuration / runner |
-| Held-out evaluation | Runs 1, 2 and 3 per recorded cell | Archived snapshot |
-| Complete total compute budget | Not established; evaluation metrics exclude adaptation/search work | Unavailable |
+| Task-solving model | GPT-5 | Recorded experiment setting |
+| Optimization budget | 50 task evaluations per optimization stage, counted as GEPA metric calls | Recorded experiment setting |
+| Tasks per feedback batch | 3 tasks | Recorded experiment setting |
+| Optimization repetitions | 1 attempt per task for each candidate being evaluated | Recorded experiment setting |
+| Prompt-improvement model | GPT-5 | Recorded experiment setting |
+| Prompt-improvement response limit | 32,768 completion tokens per response, including reasoning tokens | Implementation default; original run setting unknown |
+| Prompt-improvement request attempts | Up to 5 attempts per response: the initial request and at most 4 retries | Implementation default; original run setting unknown |
+| Optimization parallelism | Up to 8 task attempts at once | Implementation default; original run setting unknown |
+| Random seed for search sampling | 0 | Implementation default; original run setting unknown |
+| Initial prompt | The provided task-solving prompt, before GEPA adds or edits guidance | Implementation default; original run setting unknown |
+| Improvement rule | Accept an edit only when its total score on the sampled comparison batch exceeds its parent prompt’s score; reject ties | Implementation default; original run setting unknown |
+| Candidate selection | Pareto selection: choose among prompts that lead on different validation tasks | Implementation default; original run setting unknown |
+| Prompt-section selection | Edit one named section at a time, cycling through sections for each candidate (round-robin) | Implementation default; original run setting unknown |
+| Combining candidate prompts | Disabled; sections from two parent prompts are not merged | Implementation default; original run setting unknown |
+| Reusing cached evaluation results | Disabled; evaluate a repeated prompt and task again instead of reusing its prior score | Implementation default; original run setting unknown |
+| EOG task time limit | 900 seconds in total for each task | Implementation default; original run setting unknown |
+| EOG task continuation limit | Up to 4 episodes in total, including continuations, within the same task time limit; separate from evaluation repetitions | Implementation default; original run setting unknown |
+| ALE task time limit | 7,200 seconds per task | Recorded configuration and implementation setting |
+| Held-out evaluation repetitions | 3 runs for each evaluated combination of stream, system stage, and task group; each task is attempted once per run | Recorded experiment setting |
+| Total experiment compute | Not reported; held-out evaluation usage excludes training, memory building and optimization | Not reported |
 
-- 50 calls is a stopping threshold: initial validation consumes calls, batches can overshoot, and retries add work.
-- Library defaults: strict improvement, Pareto selection, round-robin module selection, no merge and no evaluation cache.
-- Validation pools cohorts 1…k. Winners carry forward; learning uses the new cohort with a cumulative-data fallback from the seed.
-- GEPA metric calls and Meta-Harness proposer iterations are different budget units. These searches were not demonstrated to be compute-matched.
-- No complete search token/dollar cap or historical concurrency override was established. Three evaluation runs are not three independent searches.
+- One GEPA metric call evaluates one candidate on one task once. A batch of 3 tasks with 1 repetition uses 3 metric calls; it can contain many model requests and tool calls.
+- The 50-call budget is a stopping threshold. Initial validation counts toward it, a final batch can exceed it, and request retries add compute.
+- At each stage, validation includes tasks from Stage 1 through the current stage. Prompt improvement uses the current stage’s training tasks when continuing an adapted prompt; otherwise it uses training tasks from all stages seen so far.
+- An edit that improves the sampled comparison batch can still reduce full-validation or held-out performance. The random seed controls search sampling; it is separate from the starting prompt.
+- GEPA counts task evaluations, whereas Meta-Harness counts proposal rounds. These budgets do not establish equal model usage, elapsed time, or monetary cost across methods.
+- The total optimization token or monetary budget and original parallel-task limit were not reported. The 3 held-out evaluation repetitions do not represent 3 independent optimization runs.
 
 Sources: `analysis/arms.py`; `analysis/cache/cells_skills.tsv`; `evovle_skills/src/scripts/run_gepa.sh`; `evovle_skills/meta_harness/run_gepa.py`; `evovle_skills/meta_harness/gepa_reflection.py`; `evovle_skills/meta_harness/splits.py`; `evovle_skills/jobs/cumulative_skill_gepa/<stream>/run_*/v*/search.json`; `evovle_skills/src/config.py`; `evovle_skills/src/runner.py`
 
 ### skills / Task-specific GEPA (eval on full library) (`gepa-oracle`)
 
-Reflective prompt optimization. GEPA edits prompt text and carries the selected prompt forward between stages. This variant searches with each task’s oracle skills, then evaluates with the full stage library.
+GEPA uses feedback from task attempts to improve prompt text. The selected prompt carries forward to the next stage. This variant optimizes with the skills designated for each task, then evaluates with the full library available at that stage.
 
 | Setting | Value | Evidence |
 |---|---|---|
-| Solver model | GPT-5 | Recorded |
-| Search budget | 50 metric calls per searched stage | Recorded search.json |
-| Reflection minibatch | 3 tasks | Recorded |
-| Search repetitions | 1 trial per task | Recorded |
-| Reflection model | GPT-5 | Recorded |
-| Reflection response limit | 32,768 tokens; up to 5 API attempts | Current configuration |
-| Concurrency / RNG seed | 8 concurrent trials / seed 0 | Current defaults |
-| Search / evaluation library | Per-task oracle / full stage library (CSM 9, HR 10, ITSM 10 skills) | Recorded / registry |
-| EOG solver limit | 900 seconds per task shared across up to 4 episodes | Current default; historical overrides not fully established |
-| Held-out evaluation | Runs 1, 2 and 3 per recorded cell | Archived snapshot |
-| Complete total compute budget | Not established; evaluation metrics exclude adaptation/search work | Unavailable |
+| Task-solving model | GPT-5 | Recorded experiment setting |
+| Optimization budget | 50 task evaluations per optimization stage, counted as GEPA metric calls | Recorded experiment setting |
+| Tasks per feedback batch | 3 tasks | Recorded experiment setting |
+| Optimization repetitions | 1 attempt per task for each candidate being evaluated | Recorded experiment setting |
+| Prompt-improvement model | GPT-5 | Recorded experiment setting |
+| Prompt-improvement response limit | 32,768 completion tokens per response, including reasoning tokens | Implementation default; original run setting unknown |
+| Prompt-improvement request attempts | Up to 5 attempts per response: the initial request and at most 4 retries | Implementation default; original run setting unknown |
+| Optimization parallelism | Up to 8 task attempts at once | Implementation default; original run setting unknown |
+| Random seed for search sampling | 0 | Implementation default; original run setting unknown |
+| Initial prompt | The provided task-solving prompt, before GEPA adds or edits guidance | Implementation default; original run setting unknown |
+| Improvement rule | Accept an edit only when its total score on the sampled comparison batch exceeds its parent prompt’s score; reject ties | Implementation default; original run setting unknown |
+| Candidate selection | Pareto selection: choose among prompts that lead on different validation tasks | Implementation default; original run setting unknown |
+| Prompt-section selection | Edit one named section at a time, cycling through sections for each candidate (round-robin) | Implementation default; original run setting unknown |
+| Combining candidate prompts | Disabled; sections from two parent prompts are not merged | Implementation default; original run setting unknown |
+| Reusing cached evaluation results | Disabled; evaluate a repeated prompt and task again instead of reusing its prior score | Implementation default; original run setting unknown |
+| Skills supplied during optimization | Only the skills designated for each task | Recorded experiment setting |
+| Skills supplied during held-out evaluation | Full final-stage library: CSM 9 skills, HR 10 skills, ITSM 10 skills | Recorded experiment setting |
+| EOG task time limit | 900 seconds in total for each task | Implementation default; original run setting unknown |
+| EOG task continuation limit | Up to 4 episodes in total, including continuations, within the same task time limit; separate from evaluation repetitions | Implementation default; original run setting unknown |
+| Held-out evaluation repetitions | 3 runs for each evaluated combination of stream, system stage, and task group; each task is attempted once per run | Recorded experiment setting |
+| Total experiment compute | Not reported; held-out evaluation usage excludes training, memory building and optimization | Not reported |
 
-- 50 calls is a stopping threshold: initial validation consumes calls, batches can overshoot, and retries add work.
-- Library defaults: strict improvement, Pareto selection, round-robin module selection, no merge and no evaluation cache.
-- Validation pools cohorts 1…k. Winners carry forward; learning uses the new cohort with a cumulative-data fallback from the seed.
-- Only final-stage held-out evaluations are archived: CSM/HR v3, ITSM v4. Earlier search stages exist, but are not earlier held-out results. No ALE evaluation is registered.
-- GEPA metric calls and Meta-Harness proposer iterations are different budget units. These searches were not demonstrated to be compute-matched.
-- No complete search token/dollar cap or historical concurrency override was established. Three evaluation runs are not three independent searches.
+- One GEPA metric call evaluates one candidate on one task once. A batch of 3 tasks with 1 repetition uses 3 metric calls; it can contain many model requests and tool calls.
+- The 50-call budget is a stopping threshold. Initial validation counts toward it, a final batch can exceed it, and request retries add compute.
+- At each stage, validation includes tasks from Stage 1 through the current stage. Prompt improvement uses the current stage’s training tasks when continuing an adapted prompt; otherwise it uses training tasks from all stages seen so far.
+- An edit that improves the sampled comparison batch can still reduce full-validation or held-out performance. The random seed controls search sampling; it is separate from the starting prompt.
+- Held-out results are available only for the final stage: Stage 3 in CSM and HR, and Stage 4 in ITSM. Earlier optimization stages do not provide earlier held-out results. No ALE results are available for this variant.
+- GEPA counts task evaluations, whereas Meta-Harness counts proposal rounds. These budgets do not establish equal model usage, elapsed time, or monetary cost across methods.
+- The total optimization token or monetary budget and original parallel-task limit were not reported. The 3 held-out evaluation repetitions do not represent 3 independent optimization runs.
 
 Sources: `analysis/arms.py`; `analysis/cache/cells_skills.tsv`; `evovle_skills/src/scripts/run_gepa.sh`; `evovle_skills/meta_harness/run_gepa.py`; `evovle_skills/meta_harness/gepa_reflection.py`; `evovle_skills/meta_harness/splits.py`; `evovle_skills/jobs/oracle_skills_gepa/<stream>/oracle_skills_gepa_*/v*/search.json`; `evovle_skills/src/config.py`; `evovle_skills/src/runner.py`
 
 ### skills / SkillOpt (`skillopt`)
 
-SkillOpt with GPT-5.5, evaluated against the cumulative EOG skill library. This is a different backbone from the GPT-5 systems.
+SkillOpt uses GPT-5.5 with the EOG skills introduced through the current stage. Its task-solving model differs from the GPT-5 baselines.
 
 | Setting | Value | Evidence |
 |---|---|---|
-| Solver model | GPT-5.5 | Registry |
-| Optimization budget | Not recorded with this archived evaluation export | Unavailable |
-| Solver limits / concurrency | Not established by these artifacts | Unavailable |
-| Held-out evaluation | Runs 1, 2 and 3 per recorded cell | Archived snapshot |
-| Complete total compute budget | Not established; evaluation metrics exclude adaptation/search work | Unavailable |
+| Task-solving model | GPT-5.5 | Reported experiment setting |
+| Optimization budget | Not reported for this experiment | Not reported |
+| Task time limit | Not reported | Not reported |
+| Parallel task limit | Not reported | Not reported |
+| Held-out evaluation repetitions | 3 runs for each evaluated combination of stream, system stage, and task group; each task is attempted once per run | Recorded experiment setting |
+| Total experiment compute | Not reported; held-out evaluation usage excludes training, memory building and optimization | Not reported |
 
-- EOG only. Recorded trial durations are unavailable; missing time must not be interpreted as zero cost.
+- Results are available for EOG only. Task durations were not reported; unavailable timing must not be interpreted as zero cost.
 
 Sources: `analysis/arms.py`; `analysis/cache/cells_skills.tsv`
 
 ### agents / Task-specific Codex (`oracle`)
 
-Reference control with a per-cohort specialist library on EOG and task-specific specialist families on ALE. No cross-stage adaptation.
+Reference system given the stage’s specialist library on EOG and the task’s designated specialist groups on ALE. It does not learn between stages.
 
 | Setting | Value | Evidence |
 |---|---|---|
-| Solver model | EOG: gpt-5-codex in inspected saved config.toml; ALE: GPT-5 | Recorded |
-| Capability selection | EOG: per-cohort reference specialist library; ALE: task-specific specialist families | Saved EOG manifests / ALE runner |
-| Stage search budget | No stage-level prompt or harness search in this control | Experiment design |
-| EOG solver limit | 900 seconds per task shared across up to 4 episodes | Current default; historical overrides not fully established |
-| ALE solver limit | 7,200 seconds per task | Saved experiment configuration / runner |
-| Base delegation limits | 12 threads; maximum depth 1 | Saved base configuration / current default |
-| Held-out evaluation | Runs 1, 2 and 3 per recorded cell | Archived snapshot |
-| Complete total compute budget | Not established; evaluation metrics exclude adaptation/search work | Unavailable |
+| Task-solving model | EOG: gpt-5-codex; ALE: gpt-5 | Recorded experiment setting |
+| Specialist agents supplied | EOG: the reference specialist library for that stage. ALE: the specialist groups designated for each task. | EOG: recorded experiment setting; ALE: implementation behavior |
+| Optimization between stages | None; no prompt or agent-program search | Experiment design |
+| EOG task time limit | 900 seconds in total for each task | Implementation default; original run setting unknown |
+| EOG task continuation limit | Up to 4 episodes in total, including continuations, within the same task time limit; separate from evaluation repetitions | Implementation default; original run setting unknown |
+| ALE task time limit | 7,200 seconds per task | Recorded configuration and implementation setting |
+| Agent thread limit | 12 concurrent agent threads | Recorded base setting and implementation default |
+| Delegation depth limit | 1 level of specialist delegation below the lead agent | Recorded base setting and implementation default |
+| Held-out evaluation repetitions | 3 runs for each evaluated combination of stream, system stage, and task group; each task is attempted once per run | Recorded experiment setting |
+| Total experiment compute | Not reported; held-out evaluation usage excludes training, memory building and optimization | Not reported |
 
-- Each stage point evaluates that cohort only. The benchmark aggregate pools all cohorts; this is not a cumulative adaptation curve.
-- On EOG, tasks with different selected tool sets use the same specialist roster within each cohort.
-- These are base Codex delegation limits; an evolved harness may change orchestration behavior.
+- Each stage result covers that stage’s held-out tasks only. The overall benchmark result combines tasks from all stages. No adaptation takes place between these evaluations.
+- On EOG, tasks from the same stage receive the same specialist library even when their designated tools differ.
+- The delegation limits describe the base Codex configuration. A program produced by optimization may change how agents are coordinated.
 
 Sources: `analysis/arms.py`; `analysis/cache/cells_agents.tsv`; `evovle_agents/src/config.py`; `evovle_agents/src/runner.py`
 
 ### agents / Task-specific Claude Code (`oracle-claude`)
 
-Task-specific reference. Each task receives its selected capability subset; no state accumulates across cohorts.
+Reference system given the capabilities selected for each task. It does not learn or retain experience between stages.
 
 | Setting | Value | Evidence |
 |---|---|---|
-| Solver model | Sonnet-4.6 | Reported |
-| Capability selection | Task-specific specialist agents | Registry / runner |
-| Stage search budget | No stage-level prompt or harness search in this control | Experiment design |
-| EOG solver limit | 900 seconds per task | Export notes / timeout records |
-| ALE solver limit / launch overrides | Not specified in the exported run configuration | Unavailable |
-| Held-out evaluation | Runs 1, 2 and 3 per recorded cell | Archived snapshot |
-| Complete total compute budget | Not established; evaluation metrics exclude adaptation/search work | Unavailable |
+| Task-solving model | Sonnet-4.6 | Reported experiment setting |
+| Capabilities supplied to each task | The task’s designated specialist agents | Reported experiment setting |
+| Optimization between stages | None; no prompt or agent-program search | Experiment design |
+| EOG task time limit | 900 seconds per task | Recorded experiment setting |
+| ALE task time limit | Not reported | Not reported |
+| Held-out evaluation repetitions | 3 runs for each evaluated combination of stream, system stage, and task group; each task is attempted once per run | Recorded experiment setting |
+| Total experiment compute | Not reported; held-out evaluation usage excludes training, memory building and optimization | Not reported |
 
-- Each stage point evaluates that cohort only. The benchmark aggregate pools all cohorts; this is not a cumulative adaptation curve.
-- Some EOG usage comes from a dedicated one-run telemetry pass; accuracy still uses the original three runs. Missing usage means cost totals may be lower bounds.
+- Each stage result covers that stage’s held-out tasks only. The overall benchmark result combines tasks from all stages. No adaptation takes place between these evaluations.
+- Some EOG token-usage measurements come from 1 additional repetition run specifically to measure usage. Accuracy uses the original 3 evaluation repetitions. Missing token counts mean the reported usage may understate total cost.
 
 Sources: `analysis/arms.py`; `analysis/cache/cells_agents.tsv`; `yang_li/results_final/README.md`
 
 ### agents / Codex (`codex`)
 
-Deployment baseline with the benchmark’s accumulating capability pool. No stage-specific prompt or harness optimization.
+Deployment baseline that receives the capabilities introduced up to the current stage. Its prompt and agent program are not optimized between stages.
 
 | Setting | Value | Evidence |
 |---|---|---|
-| Solver model | EOG: gpt-5-codex in inspected saved config.toml; ALE: GPT-5 | Recorded |
-| Stage search budget | No stage-level optimization | Experiment design |
-| Capability pool | Cumulative through the selected stage | Registry / runner |
-| EOG solver limit | 900 seconds per task shared across up to 4 episodes | Current default; historical overrides not fully established |
-| ALE solver limit | 7,200 seconds per task | Saved experiment configuration / runner |
-| Base delegation limits | 12 threads; maximum depth 1 | Saved base configuration / current default |
-| Held-out evaluation | Runs 1, 2 and 3 per recorded cell | Archived snapshot |
-| Complete total compute budget | Not established; evaluation metrics exclude adaptation/search work | Unavailable |
+| Task-solving model | EOG: gpt-5-codex; ALE: gpt-5 | Recorded experiment setting |
+| Optimization between stages | None | Experiment design |
+| Available capabilities | All capabilities introduced through the selected stage | Reported experiment setting |
+| EOG task time limit | 900 seconds in total for each task | Implementation default; original run setting unknown |
+| EOG task continuation limit | Up to 4 episodes in total, including continuations, within the same task time limit; separate from evaluation repetitions | Implementation default; original run setting unknown |
+| ALE task time limit | 7,200 seconds per task | Recorded configuration and implementation setting |
+| Agent thread limit | 12 concurrent agent threads | Recorded base setting and implementation default |
+| Delegation depth limit | 1 level of specialist delegation below the lead agent | Recorded base setting and implementation default |
+| Held-out evaluation repetitions | 3 runs for each evaluated combination of stream, system stage, and task group; each task is attempted once per run | Recorded experiment setting |
+| Total experiment compute | Not reported; held-out evaluation usage excludes training, memory building and optimization | Not reported |
 
-- These are base Codex delegation limits; an evolved harness may change orchestration behavior.
+- The delegation limits describe the base Codex configuration. A program produced by optimization may change how agents are coordinated.
 
 Sources: `analysis/arms.py`; `analysis/cache/cells_agents.tsv`; `evovle_agents/src/config.py`; `evovle_agents/src/runner.py`
 
 ### agents / Claude Code (`claude`)
 
-Deployment baseline with the benchmark’s accumulating capability pool. No stage-specific prompt or harness optimization.
+Deployment baseline that receives the capabilities introduced up to the current stage. Its prompt and agent program are not optimized between stages.
 
 | Setting | Value | Evidence |
 |---|---|---|
-| Solver model | Sonnet-4.6 | Reported |
-| Stage search budget | No stage-level optimization | Experiment design |
-| Capability pool | Cumulative through the selected stage | Registry / runner |
-| EOG solver limit | 900 seconds per task | Export notes / timeout records |
-| ALE solver limit / launch overrides | Not specified in the exported run configuration | Unavailable |
-| Held-out evaluation | Runs 1, 2 and 3 per recorded cell | Archived snapshot |
-| Complete total compute budget | Not established; evaluation metrics exclude adaptation/search work | Unavailable |
+| Task-solving model | Sonnet-4.6 | Reported experiment setting |
+| Optimization between stages | None | Experiment design |
+| Available capabilities | All capabilities introduced through the selected stage | Reported experiment setting |
+| EOG task time limit | 900 seconds per task | Recorded experiment setting |
+| ALE task time limit | Not reported | Not reported |
+| Held-out evaluation repetitions | 3 runs for each evaluated combination of stream, system stage, and task group; each task is attempted once per run | Recorded experiment setting |
+| Total experiment compute | Not reported; held-out evaluation usage excludes training, memory building and optimization | Not reported |
 
-- Some EOG usage comes from a dedicated one-run telemetry pass; accuracy still uses the original three runs. Missing usage means cost totals may be lower bounds.
+- Some EOG token-usage measurements come from 1 additional repetition run specifically to measure usage. Accuracy uses the original 3 evaluation repetitions. Missing token counts mean the reported usage may understate total cost.
 
 Sources: `analysis/arms.py`; `analysis/cache/cells_agents.tsv`; `yang_li/results_final/README.md`
 
 ### agents / Codex Memory (`memory`)
 
-Codex with native persistent memory. Training rollouts populate a shared memory home that is carried between stages and copied for evaluation.
+Codex builds persistent memory from its attempts at training tasks. The memory carries forward between stages, and held-out tasks receive a copy of the memory learned so far.
 
 | Setting | Value | Evidence |
 |---|---|---|
-| Solver model | GPT-5 | Recorded |
-| Adaptation | Training tasks from versions 1…k; memory carried between stages | Current runner |
-| Memory training concurrency | EOG: 1 (forced); ALE: requested concurrency, with parallel sandbox rollouts | Current runner; historical override unknown |
-| Extraction / consolidation limits | 600 / 900 seconds | Current defaults |
-| Extraction concurrency | 8 | Current default |
-| Stage search budget | No GEPA/Meta-Harness search; training and memory processing add work | Runner |
-| EOG solver limit | 900 seconds per task shared across up to 4 episodes | Current default; historical overrides not fully established |
-| ALE solver limit | 7,200 seconds per task | Saved experiment configuration / runner |
-| Base delegation limits | 12 threads; maximum depth 1 | Saved base configuration / current default |
-| Held-out evaluation | Runs 1, 2 and 3 per recorded cell | Archived snapshot |
-| Complete total compute budget | Not established; evaluation metrics exclude adaptation/search work | Unavailable |
+| Task-solving model | GPT-5 | Recorded experiment setting |
+| Training data | Training tasks from Stage 1 through the current stage; learned memory carries forward | Implementation behavior |
+| EOG training parallelism | 1 training task at a time | Required by the current implementation; original run setting unknown |
+| ALE training parallelism | Training tasks can run in parallel in separate environments; the experiment’s parallel-task limit was not reported | Not reported |
+| Memory extraction time limit | 600 seconds per memory-extraction operation | Implementation default; original run setting unknown |
+| Memory consolidation time limit | 900 seconds to combine extracted memories | Implementation default; original run setting unknown |
+| Memory extraction parallelism | Up to 8 extraction operations at once | Implementation default; original run setting unknown |
+| Candidate search | None; compute is spent on training-task attempts and memory processing | Implementation behavior |
+| EOG task time limit | 900 seconds in total for each task | Implementation default; original run setting unknown |
+| EOG task continuation limit | Up to 4 episodes in total, including continuations, within the same task time limit; separate from evaluation repetitions | Implementation default; original run setting unknown |
+| ALE task time limit | 7,200 seconds per task | Recorded configuration and implementation setting |
+| Agent thread limit | 12 concurrent agent threads | Recorded base setting and implementation default |
+| Delegation depth limit | 1 level of specialist delegation below the lead agent | Recorded base setting and implementation default |
+| Held-out evaluation repetitions | 3 runs for each evaluated combination of stream, system stage, and task group; each task is attempted once per run | Recorded experiment setting |
+| Total experiment compute | Not reported; held-out evaluation usage excludes training, memory building and optimization | Not reported |
 
-- Historical memory-processing overrides and total adaptation tokens/cost are not recoverable from the evaluation snapshot. Held-out evaluation uses a copy of trained memory.
-- These are base Codex delegation limits; an evolved harness may change orchestration behavior.
+- The original memory-processing settings and total training token usage or monetary cost were not reported. Held-out task attempts are kept separate from the memory used to train later stages.
+- The delegation limits describe the base Codex configuration. A program produced by optimization may change how agents are coordinated.
 
 Sources: `analysis/arms.py`; `analysis/cache/cells_agents.tsv`; `evovle_agents/src/scripts/run_cumulative_agents.py`; `evovle_agents/src/config.py:328`; `evovle_agents/src/config.py`; `evovle_agents/src/config.py`; `evovle_agents/src/runner.py`
 
 ### agents / Meta-Harness (`meta`)
 
-Code-based adaptation. A GPT-5 proposer edits the Python harness and learned state, carrying the selected program and state between stages.
+Meta-Harness asks GPT-5 to edit the Python program that controls the agent and its learned state. The selected program and state carry forward between stages.
 
 | Setting | Value | Evidence |
 |---|---|---|
-| Solver model | GPT-5 | Recorded |
-| Search budget | 5 proposer iterations per stage | Launcher configuration |
-| Candidates | 3 requested per iteration | Proposer instruction |
-| EOG search repetitions | 3 trials per task | Recorded |
-| ALE candidate validation repetitions | v1: 3 trials/task; v2: 3 trials/task; v3: 3 trials/task; v4: 3 trials/task; v5: 1 trials/task; v6: 1 trials/task | Recorded; repetitions per candidate, separate from held-out evaluation |
-| Proposer | GPT-5; 2,400 seconds per iteration | Configuration |
-| Inner learning | Offline; 1 epoch; batch size 1 | Configuration |
-| Concurrency | 8 concurrent trials | Current default |
-| EOG solver limit | 900 seconds per task shared across up to 4 episodes | Current default; historical overrides not fully established |
-| ALE solver limit | 7,200 seconds per task | Saved experiment configuration / runner |
-| Base delegation limits | 12 threads; maximum depth 1 | Saved base configuration / current default |
-| Held-out evaluation | Runs 1, 2 and 3 per recorded cell | Archived snapshot |
-| Complete total compute budget | Not established; evaluation metrics exclude adaptation/search work | Unavailable |
+| Task-solving model | GPT-5 | Recorded experiment setting |
+| Proposal rounds | 5 requested rounds per optimization stage | Configured experiment budget |
+| Candidate programs requested | 3 per proposal round | Proposal instruction; completion not guaranteed |
+| EOG candidate-validation repetitions | 3 attempts per validation task for each candidate | Recorded experiment setting |
+| ALE candidate-validation repetitions | Per validation task, for each candidate: Stage 1: 3 attempts; Stage 2: 3 attempts; Stage 3: 3 attempts; Stage 4: 3 attempts; Stage 5: 1 attempt; Stage 6: 1 attempt | Recorded experiment setting |
+| Program-proposal model | GPT-5 | Configured experiment setting |
+| Proposal code-editing time limit | 2,400 seconds (40 minutes) per proposal round; candidate learning and validation take additional time | Configured experiment setting |
+| Candidate learning method | Update the program’s learned state from training examples, then freeze that state for validation (offline learning) | Configured experiment setting |
+| Training passes | 1 pass through the assigned training examples (1 epoch) | Configured experiment setting |
+| Training batch size | 1 example per learning step | Configured experiment setting |
+| Initial comparison programs | The unmodified agent program and a program given all training examples in its prompt; later stages also compare the previous stage’s winner | Implementation default; original run setting unknown |
+| Optimization parallelism | Up to 8 task attempts at once | Implementation default; original run setting unknown |
+| EOG task time limit | 900 seconds in total for each task | Implementation default; original run setting unknown |
+| EOG task continuation limit | Up to 4 episodes in total, including continuations, within the same task time limit; separate from evaluation repetitions | Implementation default; original run setting unknown |
+| ALE task time limit | 7,200 seconds per task | Recorded configuration and implementation setting |
+| Agent thread limit | 12 concurrent agent threads | Recorded base setting and implementation default |
+| Delegation depth limit | 1 level of specialist delegation below the lead agent | Recorded base setting and implementation default |
+| Held-out evaluation repetitions | 3 runs for each evaluated combination of stream, system stage, and task group; each task is attempted once per run | Recorded experiment setting |
+| Total experiment compute | Not reported; held-out evaluation usage excludes training, memory building and optimization | Not reported |
 
-- Each candidate is evaluated on the full validation set. Five iterations do not guarantee 15 evaluated candidates; archived logs include incomplete stages.
-- The current ALE launcher defaults to one search trial/task throughout. The recorded schedule above differs.
-- Validation pools cohorts 1…k, with winners carried forward. Learning uses the new cohort with cumulative-data fallback from the seed.
-- GEPA metric calls and Meta-Harness proposer iterations are different budget units. These searches were not demonstrated to be compute-matched.
-- No complete search token/dollar cap or historical concurrency override was established. Three evaluation runs are not three independent searches.
-- These are base Codex delegation limits; an evolved harness may change orchestration behavior.
+- Each candidate is evaluated on the full validation set, using the repetition count shown for its stage. These validation attempts select the candidate; they are separate from the 3 repetitions used to report held-out results.
+- Five proposal rounds requesting 3 candidates each do not guarantee 15 completed candidate evaluations. Some recorded stages stopped before completing the requested work.
+- The implementation now defaults to 1 validation attempt per task throughout ALE. The recorded stage schedule above is the relevant setting for these results.
+- Candidate learning changes program state, not model weights. It reads training examples without requiring the task-solving agent to attempt each training task, although the candidate’s learning code may make model requests.
+- At each stage, validation includes tasks from Stage 1 through the current stage. Learning uses the current stage’s training examples when the previous stage’s learned state is successfully restored; otherwise it uses training examples from all stages seen so far.
+- GEPA counts task evaluations, whereas Meta-Harness counts proposal rounds. These budgets do not establish equal model usage, elapsed time, or monetary cost across methods.
+- The total optimization token or monetary budget and original parallel-task limit were not reported. The 3 held-out evaluation repetitions do not represent 3 independent optimization runs.
+- The delegation limits describe the base Codex configuration. A program produced by optimization may change how agents are coordinated.
 
 Sources: `analysis/arms.py`; `analysis/cache/cells_agents.tsv`; `evovle_agents/src/scripts/run_meta_harness.sh`; `evovle_agents/meta_harness/config.yaml`; `evovle_agents/meta_harness/skills/meta-harness/SKILL.md`; `evovle_agents/meta_harness/logs/run_*/v*/<stream>/<candidate>/gpt-5/val.json`; `evovle_agents/src/config.py`; `evovle_agents/src/runner.py`
 
 ### agents / GEPA (`gepa`)
 
-Reflective prompt optimization. GEPA edits prompt text and carries the selected prompt forward between stages.
+GEPA uses feedback from task attempts to improve prompt text. The selected prompt carries forward to the next stage.
 
 | Setting | Value | Evidence |
 |---|---|---|
-| Solver model | GPT-5 | Recorded |
-| Search budget | 50 metric calls per searched stage | Recorded search.json |
-| Reflection minibatch | 3 tasks | Recorded |
-| Search repetitions | 1 trial per task | Recorded |
-| Reflection model | GPT-5 | Recorded |
-| Reflection response limit | 32,768 tokens; up to 5 API attempts | Current configuration |
-| Concurrency / RNG seed | 8 concurrent trials / seed 0 | Current defaults |
-| EOG solver limit | 900 seconds per task shared across up to 4 episodes | Current default; historical overrides not fully established |
-| ALE solver limit | 7,200 seconds per task | Saved experiment configuration / runner |
-| Base delegation limits | 12 threads; maximum depth 1 | Saved base configuration / current default |
-| Held-out evaluation | Runs 1, 2 and 3 per recorded cell | Archived snapshot |
-| Complete total compute budget | Not established; evaluation metrics exclude adaptation/search work | Unavailable |
+| Task-solving model | GPT-5 | Recorded experiment setting |
+| Optimization budget | 50 task evaluations per optimization stage, counted as GEPA metric calls | Recorded experiment setting |
+| Tasks per feedback batch | 3 tasks | Recorded experiment setting |
+| Optimization repetitions | 1 attempt per task for each candidate being evaluated | Recorded experiment setting |
+| Prompt-improvement model | GPT-5 | Recorded experiment setting |
+| Prompt-improvement response limit | 32,768 completion tokens per response, including reasoning tokens | Implementation default; original run setting unknown |
+| Prompt-improvement request attempts | Up to 5 attempts per response: the initial request and at most 4 retries | Implementation default; original run setting unknown |
+| Optimization parallelism | Up to 8 task attempts at once | Implementation default; original run setting unknown |
+| Random seed for search sampling | 0 | Implementation default; original run setting unknown |
+| Initial prompt | The provided task-solving prompt, before GEPA adds or edits guidance | Implementation default; original run setting unknown |
+| Improvement rule | Accept an edit only when its total score on the sampled comparison batch exceeds its parent prompt’s score; reject ties | Implementation default; original run setting unknown |
+| Candidate selection | Pareto selection: choose among prompts that lead on different validation tasks | Implementation default; original run setting unknown |
+| Prompt-section selection | Edit one named section at a time, cycling through sections for each candidate (round-robin) | Implementation default; original run setting unknown |
+| Combining candidate prompts | Disabled; sections from two parent prompts are not merged | Implementation default; original run setting unknown |
+| Reusing cached evaluation results | Disabled; evaluate a repeated prompt and task again instead of reusing its prior score | Implementation default; original run setting unknown |
+| EOG task time limit | 900 seconds in total for each task | Implementation default; original run setting unknown |
+| EOG task continuation limit | Up to 4 episodes in total, including continuations, within the same task time limit; separate from evaluation repetitions | Implementation default; original run setting unknown |
+| ALE task time limit | 7,200 seconds per task | Recorded configuration and implementation setting |
+| Agent thread limit | 12 concurrent agent threads | Recorded base setting and implementation default |
+| Delegation depth limit | 1 level of specialist delegation below the lead agent | Recorded base setting and implementation default |
+| Held-out evaluation repetitions | 3 runs for each evaluated combination of stream, system stage, and task group; each task is attempted once per run | Recorded experiment setting |
+| Total experiment compute | Not reported; held-out evaluation usage excludes training, memory building and optimization | Not reported |
 
-- 50 calls is a stopping threshold: initial validation consumes calls, batches can overshoot, and retries add work.
-- Library defaults: strict improvement, Pareto selection, round-robin module selection, no merge and no evaluation cache.
-- Validation pools cohorts 1…k. Winners carry forward; learning uses the new cohort with a cumulative-data fallback from the seed.
-- GEPA metric calls and Meta-Harness proposer iterations are different budget units. These searches were not demonstrated to be compute-matched.
-- No complete search token/dollar cap or historical concurrency override was established. Three evaluation runs are not three independent searches.
-- These are base Codex delegation limits; an evolved harness may change orchestration behavior.
+- One GEPA metric call evaluates one candidate on one task once. A batch of 3 tasks with 1 repetition uses 3 metric calls; it can contain many model requests and tool calls.
+- The 50-call budget is a stopping threshold. Initial validation counts toward it, a final batch can exceed it, and request retries add compute.
+- At each stage, validation includes tasks from Stage 1 through the current stage. Prompt improvement uses the current stage’s training tasks when continuing an adapted prompt; otherwise it uses training tasks from all stages seen so far.
+- An edit that improves the sampled comparison batch can still reduce full-validation or held-out performance. The random seed controls search sampling; it is separate from the starting prompt.
+- GEPA counts task evaluations, whereas Meta-Harness counts proposal rounds. These budgets do not establish equal model usage, elapsed time, or monetary cost across methods.
+- The total optimization token or monetary budget and original parallel-task limit were not reported. The 3 held-out evaluation repetitions do not represent 3 independent optimization runs.
+- The delegation limits describe the base Codex configuration. A program produced by optimization may change how agents are coordinated.
 
 Sources: `analysis/arms.py`; `analysis/cache/cells_agents.tsv`; `evovle_agents/src/scripts/run_gepa.sh`; `evovle_agents/meta_harness/run_gepa.py`; `evovle_agents/meta_harness/gepa_reflection.py`; `evovle_agents/meta_harness/splits.py`; `evovle_agents/jobs/cumulative_agents_gepa/<stream>/run_*/v*/search.json`; `evovle_agents/src/config.py`; `evovle_agents/src/runner.py`

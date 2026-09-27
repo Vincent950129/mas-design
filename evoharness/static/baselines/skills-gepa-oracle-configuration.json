@@ -6,71 +6,122 @@
   "harness": "Codex",
   "author": "Zixuan",
   "kind": "cumulative",
-  "description": "Reflective prompt optimization. GEPA edits prompt text and carries the selected prompt forward between stages. This variant searches with each task’s oracle skills, then evaluates with the full stage library.",
+  "description": "GEPA uses feedback from task attempts to improve prompt text. The selected prompt carries forward to the next stage. This variant optimizes with the skills designated for each task, then evaluates with the full library available at that stage.",
   "settings": [
     [
-      "Solver model",
+      "Task-solving model",
       "GPT-5",
-      "Recorded"
+      "Recorded experiment setting"
     ],
     [
-      "Search budget",
-      "50 metric calls per searched stage",
-      "Recorded search.json"
+      "Optimization budget",
+      "50 task evaluations per optimization stage, counted as GEPA metric calls",
+      "Recorded experiment setting"
     ],
     [
-      "Reflection minibatch",
+      "Tasks per feedback batch",
       "3 tasks",
-      "Recorded"
+      "Recorded experiment setting"
     ],
     [
-      "Search repetitions",
-      "1 trial per task",
-      "Recorded"
+      "Optimization repetitions",
+      "1 attempt per task for each candidate being evaluated",
+      "Recorded experiment setting"
     ],
     [
-      "Reflection model",
+      "Prompt-improvement model",
       "GPT-5",
-      "Recorded"
+      "Recorded experiment setting"
     ],
     [
-      "Reflection response limit",
-      "32,768 tokens; up to 5 API attempts",
-      "Current configuration"
+      "Prompt-improvement response limit",
+      "32,768 completion tokens per response, including reasoning tokens",
+      "Implementation default; original run setting unknown"
     ],
     [
-      "Concurrency / RNG seed",
-      "8 concurrent trials / seed 0",
-      "Current defaults"
+      "Prompt-improvement request attempts",
+      "Up to 5 attempts per response: the initial request and at most 4 retries",
+      "Implementation default; original run setting unknown"
     ],
     [
-      "Search / evaluation library",
-      "Per-task oracle / full stage library (CSM 9, HR 10, ITSM 10 skills)",
-      "Recorded / registry"
+      "Optimization parallelism",
+      "Up to 8 task attempts at once",
+      "Implementation default; original run setting unknown"
     ],
     [
-      "EOG solver limit",
-      "900 seconds per task shared across up to 4 episodes",
-      "Current default; historical overrides not fully established"
+      "Random seed for search sampling",
+      "0",
+      "Implementation default; original run setting unknown"
     ],
     [
-      "Held-out evaluation",
-      "Runs 1, 2 and 3 per recorded cell",
-      "Archived snapshot"
+      "Initial prompt",
+      "The provided task-solving prompt, before GEPA adds or edits guidance",
+      "Implementation default; original run setting unknown"
     ],
     [
-      "Complete total compute budget",
-      "Not established; evaluation metrics exclude adaptation/search work",
-      "Unavailable"
+      "Improvement rule",
+      "Accept an edit only when its total score on the sampled comparison batch exceeds its parent prompt’s score; reject ties",
+      "Implementation default; original run setting unknown"
+    ],
+    [
+      "Candidate selection",
+      "Pareto selection: choose among prompts that lead on different validation tasks",
+      "Implementation default; original run setting unknown"
+    ],
+    [
+      "Prompt-section selection",
+      "Edit one named section at a time, cycling through sections for each candidate (round-robin)",
+      "Implementation default; original run setting unknown"
+    ],
+    [
+      "Combining candidate prompts",
+      "Disabled; sections from two parent prompts are not merged",
+      "Implementation default; original run setting unknown"
+    ],
+    [
+      "Reusing cached evaluation results",
+      "Disabled; evaluate a repeated prompt and task again instead of reusing its prior score",
+      "Implementation default; original run setting unknown"
+    ],
+    [
+      "Skills supplied during optimization",
+      "Only the skills designated for each task",
+      "Recorded experiment setting"
+    ],
+    [
+      "Skills supplied during held-out evaluation",
+      "Full final-stage library: CSM 9 skills, HR 10 skills, ITSM 10 skills",
+      "Recorded experiment setting"
+    ],
+    [
+      "EOG task time limit",
+      "900 seconds in total for each task",
+      "Implementation default; original run setting unknown"
+    ],
+    [
+      "EOG task continuation limit",
+      "Up to 4 episodes in total, including continuations, within the same task time limit; separate from evaluation repetitions",
+      "Implementation default; original run setting unknown"
+    ],
+    [
+      "Held-out evaluation repetitions",
+      "3 runs for each evaluated combination of stream, system stage, and task group; each task is attempted once per run",
+      "Recorded experiment setting"
+    ],
+    [
+      "Total experiment compute",
+      "Not reported; held-out evaluation usage excludes training, memory building and optimization",
+      "Not reported"
     ]
   ],
   "notes": [
-    "50 calls is a stopping threshold: initial validation consumes calls, batches can overshoot, and retries add work.",
-    "Library defaults: strict improvement, Pareto selection, round-robin module selection, no merge and no evaluation cache.",
-    "Validation pools cohorts 1…k. Winners carry forward; learning uses the new cohort with a cumulative-data fallback from the seed.",
-    "Only final-stage held-out evaluations are archived: CSM/HR v3, ITSM v4. Earlier search stages exist, but are not earlier held-out results. No ALE evaluation is registered.",
-    "GEPA metric calls and Meta-Harness proposer iterations are different budget units. These searches were not demonstrated to be compute-matched.",
-    "No complete search token/dollar cap or historical concurrency override was established. Three evaluation runs are not three independent searches."
+    "One GEPA metric call evaluates one candidate on one task once. A batch of 3 tasks with 1 repetition uses 3 metric calls; it can contain many model requests and tool calls.",
+    "The 50-call budget is a stopping threshold. Initial validation counts toward it, a final batch can exceed it, and request retries add compute.",
+    "At each stage, validation includes tasks from Stage 1 through the current stage. Prompt improvement uses the current stage’s training tasks when continuing an adapted prompt; otherwise it uses training tasks from all stages seen so far.",
+    "An edit that improves the sampled comparison batch can still reduce full-validation or held-out performance. The random seed controls search sampling; it is separate from the starting prompt.",
+    "Held-out results are available only for the final stage: Stage 3 in CSM and HR, and Stage 4 in ITSM. Earlier optimization stages do not provide earlier held-out results. No ALE results are available for this variant.",
+    "GEPA counts task evaluations, whereas Meta-Harness counts proposal rounds. These budgets do not establish equal model usage, elapsed time, or monetary cost across methods.",
+    "The total optimization token or monetary budget and original parallel-task limit were not reported. The 3 held-out evaluation repetitions do not represent 3 independent optimization runs."
   ],
   "sources": [
     "analysis/arms.py",

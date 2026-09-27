@@ -51,9 +51,10 @@ const LB_DETAILS = (() => {
 
   function settings(profile) {
     const rows = [...profile.settings,
-      ["Evaluation coverage", `${profile.evaluationCells} cells; ${profile.evaluationTrials.toLocaleString()} recorded task trials across all stages and runs`, "Evaluation only; excludes search/adaptation"]];
+      ["Evaluation coverage", `${profile.evaluationCells} combinations of stream, system stage, and task group; ${profile.evaluationTrials.toLocaleString()} task attempts across all runs`, "Evaluation only; excludes training and search"]];
     return `<section class="lbd-section" data-lbd-part="configuration"><h3 tabindex="-1">Configuration and search budget</h3>
-      <p class="lbd-help">Settings distinguish recorded experiment values from implementation defaults. Unavailable settings are marked explicitly.</p>
+      <p class="lbd-help">EOG is EnterpriseOps-Gym; ALE is Agents’ Last Exam. Stages are successive releases of tasks and capabilities (tools, skills, or agents).</p>
+      <p class="lbd-help">Recorded settings come from experiment records. Implementation defaults are labeled when the original run setting is unknown. Unreported values are marked explicitly.</p>
       <dl class="lbd-settings">${rows.map(([label, value, basis]) =>
         `<div><dt>${esc(label)}</dt><dd>${esc(value)}<span class="lbd-basis">${esc(basis)}</span></dd></div>`).join("")}</dl>
       <ul class="lbd-notes">${profile.notes.map(n => `<li>${esc(n)}</li>`).join("")}</ul>
@@ -65,16 +66,17 @@ const LB_DETAILS = (() => {
     const records = profile.searchBudget || profile.reproduction?.protocol?.search_stages;
     if (!records?.length) return "";
     const value = v => v == null ? "—" : esc(Array.isArray(v) ? v.join(" / ") : v);
-    return `<details class="lbd-search-budget"><summary>Recorded search work by stream and stage</summary>
-      <p>Search repetitions are per validation task for each candidate, separate from the three held-out evaluation runs. Requested budgets are limits or plans; retained trials are the work still present in saved artifacts, not complete billed compute. A dash means not recorded.</p>
-      <div class="lbd-table-wrap" tabindex="0" role="region" aria-label="Recorded search budgets by stage"><table class="lbd-table"><thead><tr>
-        <th scope="col">Stream</th><th scope="col">Stage</th><th scope="col">Learn tasks</th><th scope="col">Val tasks</th><th scope="col">Trials/task</th><th scope="col">Requested budget</th><th scope="col">Retained trials</th>
+    return `<details class="lbd-search-budget"><summary>Search budgets by stream and stage</summary>
+      <p>A candidate is a proposed prompt or harness change. Training tasks guide these changes; validation tasks measure candidate quality. Attempts per task apply to each candidate during search, separately from the three evaluation runs of the selected system.</p>
+      <div class="lbd-table-wrap" tabindex="0" role="region" aria-label="Search budgets by stage"><table class="lbd-table"><thead><tr>
+        <th scope="col">Stream</th><th scope="col">Stage</th><th scope="col">Training tasks</th><th scope="col">Validation tasks</th><th scope="col">Attempts per task</th><th scope="col">Search budget</th><th scope="col">Recorded task attempts</th>
       </tr></thead><tbody>${records.map(r => `<tr><th scope="row">${esc(r.domain.toUpperCase())}</th><td>v${r.version}</td>
         <td>${value(r.n_train)}</td><td>${value(r.n_val ?? r.validation_task_counts)}</td><td>${value(r.trials_per_task ?? r.recorded_trials_per_task)}</td>
-        <td>${r.searched === false ? "Not searched" : profile.arm === "meta" ? "5 iterations; 3 candidates requested each" : r.max_metric_calls == null ? "—" : `${value(r.max_metric_calls)} metric calls`}</td>
+        <td>${r.searched === false ? "No search at this stage" : profile.arm === "meta" ? "5 iterations; 3 candidates requested per iteration" : r.max_metric_calls == null ? "—" : `${value(r.max_metric_calls)} task-scoring calls`}</td>
         <td>${value(r.retained_adapter_statistics?.n_trials ?? r.retained_candidate_trials)}</td></tr>`).join("")}</tbody></table></div>
-      <p class="lbd-help">Multiple task counts reflect different retained candidates or fallback training sets. Retained validation files may include seed/incumbent evaluations and omit failed or overwritten attempts.</p>
-      <p><a href="static/baselines/search-stage-evidence.json" download>Search evidence, validation task IDs &amp; checkpoint hashes (JSON) ↓</a></p>
+      <p class="lbd-help">${profile.arm === "meta" ? "The candidate count is requested, so fewer candidates may have completed validation." : "One task-scoring call (GEPA’s metric call) evaluates one candidate on one task. The budget is a stopping threshold; a batch already in progress can exceed it."} Recorded task attempts count the work available in saved results; they are not a complete compute or cost total.</p>
+      <p class="lbd-help">Multiple task counts indicate that candidates used different training or validation sets. Counts can include evaluations of the starting candidate and the current best candidate, while failed or overwritten attempts may be missing. A dash means the value was not recorded.</p>
+      <p><a href="static/baselines/search-stage-evidence.json" download>Detailed search budgets (JSON) ↓</a></p>
     </details>`;
   }
 
@@ -140,14 +142,14 @@ const LB_DETAILS = (() => {
     const entries = Object.entries(results.streams);
     selection.stream = entries.find(([, s]) => s.benchmark === "eog")?.[0] || entries[0][0];
     return `<section class="lbd-section" data-lbd-part="results"><div class="lbd-section-head"><h3 tabindex="-1">Results by stream and stage</h3><span class="lbd-snapshot">August 2026 snapshot</span></div>
-      <p class="lbd-help">Score gives partial credit; Pass counts fully solved tasks. Values average evaluation runs 1–3 of the recorded harness. ± is population standard deviation across runs; these are not independent adaptation searches.</p>
+      <p class="lbd-help">Score gives partial credit; Pass counts fully solved tasks. A cohort is the group of tasks introduced at one stage. Values average evaluation runs 1–3 of the selected system. ± is population standard deviation across these runs; the training or search process was not repeated for each evaluation run.</p>
       <div class="lbd-controls">
         <label>Stream<select data-lbd-control="stream">${["eog", "ale"].map(env => `<optgroup label="${env.toUpperCase()}">${entries.filter(([, s]) => s.benchmark === env)
           .map(([id, s]) => `<option value="${id}"${id === selection.stream ? " selected" : ""}>${esc(s.label)}</option>`).join("")}</optgroup>`).join("")}</select></label>
         <label>Metric<select data-lbd-control="metric"><option value="score">Score (%)</option><option value="pass">Pass (%)</option></select></label>
         <label>View<select data-lbd-control="view"><option value="stages">${results.kind === "control" ? "By cohort" : "After each stage"}</option><option value="matrix">Full evaluation matrix</option></select></label>
       </div>
-      <p class="lbd-help">${results.kind === "control" ? "Reference controls report each cohort separately. The benchmark aggregate above pools all these cohorts." : "The stage summary weights recorded seen tasks equally within a run, then averages runs. It differs from ACC that weights each cohort equally. The benchmark aggregate uses each stream’s final recorded stage."}</p>
+      <p class="lbd-help">${results.kind === "control" ? "Reference controls report each cohort separately. The benchmark aggregate above pools all these cohorts." : "The stage summary gives each evaluated task equal weight within a run, then averages runs. This can differ from an average that gives every cohort equal weight. The benchmark aggregate uses each stream’s final recorded stage."}</p>
       <div data-lbd-results aria-live="polite" aria-atomic="false"></div>
       <div class="lbd-downloads"><b>Download all streams for this system</b>
         <a href="static/baselines/${key}-stages.csv" download>Stage summary CSV ↓</a>

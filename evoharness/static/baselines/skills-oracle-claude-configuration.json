@@ -6,47 +6,47 @@
   "harness": "Claude Code",
   "author": "Yang Li",
   "kind": "control",
-  "description": "Task-specific reference. Each task receives its selected capability subset; no state accumulates across cohorts.",
+  "description": "Reference system given the capabilities selected for each task. It does not learn or retain experience between stages.",
   "settings": [
     [
-      "Solver model",
+      "Task-solving model",
       "Sonnet-4.6",
-      "Reported"
+      "Reported experiment setting"
     ],
     [
-      "Capability selection",
-      "Task-specific skills with oracle tools",
-      "Registry / runner"
+      "Capabilities supplied to each task",
+      "The task’s designated skills and tools",
+      "Reported experiment setting"
     ],
     [
-      "Stage search budget",
-      "No stage-level prompt or harness search in this control",
+      "Optimization between stages",
+      "None; no prompt or agent-program search",
       "Experiment design"
     ],
     [
-      "EOG solver limit",
+      "EOG task time limit",
       "900 seconds per task",
-      "Export notes / timeout records"
+      "Recorded experiment setting"
     ],
     [
-      "ALE solver limit / launch overrides",
-      "Not specified in the exported run configuration",
-      "Unavailable"
+      "ALE task time limit",
+      "Not reported",
+      "Not reported"
     ],
     [
-      "Held-out evaluation",
-      "Runs 1, 2 and 3 per recorded cell",
-      "Archived snapshot"
+      "Held-out evaluation repetitions",
+      "3 runs for each evaluated combination of stream, system stage, and task group; each task is attempted once per run",
+      "Recorded experiment setting"
     ],
     [
-      "Complete total compute budget",
-      "Not established; evaluation metrics exclude adaptation/search work",
-      "Unavailable"
+      "Total experiment compute",
+      "Not reported; held-out evaluation usage excludes training, memory building and optimization",
+      "Not reported"
     ]
   ],
   "notes": [
-    "Each stage point evaluates that cohort only. The benchmark aggregate pools all cohorts; this is not a cumulative adaptation curve.",
-    "Some EOG usage comes from a dedicated one-run telemetry pass; accuracy still uses the original three runs. Missing usage means cost totals may be lower bounds."
+    "Each stage result covers that stage’s held-out tasks only. The overall benchmark result combines tasks from all stages. No adaptation takes place between these evaluations.",
+    "Some EOG token-usage measurements come from 1 additional repetition run specifically to measure usage. Accuracy uses the original 3 evaluation repetitions. Missing token counts mean the reported usage may understate total cost."
   ],
   "sources": [
     "analysis/arms.py",

@@ -6,53 +6,63 @@
   "harness": "Codex",
   "author": "Zixuan",
   "kind": "control",
-  "description": "Reference control with a per-cohort specialist library on EOG and task-specific specialist families on ALE. No cross-stage adaptation.",
+  "description": "Reference system given the stage’s specialist library on EOG and the task’s designated specialist groups on ALE. It does not learn between stages.",
   "settings": [
     [
-      "Solver model",
-      "EOG: gpt-5-codex in inspected saved config.toml; ALE: GPT-5",
-      "Recorded"
+      "Task-solving model",
+      "EOG: gpt-5-codex; ALE: gpt-5",
+      "Recorded experiment setting"
     ],
     [
-      "Capability selection",
-      "EOG: per-cohort reference specialist library; ALE: task-specific specialist families",
-      "Saved EOG manifests / ALE runner"
+      "Specialist agents supplied",
+      "EOG: the reference specialist library for that stage. ALE: the specialist groups designated for each task.",
+      "EOG: recorded experiment setting; ALE: implementation behavior"
     ],
     [
-      "Stage search budget",
-      "No stage-level prompt or harness search in this control",
+      "Optimization between stages",
+      "None; no prompt or agent-program search",
       "Experiment design"
     ],
     [
-      "EOG solver limit",
-      "900 seconds per task shared across up to 4 episodes",
-      "Current default; historical overrides not fully established"
+      "EOG task time limit",
+      "900 seconds in total for each task",
+      "Implementation default; original run setting unknown"
     ],
     [
-      "ALE solver limit",
+      "EOG task continuation limit",
+      "Up to 4 episodes in total, including continuations, within the same task time limit; separate from evaluation repetitions",
+      "Implementation default; original run setting unknown"
+    ],
+    [
+      "ALE task time limit",
       "7,200 seconds per task",
-      "Saved experiment configuration / runner"
+      "Recorded configuration and implementation setting"
     ],
     [
-      "Base delegation limits",
-      "12 threads; maximum depth 1",
-      "Saved base configuration / current default"
+      "Agent thread limit",
+      "12 concurrent agent threads",
+      "Recorded base setting and implementation default"
     ],
     [
-      "Held-out evaluation",
-      "Runs 1, 2 and 3 per recorded cell",
-      "Archived snapshot"
+      "Delegation depth limit",
+      "1 level of specialist delegation below the lead agent",
+      "Recorded base setting and implementation default"
     ],
     [
-      "Complete total compute budget",
-      "Not established; evaluation metrics exclude adaptation/search work",
-      "Unavailable"
+      "Held-out evaluation repetitions",
+      "3 runs for each evaluated combination of stream, system stage, and task group; each task is attempted once per run",
+      "Recorded experiment setting"
+    ],
+    [
+      "Total experiment compute",
+      "Not reported; held-out evaluation usage excludes training, memory building and optimization",
+      "Not reported"
     ]
   ],
   "notes": [
-    "Each stage point evaluates that cohort only. The benchmark aggregate pools all cohorts; this is not a cumulative adaptation curve.",
-    "On EOG, tasks with different selected tool sets use the same specialist roster within each cohort.",
-    "These are base Codex delegation limits; an evolved harness may change orchestration behavior."
+    "Each stage result covers that stage’s held-out tasks only. The overall benchmark result combines tasks from all stages. No adaptation takes place between these evaluations.",
+    "On EOG, tasks from the same stage receive the same specialist library even when their designated tools differ.",
+    "The delegation limits describe the base Codex configuration. A program produced by optimization may change how agents are coordinated."
   ],
   "sources": [
     "analysis/arms.py",

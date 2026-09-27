@@ -6,46 +6,46 @@
   "harness": "Claude Code",
   "author": "Yang Li",
   "kind": "cumulative",
-  "description": "Deployment baseline with the benchmark’s accumulating capability pool. No stage-specific prompt or harness optimization.",
+  "description": "Deployment baseline that receives the capabilities introduced up to the current stage. Its prompt and agent program are not optimized between stages.",
   "settings": [
     [
-      "Solver model",
+      "Task-solving model",
       "Sonnet-4.6",
-      "Reported"
+      "Reported experiment setting"
     ],
     [
-      "Stage search budget",
-      "No stage-level optimization",
+      "Optimization between stages",
+      "None",
       "Experiment design"
     ],
     [
-      "Capability pool",
-      "Cumulative through the selected stage",
-      "Registry / runner"
+      "Available capabilities",
+      "All capabilities introduced through the selected stage",
+      "Reported experiment setting"
     ],
     [
-      "EOG solver limit",
+      "EOG task time limit",
       "900 seconds per task",
-      "Export notes / timeout records"
+      "Recorded experiment setting"
     ],
     [
-      "ALE solver limit / launch overrides",
-      "Not specified in the exported run configuration",
-      "Unavailable"
+      "ALE task time limit",
+      "Not reported",
+      "Not reported"
     ],
     [
-      "Held-out evaluation",
-      "Runs 1, 2 and 3 per recorded cell",
-      "Archived snapshot"
+      "Held-out evaluation repetitions",
+      "3 runs for each evaluated combination of stream, system stage, and task group; each task is attempted once per run",
+      "Recorded experiment setting"
     ],
     [
-      "Complete total compute budget",
-      "Not established; evaluation metrics exclude adaptation/search work",
-      "Unavailable"
+      "Total experiment compute",
+      "Not reported; held-out evaluation usage excludes training, memory building and optimization",
+      "Not reported"
     ]
   ],
   "notes": [
-    "Some EOG usage comes from a dedicated one-run telemetry pass; accuracy still uses the original three runs. Missing usage means cost totals may be lower bounds."
+    "Some EOG token-usage measurements come from 1 additional repetition run specifically to measure usage. Accuracy uses the original 3 evaluation repetitions. Missing token counts mean the reported usage may understate total cost."
   ],
   "sources": [
     "analysis/arms.py",

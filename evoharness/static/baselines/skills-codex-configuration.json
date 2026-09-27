@@ -6,42 +6,47 @@
   "harness": "Codex",
   "author": "Zixuan",
   "kind": "cumulative",
-  "description": "Deployment baseline with the benchmark’s accumulating capability pool. No stage-specific prompt or harness optimization.",
+  "description": "Deployment baseline that receives the capabilities introduced up to the current stage. Its prompt and agent program are not optimized between stages.",
   "settings": [
     [
-      "Solver model",
+      "Task-solving model",
       "GPT-5",
-      "Recorded"
+      "Recorded experiment setting"
     ],
     [
-      "Stage search budget",
-      "No stage-level optimization",
+      "Optimization between stages",
+      "None",
       "Experiment design"
     ],
     [
-      "Capability pool",
-      "Cumulative through the selected stage",
-      "Registry / runner"
+      "Available capabilities",
+      "All capabilities introduced through the selected stage",
+      "Reported experiment setting"
     ],
     [
-      "EOG solver limit",
-      "900 seconds per task shared across up to 4 episodes",
-      "Current default; historical overrides not fully established"
+      "EOG task time limit",
+      "900 seconds in total for each task",
+      "Implementation default; original run setting unknown"
     ],
     [
-      "ALE solver limit",
+      "EOG task continuation limit",
+      "Up to 4 episodes in total, including continuations, within the same task time limit; separate from evaluation repetitions",
+      "Implementation default; original run setting unknown"
+    ],
+    [
+      "ALE task time limit",
       "7,200 seconds per task",
-      "Saved experiment configuration / runner"
+      "Recorded configuration and implementation setting"
     ],
     [
-      "Held-out evaluation",
-      "Runs 1, 2 and 3 per recorded cell",
-      "Archived snapshot"
+      "Held-out evaluation repetitions",
+      "3 runs for each evaluated combination of stream, system stage, and task group; each task is attempted once per run",
+      "Recorded experiment setting"
     ],
     [
-      "Complete total compute budget",
-      "Not established; evaluation metrics exclude adaptation/search work",
-      "Unavailable"
+      "Total experiment compute",
+      "Not reported; held-out evaluation usage excludes training, memory building and optimization",
+      "Not reported"
     ]
   ],
   "notes": [],

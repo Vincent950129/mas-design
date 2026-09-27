@@ -6,67 +6,87 @@
   "harness": "Codex",
   "author": "Zixuan",
   "kind": "cumulative",
-  "description": "Codex with native persistent memory. Training rollouts populate a shared memory home that is carried between stages and copied for evaluation.",
+  "description": "Codex builds persistent memory from its attempts at training tasks. The memory carries forward between stages, and held-out tasks receive a copy of the memory learned so far.",
   "settings": [
     [
-      "Solver model",
+      "Task-solving model",
       "GPT-5",
-      "Recorded"
+      "Recorded experiment setting"
     ],
     [
-      "Adaptation",
-      "Training tasks from versions 1…k; memory carried between stages",
-      "Current runner"
+      "Training data",
+      "Training tasks from Stage 1 through the current stage; learned memory carries forward",
+      "Implementation behavior"
     ],
     [
-      "Memory training concurrency",
-      "EOG: 1 (forced); ALE: requested concurrency, with parallel sandbox rollouts",
-      "Current runner; historical override unknown"
+      "EOG training parallelism",
+      "1 training task at a time",
+      "Required by the current implementation; original run setting unknown"
     ],
     [
-      "Extraction / consolidation limits",
-      "600 / 900 seconds",
-      "Current defaults"
+      "ALE training parallelism",
+      "Training tasks can run in parallel in separate environments; the experiment’s parallel-task limit was not reported",
+      "Not reported"
     ],
     [
-      "Extraction concurrency",
-      "8",
-      "Current default"
+      "Memory extraction time limit",
+      "600 seconds per memory-extraction operation",
+      "Implementation default; original run setting unknown"
     ],
     [
-      "Stage search budget",
-      "No GEPA/Meta-Harness search; training and memory processing add work",
-      "Runner"
+      "Memory consolidation time limit",
+      "900 seconds to combine extracted memories",
+      "Implementation default; original run setting unknown"
     ],
     [
-      "EOG solver limit",
-      "900 seconds per task shared across up to 4 episodes",
-      "Current default; historical overrides not fully established"
+      "Memory extraction parallelism",
+      "Up to 8 extraction operations at once",
+      "Implementation default; original run setting unknown"
     ],
     [
-      "ALE solver limit",
+      "Candidate search",
+      "None; compute is spent on training-task attempts and memory processing",
+      "Implementation behavior"
+    ],
+    [
+      "EOG task time limit",
+      "900 seconds in total for each task",
+      "Implementation default; original run setting unknown"
+    ],
+    [
+      "EOG task continuation limit",
+      "Up to 4 episodes in total, including continuations, within the same task time limit; separate from evaluation repetitions",
+      "Implementation default; original run setting unknown"
+    ],
+    [
+      "ALE task time limit",
       "7,200 seconds per task",
-      "Saved experiment configuration / runner"
+      "Recorded configuration and implementation setting"
     ],
     [
-      "Base delegation limits",
-      "12 threads; maximum depth 1",
-      "Saved base configuration / current default"
+      "Agent thread limit",
+      "12 concurrent agent threads",
+      "Recorded base setting and implementation default"
     ],
     [
-      "Held-out evaluation",
-      "Runs 1, 2 and 3 per recorded cell",
-      "Archived snapshot"
+      "Delegation depth limit",
+      "1 level of specialist delegation below the lead agent",
+      "Recorded base setting and implementation default"
     ],
     [
-      "Complete total compute budget",
-      "Not established; evaluation metrics exclude adaptation/search work",
-      "Unavailable"
+      "Held-out evaluation repetitions",
+      "3 runs for each evaluated combination of stream, system stage, and task group; each task is attempted once per run",
+      "Recorded experiment setting"
+    ],
+    [
+      "Total experiment compute",
+      "Not reported; held-out evaluation usage excludes training, memory building and optimization",
+      "Not reported"
     ]
   ],
   "notes": [
-    "Historical memory-processing overrides and total adaptation tokens/cost are not recoverable from the evaluation snapshot. Held-out evaluation uses a copy of trained memory.",
-    "These are base Codex delegation limits; an evolved harness may change orchestration behavior."
+    "The original memory-processing settings and total training token usage or monetary cost were not reported. Held-out task attempts are kept separate from the memory used to train later stages.",
+    "The delegation limits describe the base Codex configuration. A program produced by optimization may change how agents are coordinated."
   ],
   "sources": [
     "analysis/arms.py",

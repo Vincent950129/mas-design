@@ -6,41 +6,41 @@
   "harness": "Codex (ALE)",
   "author": "Vaidehi",
   "kind": "cumulative",
-  "description": "Deployment baseline with the benchmark’s accumulating capability pool. No stage-specific prompt or harness optimization.",
+  "description": "Deployment baseline that receives the capabilities introduced up to the current stage. Its prompt and agent program are not optimized between stages.",
   "settings": [
     [
-      "Solver model",
+      "Task-solving model",
       "GPT-5",
-      "Recorded"
+      "Recorded experiment setting"
     ],
     [
-      "Stage search budget",
-      "No stage-level optimization",
+      "Optimization between stages",
+      "None",
       "Experiment design"
     ],
     [
-      "Capability pool",
-      "Cumulative through the selected stage",
-      "Registry / runner"
+      "Available capabilities",
+      "All capabilities introduced through the selected stage",
+      "Reported experiment setting"
     ],
     [
-      "ALE solver limit",
+      "ALE task time limit",
       "7,200 seconds per task",
-      "Saved experiment configuration / runner"
+      "Recorded configuration and implementation setting"
     ],
     [
-      "Held-out evaluation",
-      "Runs 1, 2 and 3 per recorded cell",
-      "Archived snapshot"
+      "Held-out evaluation repetitions",
+      "3 runs for each evaluated combination of stream, system stage, and task group; each task is attempted once per run",
+      "Recorded experiment setting"
     ],
     [
-      "Complete total compute budget",
-      "Not established; evaluation metrics exclude adaptation/search work",
-      "Unavailable"
+      "Total experiment compute",
+      "Not reported; held-out evaluation usage excludes training, memory building and optimization",
+      "Not reported"
     ]
   ],
   "notes": [
-    "ALE deployment control for the tool-memory baselines. Results are reported separately from the other ReAct / Codex deployment run."
+    "This is the ALE deployment baseline used for comparison with the tool-memory methods. Its results are reported separately from the other ReAct / Codex deployment experiment."
   ],
   "sources": [
     "analysis/arms.py",

@@ -6,6 +6,7 @@ import functools
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 import json
 from pathlib import Path
+import re
 import statistics
 import subprocess
 import sys
@@ -16,6 +17,33 @@ from playwright.sync_api import sync_playwright, expect
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "tools/proofs/baseline_details"
+PRIVATE_PATH = re.compile(r"/(?:export|home|root|tmp)(?:/|(?=$|[\s\"']))")
+INTERNAL_FILENAME = re.compile(r"\b(?:[A-Za-z0-9_-]+/)*[A-Za-z0-9_.-]+\.(?:py|sh|toml|yaml|yml|jsonl|json|tsv)\b")
+
+
+def assert_no_private_paths(text, location):
+    assert not PRIVATE_PATH.search(text), f"Local server path in {location}"
+
+
+def verify_public_artifacts():
+    """Public exports may use relative source references or portable placeholders."""
+    files = members = 0
+    for path in (ROOT / "static/baselines").iterdir():
+        if not path.is_file():
+            continue
+        files += 1
+        if path.suffix == ".zip":
+            with zipfile.ZipFile(path) as archive:
+                for member in archive.infolist():
+                    assert_no_private_paths(archive.read(member).decode("utf-8"), f"{path.name}!{member.filename}")
+                    members += 1
+        else:
+            assert_no_private_paths(path.read_text(), path.name)
+        if path.name.endswith("-configuration.json"):
+            configuration = json.loads(path.read_text())
+            for source in configuration.get("sourceRoots", {}).values():
+                assert not Path(source).is_absolute(), f"Absolute source root in {path.name}"
+    return files, members
 
 
 class QuietHandler(SimpleHTTPRequestHandler):
@@ -60,6 +88,10 @@ def assert_public_details(page, axis):
     expect(page.locator(".lbd-headlines > div > span")).to_have_text(["EOG", "ALE"])
     assert page.locator("[data-lbd-mismatch]").count() == 0
     content = page.locator(".lbd-body").inner_text()
+    assert_no_private_paths(content, "system dialog")
+    assert not INTERNAL_FILENAME.search(content), "Internal source filename in system dialog"
+    for label in page.locator(".lbd-settings dt").all_text_contents():
+        assert not re.match(r"(?i)^(?:registry|author|source[ _]?root|cache[ _]?key|recorded[ _]?path)\b", label), label
     for removed in (
         "Archived Score and Pass agree", "Archived and published results differ",
         "Additional archived run.", "Registry:", "Archived evaluation coverage",
@@ -85,7 +117,7 @@ def assert_metrics(expected, rows):
 def verify_data(data):
     assert len(data["systems"]) == 25
     assert {a: sum(r["track"] == a for r in data["systems"].values()) for a in ("tools", "skills", "agents")} == {"tools": 8, "skills": 10, "agents": 7}
-    assert "/export/" not in json.dumps(data)
+    assert_no_private_paths(json.dumps(data), "browser result data")
     counts = dict(stages=0, cells=0, aggregates=0)
     for key, result in data["systems"].items():
         with (ROOT / f"static/baselines/{key}-runs.csv").open() as f:
@@ -115,6 +147,7 @@ def verify_data(data):
 
 
 def main():
+    public_files, archive_members = verify_public_artifacts()
     server = ThreadingHTTPServer(("127.0.0.1", 0), functools.partial(QuietHandler, directory=str(ROOT)))
     threading.Thread(target=server.serve_forever, daemon=True).start()
     url = f"http://127.0.0.1:{server.server_port}"
@@ -176,6 +209,9 @@ def main():
                     expect(page.locator('[data-lbd-part="configuration"] h3')).to_be_focused()
                     recorded_search = result["reproduction"].get("protocol", {}).get("search_stages", [])
                     assert page.locator(".lbd-search-budget tbody tr").count() == len(recorded_search)
+                    if recorded_search:
+                        page.locator(".lbd-search-budget > summary").click()
+                        assert_public_details(page, axis)
                     page.click('[data-lbd-jump="results"]')
                     expect(page.locator('[data-lbd-part="results"] h3')).to_be_focused()
                     for stream, values in result["streams"].items():
@@ -234,8 +270,13 @@ def main():
             assert page.locator("[data-lb-system]").count() == 1
             page.click("[data-lb-reset]")
             tool_rows = [r for r in published["tools"]["rows"] if "sec" not in r] + published["tools"].get("more", [])
-            open_experiment_from_ranking(page, "tools", "tools-memtoolagent", data["systems"]["tools-memtoolagent"], tool_rows)
-            page.locator("#lb-system-dialog").screenshot(path=str(OUT / "desktop-memtoolagent.png"))
+            open_experiment_from_ranking(page, "tools", "tools-meta-harness", data["systems"]["tools-meta-harness"], tool_rows)
+            page.click('[data-lbd-jump="configuration"]')
+            page.locator("#lb-system-dialog").screenshot(path=str(OUT / "desktop-meta-harness-configuration.png"))
+            page.locator(".lbd-search-budget > summary").click()
+            page.locator(".lbd-search-budget").evaluate("node => node.scrollIntoView({block: 'start'})")
+            assert_public_details(page, "tools")
+            page.locator("#lb-system-dialog").screenshot(path=str(OUT / "desktop-meta-harness-search-budget.png"))
             page.select_option('[data-lbd-control="stream"]', "ale")
             page.select_option('[data-lbd-control="view"]', "matrix")
             for width in (390, 768):
@@ -246,7 +287,10 @@ def main():
                 page.click('[data-lbd-jump="configuration"]')
                 expect(page.locator('[data-lbd-part="configuration"] h3')).to_be_focused()
                 assert page.evaluate("document.querySelector('.lbd-body').scrollWidth <= document.querySelector('.lbd-body').clientWidth")
-                page.locator("#lb-system-dialog").screenshot(path=str(OUT / f"configuration-{width}.png"))
+                page.locator("#lb-system-dialog").screenshot(path=str(OUT / f"meta-harness-configuration-{width}.png"))
+                page.locator(".lbd-search-budget").evaluate("node => node.scrollIntoView({block: 'start'})")
+                assert page.evaluate("document.querySelector('.lbd-body').scrollWidth <= document.querySelector('.lbd-body').clientWidth")
+                page.locator("#lb-system-dialog").screenshot(path=str(OUT / f"meta-harness-search-budget-{width}.png"))
             page.keyboard.press("Escape")
             assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
             assert not errors, errors
@@ -254,7 +298,7 @@ def main():
     finally:
         server.shutdown()
         server.server_close()
-    print(f"Verified all 25 experiments; {checked} row/stream interactions; {counts}; 125 per-system downloads and the extracted offline kit; public-facing labels; keyboard and mobile layouts.")
+    print(f"Verified all 25 experiments; {checked} row/stream interactions; {counts}; 125 per-system downloads and the extracted offline kit; {public_files} public files and {archive_members} ZIP members have portable paths; public-facing labels; keyboard and mobile layouts.")
 
 
 if __name__ == "__main__":

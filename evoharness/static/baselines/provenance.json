@@ -43,7 +43,7 @@
       "sha256": "428fb2db4743052e6989bb4831806caa61fbcbb1feb3771d4a791e9c731010d2"
     }
   ],
-  "exported_utc": "2026-09-27T00:43:57.244530+00:00",
+  "exported_utc": "2026-09-27T01:12:22.078189+00:00",
   "counts": {
     "systems": 25,
     "matrix_cells": 1346,
@@ -56,8 +56,8 @@
   "limitations": "August snapshot, not a fresh evaluation. Missing records are not zero-filled. Usage can be incomplete or from a separate telemetry run; it excludes adaptation/search. Current exclusion filters are not reapplied.",
   "profile_source": {
     "file": "tools/baseline_profiles.py",
-    "modified_utc": "2026-09-27T00:38:57.712550+00:00",
-    "sha256": "c7f887ad320522ae99c07e0fde3c04ceed96a28277eaad002e0f57833a9df4fb"
+    "modified_utc": "2026-09-27T01:12:14.058532+00:00",
+    "sha256": "59899cc523bf4f9570e6ef18d2f2ee9c86b172eec45c258f513810dd56224065"
   },
   "recipe_source": {
     "file": "tools/reproduction_recipes.json",
