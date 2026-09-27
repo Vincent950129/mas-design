@@ -1,0 +1,122 @@
+{
+  "name": "SkillOpt",
+  "track": "skills",
+  "arm": "skillopt",
+  "model": "GPT-5.5",
+  "harness": "SkillOpt",
+  "author": "Ye Liu",
+  "kind": "cumulative",
+  "description": "SkillOpt with GPT-5.5, evaluated against the cumulative EOG skill library. This is a different backbone from the GPT-5 systems.",
+  "settings": [
+    [
+      "Solver model",
+      "GPT-5.5",
+      "Registry"
+    ],
+    [
+      "Optimization budget",
+      "Not recorded with this archived evaluation export",
+      "Unavailable"
+    ],
+    [
+      "Solver limits / concurrency",
+      "Not established by these artifacts",
+      "Unavailable"
+    ],
+    [
+      "Held-out evaluation",
+      "Runs 1, 2 and 3 per recorded cell",
+      "Archived snapshot"
+    ],
+    [
+      "Complete total compute budget",
+      "Not established; evaluation metrics exclude adaptation/search work",
+      "Unavailable"
+    ]
+  ],
+  "notes": [
+    "EOG only. Recorded trial durations are unavailable; missing time must not be interpreted as zero cost."
+  ],
+  "sources": [
+    "analysis/arms.py",
+    "analysis/cache/cells_skills.tsv"
+  ],
+  "reproduction": {
+    "status": "unavailable",
+    "prerequisites": [
+      "Obtain SkillOpt source, an executable configuration and dependency/environment lock for this exact evaluation export from the experiment authors.",
+      "Obtain the recorded optimized artifacts and their stage mapping, original EOG task/capability data and verifier assets."
+    ],
+    "steps": [],
+    "missing": [
+      "No executable SkillOpt runner or command was found under the registered result directory.",
+      "Optimization budget, optimizer settings, adaptation data selection, concurrency, task timeout and measured trial durations are not available in the archived evaluation export.",
+      "The adjacent service_sweep artifacts belong to a different six-pass experiment and cannot supply this row’s budget.",
+      "GPT-5.5 is recorded by the registry/directory identifier; an immutable provider model snapshot and source revision are unavailable."
+    ],
+    "evidence": [
+      "analysis/arms.py:637",
+      "ye_liu/cumulative_skill_skillopt/"
+    ],
+    "protocol": {
+      "model_eog": "gpt-5.5 (registry)",
+      "benchmarks": [
+        "eog"
+      ],
+      "evaluation_runs": 3,
+      "source_revision": null
+    },
+    "result_reconstruction": "Included per-task scores and success flags reproduce all archived aggregates offline."
+  },
+  "sourceRoots": {
+    "csm": "ye_liu/cumulative_skill_skillopt/csm_harness_skillopt_llm_gpt_5_5",
+    "hr": "ye_liu/cumulative_skill_skillopt/hr_harness_skillopt_llm_gpt_5_5",
+    "itsm": "ye_liu/cumulative_skill_skillopt/itsm_harness_skillopt_llm_gpt_5_5"
+  },
+  "coverage": {
+    "csm": {
+      "benchmark": "eog",
+      "recorded_stages": [
+        1,
+        2,
+        3
+      ],
+      "evaluation_cohorts": [
+        1,
+        2,
+        3
+      ],
+      "summary_scope": "seen_cohorts"
+    },
+    "hr": {
+      "benchmark": "eog",
+      "recorded_stages": [
+        1,
+        2,
+        3
+      ],
+      "evaluation_cohorts": [
+        1,
+        2,
+        3
+      ],
+      "summary_scope": "seen_cohorts"
+    },
+    "itsm": {
+      "benchmark": "eog",
+      "recorded_stages": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "evaluation_cohorts": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "summary_scope": "seen_cohorts"
+    }
+  }
+}

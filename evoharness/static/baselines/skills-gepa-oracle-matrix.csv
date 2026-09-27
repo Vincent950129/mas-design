@@ -1,0 +1,11 @@
+track,arm,method,benchmark,stream,adapt_stage,eval_cohort,regime,score_pct,score_std_pct,pass_pct,pass_std_pct,num_runs,tasks_per_run
+skills,gepa-oracle,Task-specific GEPA (eval on full library),eog,csm,3,1,retention,52.654325,2.417279,0.0,0.0,3,1:12;2:12;3:12
+skills,gepa-oracle,Task-specific GEPA (eval on full library),eog,csm,3,2,retention,65.705131,3.032532,35.897436,7.252377,3,1:13;2:13;3:13
+skills,gepa-oracle,Task-specific GEPA (eval on full library),eog,csm,3,3,diagonal,71.832618,2.476025,24.242424,4.285496,3,1:11;2:11;3:11
+skills,gepa-oracle,Task-specific GEPA (eval on full library),eog,hr,3,1,retention,71.212124,2.474233,39.393939,4.285496,3,1:11;2:11;3:11
+skills,gepa-oracle,Task-specific GEPA (eval on full library),eog,hr,3,2,retention,61.304718,0.31725,24.242424,2.142748,3,1:22;2:22;3:22
+skills,gepa-oracle,Task-specific GEPA (eval on full library),eog,hr,3,3,diagonal,60.3576,0.291374,10.0,0.0,3,1:20;2:20;3:20
+skills,gepa-oracle,Task-specific GEPA (eval on full library),eog,itsm,4,1,retention,57.222221,4.720243,23.076923,6.280743,3,1:13;2:13;3:13
+skills,gepa-oracle,Task-specific GEPA (eval on full library),eog,itsm,4,2,retention,71.734127,2.714813,36.666667,6.236096,3,1:20;2:20;3:20
+skills,gepa-oracle,Task-specific GEPA (eval on full library),eog,itsm,4,3,retention,60.433867,4.020385,20.0,5.443311,3,1:15;2:15;3:15
+skills,gepa-oracle,Task-specific GEPA (eval on full library),eog,itsm,4,4,diagonal,57.575767,3.712137,15.151515,4.285496,3,1:11;2:11;3:11

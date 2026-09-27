@@ -1,0 +1,17 @@
+track,arm,method,benchmark,stream,adapt_stage,scope,evaluated_cohorts,score_pct,score_std_pct,pass_pct,pass_std_pct,num_runs,tasks_per_run
+skills,gepa,GEPA,eog,csm,1,seen_cohorts,1,52.283956,3.6605,0.0,0.0,3,1:12;2:12;3:12
+skills,gepa,GEPA,eog,csm,2,seen_cohorts,1;2,59.653539,1.755697,17.333333,1.885618,3,1:25;2:25;3:25
+skills,gepa,GEPA,eog,csm,3,seen_cohorts,1;2;3,64.35346,1.344847,24.074074,1.309457,3,1:36;2:36;3:36
+skills,gepa,GEPA,eog,hr,1,seen_cohorts,1,66.792933,4.485437,33.333333,4.285496,3,1:11;2:11;3:11
+skills,gepa,GEPA,eog,hr,2,seen_cohorts,1;2,63.911737,1.031548,36.363636,2.474232,3,1:33;2:33;3:33
+skills,gepa,GEPA,eog,hr,3,seen_cohorts,1;2;3,64.631282,0.86113,26.415094,0.0,3,1:53;2:53;3:53
+skills,gepa,GEPA,eog,itsm,1,seen_cohorts,1,41.367523,1.208728,17.948718,3.626189,3,1:13;2:13;3:13
+skills,gepa,GEPA,eog,itsm,2,seen_cohorts,1;2,55.000002,3.264517,21.212121,8.920971,3,1:33;2:33;3:33
+skills,gepa,GEPA,eog,itsm,3,seen_cohorts,1;2;3,49.250992,0.542831,17.361111,0.982093,3,1:48;2:48;3:48
+skills,gepa,GEPA,eog,itsm,4,seen_cohorts,1;2;3;4,55.803069,2.093241,22.033898,3.661435,3,1:59;2:59;3:59
+skills,gepa,GEPA,ale,ale,1,seen_cohorts,1,59.116183,0.728092,23.333333,4.714045,3,1:10;2:10;3:10
+skills,gepa,GEPA,ale,ale,2,seen_cohorts,1;2,31.269457,7.408573,13.72549,2.772968,3,1:17;2:17;3:17
+skills,gepa,GEPA,ale,ale,3,seen_cohorts,1;2;3,35.218137,4.641612,14.814815,3.024061,3,1:27;2:27;3:27
+skills,gepa,GEPA,ale,ale,4,seen_cohorts,1;2;3;4,30.005528,2.244098,9.929078,3.616326,3,1:47;2:47;3:47
+skills,gepa,GEPA,ale,ale,5,seen_cohorts,1;2;3;4;5,28.975625,2.341398,10.666667,2.494438,3,1:50;2:50;3:50
+skills,gepa,GEPA,ale,ale,6,seen_cohorts,1;2;3;4;5;6,27.753036,0.577532,7.352941,2.079726,3,1:68;2:68;3:68

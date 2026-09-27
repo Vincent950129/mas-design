@@ -1,0 +1,738 @@
+{
+  "name": "Task-specific GEPA (eval on full library)",
+  "track": "skills",
+  "arm": "gepa-oracle",
+  "model": "GPT-5",
+  "harness": "Codex",
+  "author": "Zixuan",
+  "kind": "cumulative",
+  "description": "Reflective prompt optimization. GEPA edits prompt text and carries the selected prompt forward between stages. This variant searches with each task’s oracle skills, then evaluates with the full stage library.",
+  "settings": [
+    [
+      "Solver model",
+      "GPT-5",
+      "Recorded"
+    ],
+    [
+      "Search budget",
+      "50 metric calls per searched stage",
+      "Recorded search.json"
+    ],
+    [
+      "Reflection minibatch",
+      "3 tasks",
+      "Recorded"
+    ],
+    [
+      "Search repetitions",
+      "1 trial per task",
+      "Recorded"
+    ],
+    [
+      "Reflection model",
+      "GPT-5",
+      "Recorded"
+    ],
+    [
+      "Reflection response limit",
+      "32,768 tokens; up to 5 API attempts",
+      "Current configuration"
+    ],
+    [
+      "Concurrency / RNG seed",
+      "8 concurrent trials / seed 0",
+      "Current defaults"
+    ],
+    [
+      "Search / evaluation library",
+      "Per-task oracle / full stage library (CSM 9, HR 10, ITSM 10 skills)",
+      "Recorded / registry"
+    ],
+    [
+      "EOG solver limit",
+      "900 seconds per task shared across up to 4 episodes",
+      "Current default; historical overrides not fully established"
+    ],
+    [
+      "Held-out evaluation",
+      "Runs 1, 2 and 3 per recorded cell",
+      "Archived snapshot"
+    ],
+    [
+      "Complete total compute budget",
+      "Not established; evaluation metrics exclude adaptation/search work",
+      "Unavailable"
+    ]
+  ],
+  "notes": [
+    "50 calls is a stopping threshold: initial validation consumes calls, batches can overshoot, and retries add work.",
+    "Library defaults: strict improvement, Pareto selection, round-robin module selection, no merge and no evaluation cache.",
+    "Validation pools cohorts 1…k. Winners carry forward; learning uses the new cohort with a cumulative-data fallback from the seed.",
+    "Only final-stage held-out evaluations are archived: CSM/HR v3, ITSM v4. Earlier search stages exist, but are not earlier held-out results. No ALE evaluation is registered.",
+    "GEPA metric calls and Meta-Harness proposer iterations are different budget units. These searches were not demonstrated to be compute-matched.",
+    "No complete search token/dollar cap or historical concurrency override was established. Three evaluation runs are not three independent searches."
+  ],
+  "sources": [
+    "analysis/arms.py",
+    "analysis/cache/cells_skills.tsv",
+    "evovle_skills/src/scripts/run_gepa.sh",
+    "evovle_skills/meta_harness/run_gepa.py",
+    "evovle_skills/meta_harness/gepa_reflection.py",
+    "evovle_skills/meta_harness/splits.py",
+    "evovle_skills/jobs/oracle_skills_gepa/<stream>/oracle_skills_gepa_*/v*/search.json",
+    "evovle_skills/src/config.py",
+    "evovle_skills/src/runner.py"
+  ],
+  "reproduction": {
+    "status": "partial",
+    "summary": "Archived metrics can be recomputed from released result tables. These source-validated recipes describe a new experiment; exact historical execution remains incomplete until the listed environment, data and checkpoint assets are supplied.",
+    "prerequisites": [
+      "Obtain the experiment source, benchmark task data and frozen capability libraries. Website CSVs can recompute reported aggregates but cannot execute an agent.",
+      "Follow install.md for local EOG gyms, Docker connectivity, Codex CLI authentication and Python environments. Authenticate with your own credentials; never reuse or publish saved authentication files.",
+      "Run namespace packages from the repository root. scripts/env.sh adds the root, eval_service/sdk (simple_agentic_evals), and reference/gepa/src to PYTHONPATH. Install the reference project dependencies instead of substituting another GEPA version.",
+      "EOG requires the reference EnterpriseOps-Gym runtime and its domain gym containers. Tools also require its ReAct/LangChain stack. Verify gym endpoints before spending the search budget.",
+      "ALE requires the reference/agents-last-exam Python 3.12 environment, gated task-data including grading references, a Linux sandbox image and the historical task eligibility/exclusion snapshot. A current manifest can change the denominator.",
+      "Freeze source, dependency locks, Python/Codex/Node versions, container digests, model identifiers, task/split manifests and library hashes. Current source fingerprints do not identify the historical runtime."
+    ],
+    "steps": [
+      {
+        "title": "Prepare an isolated run",
+        "command": "# Run from a prepared writable experiment checkout, not the website.\nset -euo pipefail\ntest -f scripts/env.sh\nsource scripts/env.sh\n# Retain this tag for resume; use a new tag for each independent search.\nexport REPRO_TAG=\"$(date -u +%Y%m%d_%H%M%S)_$$\"\nexport REPRO_RESULTS=\"$PWD/reproduction/$REPRO_TAG\"\nmkdir -p \"$REPRO_RESULTS\"\nexport EVOVLE_CODEX_MODEL=gpt-5\nexport EVOVLE_CODEX_TRANSPORT=stdio\nexport EVOVLE_CODEX_TIMEOUT_SEC=900\nexport EVOVLE_CODEX_MAX_EPISODES=4\nexport ALE_WALL_TIME_S=7200\nexport META_HARNESS_BACKEND=local\nexport META_HARNESS_CONCURRENCY=8\nunset EVOVLE_SKILLS_JOBS_ARM_DIR EVOVLE_AGENTS_JOBS_ARM_DIR",
+        "notes": "New run using inspected current source. EOG timeout 900 seconds, four episodes, stdio transport and concurrency eight are explicit current settings, not established historical overrides. Append --dry-run to a search command to inspect its plan once prerequisites exist; preparation files may still be written. Recipes were source-checked and bash syntax-checked; no benchmark was launched."
+      },
+      {
+        "title": "Search oracle-skills streams and evaluate final rows",
+        "command": "# This arm refuses --jobs-suffix; use a disposable checkout without prior arm output.\ntest ! -e evovle_skills/jobs/oracle_skills_gepa\nfor stream in csm hr itsm; do\n  bash evovle_skills/src/scripts/run_gepa.sh \"$stream\" \\\n    --oracle-skills --final-row-only --model gpt-5 --backend local \\\n    --concurrency 8 --num-runs 3 \\\n    --run-name \"repro_skills_gepa_oracle_${REPRO_TAG}_${stream}\" \\\n    --max-metric-calls 50 --reflection-minibatch-size 3 --trials-per-task 1 \\\n    --seed 0 --max-retries 1\ndone",
+        "notes": "Search uses task-specific oracle skills; held-out evaluation uses the full final library. CSM/HR end at v3; ITSM at v4. No ALE or earlier held-out rows are part of this arm. The outer run_oracle_skill_gepa.sh wrapper hardcodes the original absolute checkout; this inner launcher works in an isolated checkout."
+      }
+    ],
+    "missing": [
+      "No complete historical runtime lock: per-run Python/Codex/Node versions, dependency install state, container digests and immutable model snapshot are not recovered.",
+      "Historical concurrency, timeout, environment overrides and GEPA RNG seeds are not preserved in the inspected search summaries. Recipe values select current documented settings, not proof of the historical launch command.",
+      "No complete optimization token or dollar budget. Retained adapter statistics and reflection usage omit some failed attempts and are not total billed cost.",
+      "The downloadable result bundle does not include executable task environments, gated ALE data, trained checkpoints, full adapted code/state or frozen capability libraries. These assets are required for fresh evaluation.",
+      "A fresh search is stochastic and can select a different winner. Three evaluation repetitions are not three independently optimized harnesses.",
+      "Fixed oracle_skills_gepa output tree cannot be relocated by the launcher; use a fresh disposable checkout to avoid reusing archived cells."
+    ],
+    "evidence": [
+      "analysis/arms.py",
+      "evovle_skills/src/scripts/run_gepa.sh",
+      "evovle_skills/meta_harness/splits.py",
+      "evovle_skills/meta_harness/cl_eval.py",
+      "evovle_skills/meta_harness/run_gepa.py",
+      "install.md",
+      "scripts/env.sh",
+      "reference/gepa/pyproject.toml",
+      "reference/gepa/uv.lock",
+      "reference/EnterpriseOps-Gym/pyproject.toml",
+      "reference/EnterpriseOps-Gym/uv.lock",
+      "reference/agents-last-exam/pyproject.toml",
+      "reference/agents-last-exam/uv.lock",
+      "evovle_skills/src/scripts/run_oracle_skill_gepa.sh",
+      "evovle_skills/meta_harness/gepa_reflection.py",
+      "evovle_skills/meta_harness/gepa_adapter.py"
+    ],
+    "protocol": {
+      "scope": "Current source algorithm; historical counts are recorded below. Freeze task membership before applying it.",
+      "cohort_partition": "For each original training cohort sort task IDs by SHA256(\"{domain}|v{cohort}|{task_id}\"). Validation is the first n_val rows, where n_val=min(n-1,max(1,round(n/3))); learn is the remainder. A cohort smaller than two tasks cannot be searched.",
+      "search": "Default pooled validation includes cohorts 1..k. Learning uses the newest cohort when a non-seed winner is inherited, otherwise cumulative learn rows. --stage-local is a different experiment.",
+      "held_out": "Only R[T,1..T] is evaluated with C_T after staged task-oracle search. CSM/HR T=3, ITSM T=4; EOG only.",
+      "repeats": "Search trials_per_task and held-out --num-runs are separate. Archived held-out results use runs 1,2,3 for each cell.",
+      "aggregation": "Within each run pool task score/success across the selected cells, then equally average the three run means. Standard deviation is population SD across runs. Preserve each denominator and absent records; do not fill missing data with zeros.",
+      "streams": {
+        "csm": 3,
+        "hr": 3,
+        "itsm": 4
+      },
+      "search_stages": [
+        {
+          "domain": "csm",
+          "version": 1,
+          "model": "gpt-5",
+          "n_train": 3,
+          "n_val": 2,
+          "low_confidence": true,
+          "max_metric_calls": 50,
+          "reflection_minibatch_size": 3,
+          "trials_per_task": 1,
+          "n_candidates": 3,
+          "duration_s": 1353.1,
+          "stage_local": false,
+          "val_basis": "cumulative",
+          "library_policy": "per_task_oracle",
+          "oracle_skills": true,
+          "library_version": null,
+          "run_name": "oracle_skills_gepa_20260823_212749_csm",
+          "source": "evovle_skills/jobs/oracle_skills_gepa/csm/oracle_skills_gepa_20260823_212749_csm/v1/search.json",
+          "checkpoint_lineage": "evovle_skills/meta_harness/logs/oracle_skills_gepa_20260823_212749_csm/lineage.json",
+          "retained_adapter_statistics": {
+            "n_evaluate_calls": 18,
+            "n_trials": 51,
+            "n_unmeasured": 0,
+            "n_retries": 0,
+            "n_library_writes": 0
+          },
+          "recorded_reflection_usage": {
+            "model": "gpt-5",
+            "calls": 3,
+            "input_tokens": 3630,
+            "output_tokens": 7964,
+            "total_tokens": 11594
+          }
+        },
+        {
+          "domain": "csm",
+          "version": 2,
+          "model": "gpt-5",
+          "n_train": 6,
+          "n_val": 4,
+          "low_confidence": false,
+          "max_metric_calls": 50,
+          "reflection_minibatch_size": 3,
+          "trials_per_task": 1,
+          "n_candidates": 5,
+          "duration_s": 1678.6,
+          "stage_local": false,
+          "val_basis": "cumulative",
+          "library_policy": "per_task_oracle",
+          "oracle_skills": true,
+          "library_version": null,
+          "run_name": "oracle_skills_gepa_20260823_212749_csm",
+          "source": "evovle_skills/jobs/oracle_skills_gepa/csm/oracle_skills_gepa_20260823_212749_csm/v2/search.json",
+          "checkpoint_lineage": "evovle_skills/meta_harness/logs/oracle_skills_gepa_20260823_212749_csm/lineage.json",
+          "retained_adapter_statistics": {
+            "n_evaluate_calls": 18,
+            "n_trials": 59,
+            "n_unmeasured": 0,
+            "n_retries": 0,
+            "n_library_writes": 0
+          },
+          "recorded_reflection_usage": {
+            "model": "gpt-5",
+            "calls": 8,
+            "input_tokens": 18129,
+            "output_tokens": 33017,
+            "total_tokens": 51146
+          }
+        },
+        {
+          "domain": "csm",
+          "version": 3,
+          "model": "gpt-5",
+          "n_train": 3,
+          "n_val": 5,
+          "low_confidence": false,
+          "max_metric_calls": 50,
+          "reflection_minibatch_size": 3,
+          "trials_per_task": 1,
+          "n_candidates": 6,
+          "duration_s": 1948.4,
+          "stage_local": false,
+          "val_basis": "cumulative",
+          "library_policy": "per_task_oracle",
+          "oracle_skills": true,
+          "library_version": null,
+          "run_name": "oracle_skills_gepa_20260823_212749_csm",
+          "source": "evovle_skills/jobs/oracle_skills_gepa/csm/oracle_skills_gepa_20260823_212749_csm/v3/search.json",
+          "checkpoint_lineage": "evovle_skills/meta_harness/logs/oracle_skills_gepa_20260823_212749_csm/lineage.json",
+          "retained_adapter_statistics": {
+            "n_evaluate_calls": 16,
+            "n_trials": 60,
+            "n_unmeasured": 0,
+            "n_retries": 0,
+            "n_library_writes": 0
+          },
+          "recorded_reflection_usage": {
+            "model": "gpt-5",
+            "calls": 13,
+            "input_tokens": 37627,
+            "output_tokens": 63823,
+            "total_tokens": 101450
+          }
+        },
+        {
+          "domain": "hr",
+          "version": 1,
+          "model": "gpt-5",
+          "n_train": 3,
+          "n_val": 1,
+          "low_confidence": true,
+          "max_metric_calls": 50,
+          "reflection_minibatch_size": 3,
+          "trials_per_task": 1,
+          "n_candidates": 3,
+          "duration_s": 1315.1,
+          "stage_local": false,
+          "val_basis": "cumulative",
+          "library_policy": "per_task_oracle",
+          "oracle_skills": true,
+          "library_version": null,
+          "run_name": "oracle_skills_gepa_20260823_212724_hr",
+          "source": "evovle_skills/jobs/oracle_skills_gepa/hr/oracle_skills_gepa_20260823_212724_hr/v1/search.json",
+          "checkpoint_lineage": "evovle_skills/meta_harness/logs/oracle_skills_gepa_20260823_212724_hr/lineage.json",
+          "retained_adapter_statistics": {
+            "n_evaluate_calls": 19,
+            "n_trials": 51,
+            "n_unmeasured": 0,
+            "n_retries": 0,
+            "n_library_writes": 0
+          },
+          "recorded_reflection_usage": {
+            "model": "gpt-5",
+            "calls": 3,
+            "input_tokens": 2933,
+            "output_tokens": 9371,
+            "total_tokens": 12304
+          }
+        },
+        {
+          "domain": "hr",
+          "version": 2,
+          "model": "gpt-5",
+          "n_train": 9,
+          "n_val": 4,
+          "low_confidence": false,
+          "max_metric_calls": 50,
+          "reflection_minibatch_size": 3,
+          "trials_per_task": 1,
+          "n_candidates": 5,
+          "duration_s": 1844.0,
+          "stage_local": false,
+          "val_basis": "cumulative",
+          "library_policy": "per_task_oracle",
+          "oracle_skills": true,
+          "library_version": null,
+          "run_name": "oracle_skills_gepa_20260823_212724_hr",
+          "source": "evovle_skills/jobs/oracle_skills_gepa/hr/oracle_skills_gepa_20260823_212724_hr/v2/search.json",
+          "checkpoint_lineage": "evovle_skills/meta_harness/logs/oracle_skills_gepa_20260823_212724_hr/lineage.json",
+          "retained_adapter_statistics": {
+            "n_evaluate_calls": 16,
+            "n_trials": 53,
+            "n_unmeasured": 0,
+            "n_retries": 0,
+            "n_library_writes": 0
+          },
+          "recorded_reflection_usage": {
+            "model": "gpt-5",
+            "calls": 8,
+            "input_tokens": 18406,
+            "output_tokens": 39978,
+            "total_tokens": 58384
+          }
+        },
+        {
+          "domain": "hr",
+          "version": 3,
+          "model": "gpt-5",
+          "n_train": 6,
+          "n_val": 7,
+          "low_confidence": false,
+          "max_metric_calls": 50,
+          "reflection_minibatch_size": 3,
+          "trials_per_task": 1,
+          "n_candidates": 5,
+          "duration_s": 1395.6,
+          "stage_local": false,
+          "val_basis": "cumulative",
+          "library_policy": "per_task_oracle",
+          "oracle_skills": true,
+          "library_version": null,
+          "run_name": "oracle_skills_gepa_20260823_212724_hr",
+          "source": "evovle_skills/jobs/oracle_skills_gepa/hr/oracle_skills_gepa_20260823_212724_hr/v3/search.json",
+          "checkpoint_lineage": "evovle_skills/meta_harness/logs/oracle_skills_gepa_20260823_212724_hr/lineage.json",
+          "retained_adapter_statistics": {
+            "n_evaluate_calls": 13,
+            "n_trials": 59,
+            "n_unmeasured": 0,
+            "n_retries": 0,
+            "n_library_writes": 0
+          },
+          "recorded_reflection_usage": {
+            "model": "gpt-5",
+            "calls": 12,
+            "input_tokens": 34822,
+            "output_tokens": 63776,
+            "total_tokens": 98598
+          }
+        },
+        {
+          "domain": "itsm",
+          "version": 1,
+          "model": "gpt-5",
+          "n_train": 3,
+          "n_val": 2,
+          "low_confidence": true,
+          "max_metric_calls": 50,
+          "reflection_minibatch_size": 3,
+          "trials_per_task": 1,
+          "n_candidates": 6,
+          "duration_s": 1673.0,
+          "stage_local": false,
+          "val_basis": "cumulative",
+          "library_policy": "per_task_oracle",
+          "oracle_skills": true,
+          "library_version": null,
+          "run_name": "oracle_skills_gepa_20260823_212608_itsm",
+          "source": "evovle_skills/jobs/oracle_skills_gepa/itsm/oracle_skills_gepa_20260823_212608_itsm/v1/search.json",
+          "checkpoint_lineage": "evovle_skills/meta_harness/logs/oracle_skills_gepa_20260823_212608_itsm/lineage.json",
+          "retained_adapter_statistics": {
+            "n_evaluate_calls": 19,
+            "n_trials": 51,
+            "n_unmeasured": 0,
+            "n_retries": 0,
+            "n_library_writes": 0
+          },
+          "recorded_reflection_usage": {
+            "model": "gpt-5",
+            "calls": 7,
+            "input_tokens": 15696,
+            "output_tokens": 37129,
+            "total_tokens": 52825
+          }
+        },
+        {
+          "domain": "itsm",
+          "version": 2,
+          "model": "gpt-5",
+          "n_train": 8,
+          "n_val": 5,
+          "low_confidence": false,
+          "max_metric_calls": 50,
+          "reflection_minibatch_size": 3,
+          "trials_per_task": 1,
+          "n_candidates": 5,
+          "duration_s": 1476.8,
+          "stage_local": false,
+          "val_basis": "cumulative",
+          "library_policy": "per_task_oracle",
+          "oracle_skills": true,
+          "library_version": null,
+          "run_name": "oracle_skills_gepa_20260823_212608_itsm",
+          "source": "evovle_skills/jobs/oracle_skills_gepa/itsm/oracle_skills_gepa_20260823_212608_itsm/v2/search.json",
+          "checkpoint_lineage": "evovle_skills/meta_harness/logs/oracle_skills_gepa_20260823_212608_itsm/lineage.json",
+          "retained_adapter_statistics": {
+            "n_evaluate_calls": 15,
+            "n_trials": 55,
+            "n_unmeasured": 0,
+            "n_retries": 0,
+            "n_library_writes": 0
+          },
+          "recorded_reflection_usage": {
+            "model": "gpt-5",
+            "calls": 12,
+            "input_tokens": 28773,
+            "output_tokens": 62596,
+            "total_tokens": 91369
+          }
+        },
+        {
+          "domain": "itsm",
+          "version": 3,
+          "model": "gpt-5",
+          "n_train": 4,
+          "n_val": 7,
+          "low_confidence": false,
+          "max_metric_calls": 50,
+          "reflection_minibatch_size": 3,
+          "trials_per_task": 1,
+          "n_candidates": 5,
+          "duration_s": 1047.4,
+          "stage_local": false,
+          "val_basis": "cumulative",
+          "library_policy": "per_task_oracle",
+          "oracle_skills": true,
+          "library_version": null,
+          "run_name": "oracle_skills_gepa_20260823_212608_itsm",
+          "source": "evovle_skills/jobs/oracle_skills_gepa/itsm/oracle_skills_gepa_20260823_212608_itsm/v3/search.json",
+          "checkpoint_lineage": "evovle_skills/meta_harness/logs/oracle_skills_gepa_20260823_212608_itsm/lineage.json",
+          "retained_adapter_statistics": {
+            "n_evaluate_calls": 13,
+            "n_trials": 59,
+            "n_unmeasured": 0,
+            "n_retries": 0,
+            "n_library_writes": 0
+          },
+          "recorded_reflection_usage": {
+            "model": "gpt-5",
+            "calls": 16,
+            "input_tokens": 44210,
+            "output_tokens": 85349,
+            "total_tokens": 129559
+          }
+        },
+        {
+          "domain": "itsm",
+          "version": 4,
+          "model": "gpt-5",
+          "n_train": 3,
+          "n_val": 9,
+          "low_confidence": false,
+          "max_metric_calls": 50,
+          "reflection_minibatch_size": 3,
+          "trials_per_task": 1,
+          "n_candidates": 3,
+          "duration_s": 912.4,
+          "stage_local": false,
+          "val_basis": "cumulative",
+          "library_policy": "per_task_oracle",
+          "oracle_skills": true,
+          "library_version": null,
+          "run_name": "oracle_skills_gepa_20260823_212608_itsm",
+          "source": "evovle_skills/jobs/oracle_skills_gepa/itsm/oracle_skills_gepa_20260823_212608_itsm/v4/search.json",
+          "checkpoint_lineage": "evovle_skills/meta_harness/logs/oracle_skills_gepa_20260823_212608_itsm/lineage.json",
+          "retained_adapter_statistics": {
+            "n_evaluate_calls": 11,
+            "n_trials": 51,
+            "n_unmeasured": 0,
+            "n_retries": 0,
+            "n_library_writes": 0
+          },
+          "recorded_reflection_usage": {
+            "model": "gpt-5",
+            "calls": 18,
+            "input_tokens": 49895,
+            "output_tokens": 94900,
+            "total_tokens": 144795
+          }
+        }
+      ],
+      "initialization": "GEPA starts from the track seed candidate prompt; later stages inherit the preceding winner. Frozen candidate JSON is stored as harness state and resolved by lineage.",
+      "requested_budget": {
+        "metric_call_threshold_per_searched_stage": 50,
+        "reflection_minibatch_tasks": 3,
+        "trials_per_task": 1,
+        "reflection_response_tokens_current": 32768,
+        "reflection_api_attempts_current": 5,
+        "adapter_retries_current": 1,
+        "seed_current": 0
+      }
+    },
+    "result_reconstruction": "Included per-task scores and success flags reproduce all archived aggregates offline."
+  },
+  "searchBudget": [
+    {
+      "domain": "csm",
+      "version": 1,
+      "n_train": 3,
+      "n_val": 2,
+      "trials_per_task": 1,
+      "searched": true,
+      "max_metric_calls": 50,
+      "configured_iterations": null,
+      "retained_candidate_trials": null,
+      "retained_adapter_statistics": {
+        "n_evaluate_calls": 18,
+        "n_trials": 51,
+        "n_unmeasured": 0,
+        "n_retries": 0,
+        "n_library_writes": 0
+      }
+    },
+    {
+      "domain": "csm",
+      "version": 2,
+      "n_train": 6,
+      "n_val": 4,
+      "trials_per_task": 1,
+      "searched": true,
+      "max_metric_calls": 50,
+      "configured_iterations": null,
+      "retained_candidate_trials": null,
+      "retained_adapter_statistics": {
+        "n_evaluate_calls": 18,
+        "n_trials": 59,
+        "n_unmeasured": 0,
+        "n_retries": 0,
+        "n_library_writes": 0
+      }
+    },
+    {
+      "domain": "csm",
+      "version": 3,
+      "n_train": 3,
+      "n_val": 5,
+      "trials_per_task": 1,
+      "searched": true,
+      "max_metric_calls": 50,
+      "configured_iterations": null,
+      "retained_candidate_trials": null,
+      "retained_adapter_statistics": {
+        "n_evaluate_calls": 16,
+        "n_trials": 60,
+        "n_unmeasured": 0,
+        "n_retries": 0,
+        "n_library_writes": 0
+      }
+    },
+    {
+      "domain": "hr",
+      "version": 1,
+      "n_train": 3,
+      "n_val": 1,
+      "trials_per_task": 1,
+      "searched": true,
+      "max_metric_calls": 50,
+      "configured_iterations": null,
+      "retained_candidate_trials": null,
+      "retained_adapter_statistics": {
+        "n_evaluate_calls": 19,
+        "n_trials": 51,
+        "n_unmeasured": 0,
+        "n_retries": 0,
+        "n_library_writes": 0
+      }
+    },
+    {
+      "domain": "hr",
+      "version": 2,
+      "n_train": 9,
+      "n_val": 4,
+      "trials_per_task": 1,
+      "searched": true,
+      "max_metric_calls": 50,
+      "configured_iterations": null,
+      "retained_candidate_trials": null,
+      "retained_adapter_statistics": {
+        "n_evaluate_calls": 16,
+        "n_trials": 53,
+        "n_unmeasured": 0,
+        "n_retries": 0,
+        "n_library_writes": 0
+      }
+    },
+    {
+      "domain": "hr",
+      "version": 3,
+      "n_train": 6,
+      "n_val": 7,
+      "trials_per_task": 1,
+      "searched": true,
+      "max_metric_calls": 50,
+      "configured_iterations": null,
+      "retained_candidate_trials": null,
+      "retained_adapter_statistics": {
+        "n_evaluate_calls": 13,
+        "n_trials": 59,
+        "n_unmeasured": 0,
+        "n_retries": 0,
+        "n_library_writes": 0
+      }
+    },
+    {
+      "domain": "itsm",
+      "version": 1,
+      "n_train": 3,
+      "n_val": 2,
+      "trials_per_task": 1,
+      "searched": true,
+      "max_metric_calls": 50,
+      "configured_iterations": null,
+      "retained_candidate_trials": null,
+      "retained_adapter_statistics": {
+        "n_evaluate_calls": 19,
+        "n_trials": 51,
+        "n_unmeasured": 0,
+        "n_retries": 0,
+        "n_library_writes": 0
+      }
+    },
+    {
+      "domain": "itsm",
+      "version": 2,
+      "n_train": 8,
+      "n_val": 5,
+      "trials_per_task": 1,
+      "searched": true,
+      "max_metric_calls": 50,
+      "configured_iterations": null,
+      "retained_candidate_trials": null,
+      "retained_adapter_statistics": {
+        "n_evaluate_calls": 15,
+        "n_trials": 55,
+        "n_unmeasured": 0,
+        "n_retries": 0,
+        "n_library_writes": 0
+      }
+    },
+    {
+      "domain": "itsm",
+      "version": 3,
+      "n_train": 4,
+      "n_val": 7,
+      "trials_per_task": 1,
+      "searched": true,
+      "max_metric_calls": 50,
+      "configured_iterations": null,
+      "retained_candidate_trials": null,
+      "retained_adapter_statistics": {
+        "n_evaluate_calls": 13,
+        "n_trials": 59,
+        "n_unmeasured": 0,
+        "n_retries": 0,
+        "n_library_writes": 0
+      }
+    },
+    {
+      "domain": "itsm",
+      "version": 4,
+      "n_train": 3,
+      "n_val": 9,
+      "trials_per_task": 1,
+      "searched": true,
+      "max_metric_calls": 50,
+      "configured_iterations": null,
+      "retained_candidate_trials": null,
+      "retained_adapter_statistics": {
+        "n_evaluate_calls": 11,
+        "n_trials": 51,
+        "n_unmeasured": 0,
+        "n_retries": 0,
+        "n_library_writes": 0
+      }
+    }
+  ],
+  "sourceRoots": {
+    "csm": "evovle_skills/jobs/oracle_skills_gepa/csm",
+    "hr": "evovle_skills/jobs/oracle_skills_gepa/hr",
+    "itsm": "evovle_skills/jobs/oracle_skills_gepa/itsm"
+  },
+  "coverage": {
+    "csm": {
+      "benchmark": "eog",
+      "recorded_stages": [
+        3
+      ],
+      "evaluation_cohorts": [
+        1,
+        2,
+        3
+      ],
+      "summary_scope": "seen_cohorts"
+    },
+    "hr": {
+      "benchmark": "eog",
+      "recorded_stages": [
+        3
+      ],
+      "evaluation_cohorts": [
+        1,
+        2,
+        3
+      ],
+      "summary_scope": "seen_cohorts"
+    },
+    "itsm": {
+      "benchmark": "eog",
+      "recorded_stages": [
+        4
+      ],
+      "evaluation_cohorts": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "summary_scope": "seen_cohorts"
+    }
+  }
+}

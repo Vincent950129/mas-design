@@ -1,0 +1,186 @@
+{
+  "name": "Task-specific Codex",
+  "track": "agents",
+  "arm": "oracle",
+  "model": "GPT-5 / GPT-5-Codex",
+  "harness": "Codex",
+  "author": "Zixuan",
+  "kind": "control",
+  "description": "Reference control with a per-cohort specialist library on EOG and task-specific specialist families on ALE. No cross-stage adaptation.",
+  "settings": [
+    [
+      "Solver model",
+      "EOG: gpt-5-codex in inspected saved config.toml; ALE: GPT-5",
+      "Recorded"
+    ],
+    [
+      "Capability selection",
+      "EOG: per-cohort reference specialist library; ALE: task-specific specialist families",
+      "Saved EOG manifests / ALE runner"
+    ],
+    [
+      "Stage search budget",
+      "No stage-level prompt or harness search in this control",
+      "Experiment design"
+    ],
+    [
+      "EOG solver limit",
+      "900 seconds per task shared across up to 4 episodes",
+      "Current default; historical overrides not fully established"
+    ],
+    [
+      "ALE solver limit",
+      "7,200 seconds per task",
+      "Saved experiment configuration / runner"
+    ],
+    [
+      "Base delegation limits",
+      "12 threads; maximum depth 1",
+      "Saved base configuration / current default"
+    ],
+    [
+      "Held-out evaluation",
+      "Runs 1, 2 and 3 per recorded cell",
+      "Archived snapshot"
+    ],
+    [
+      "Complete total compute budget",
+      "Not established; evaluation metrics exclude adaptation/search work",
+      "Unavailable"
+    ]
+  ],
+  "notes": [
+    "Each stage point evaluates that cohort only. The benchmark aggregate pools all cohorts; this is not a cumulative adaptation curve.",
+    "On EOG, tasks with different selected tool sets use the same specialist roster within each cohort.",
+    "These are base Codex delegation limits; an evolved harness may change orchestration behavior."
+  ],
+  "sources": [
+    "analysis/arms.py",
+    "analysis/cache/cells_agents.tsv",
+    "evovle_agents/src/config.py",
+    "evovle_agents/src/runner.py"
+  ],
+  "reproduction": {
+    "status": "partial",
+    "prerequisites": [
+      "Use a complete experiment-source checkout, not the static website. Set REPRO_SOURCE to its root.",
+      "Set REPRO_RUN_ID to a fresh directory-safe run identifier and REPRO_CONCURRENCY to an explicit positive integer. The template concurrency is a new-run choice; historical overrides are unknown.",
+      "For EOG: run the EnterpriseOps-Gym MCP/SQL services from reference/EnterpriseOps-Gym and preserve their dataset/database seeds; install/authenticate Codex CLI with access to the requested model.",
+      "Make eval_service/sdk importable (the launch scripts set PYTHONPATH); install its declared dependencies. The inspected runner documentation requires httpx, with datasets when reloading Hugging Face data.",
+      "For ALE: obtain reference/agents-last-exam, use its Python >=3.12 environment and dependency lock (uv sync), and provision the Docker/cloud environment with the same task image and guard assets. Configure credentials privately through ALE_SECRET_FILE; never copy archived credentials."
+    ],
+    "steps": [
+      {
+        "title": "EOG rerun template",
+        "command": "cd \"${REPRO_SOURCE:?}\"\nEVOVLE_AGENTS_JOBS_ARM_DIR=\"repro_oracle_${REPRO_RUN_ID:?}\" EVOVLE_AGENTS_RUNTIME=acp EVOVLE_AGENTS_MAX_THREADS=12 EVOVLE_AGENTS_MAX_DEPTH=1 EVOVLE_CODEX_MAX_EPISODES=4 \\\n  bash evovle_agents/src/scripts/run_oracle_agents.sh --domains \"csm hr itsm\" --dataset eog \\\n  --backend local --model gpt-5-codex --num-runs 3 \\\n  --concurrency \"${REPRO_CONCURRENCY:?}\" --timeout-s 900 --transport stdio \\\n  --run-id \"${REPRO_RUN_ID:?}\"",
+        "notes": "Current source template; not a recovered historical launch. EOG model matches inspected saved config.toml. Timeout/episodes/transport and explicit concurrency remain new-run settings where historical overrides are absent. This evaluates each cohort once per run under its reference pool."
+      },
+      {
+        "title": "ALE rerun template",
+        "command": "cd \"${REPRO_SOURCE:?}\"\nEVOVLE_AGENTS_JOBS_ARM_DIR=\"repro_oracle_${REPRO_RUN_ID:?}\" EVOVLE_AGENTS_RUNTIME=acp EVOVLE_AGENTS_MAX_THREADS=12 EVOVLE_AGENTS_MAX_DEPTH=1 EVOVLE_CODEX_MAX_EPISODES=4 ALE_WALL_TIME_S=7200 ALE_MODEL=gpt-5 \\\n  bash evovle_agents/src/scripts/run_oracle_agents.sh --dataset ale --backend local --model gpt-5 \\\n  --num-runs 3 --concurrency \"${REPRO_CONCURRENCY:?}\" \\\n  --run-id \"${REPRO_RUN_ID:?}\"",
+        "notes": "Current local-backend template with model explicitly pinned to gpt-5 and task wall clock to 7,200 seconds. Keep the original ALE image, task inventory, hard capability guard and exclusion manifest; the hosted backend can select a different preset."
+      }
+    ],
+    "missing": [
+      "The archived launcher command, full environment overrides, exact dependency lock and historical source revision were not preserved in the exported evaluation snapshot.",
+      "A fresh live-model run is stochastic. Matching its protocol does not guarantee the same scores; use the downloadable trial/cell data to reproduce the archived arithmetic.",
+      "Obtain the versioned task splits, capability libraries, original verifier/environment assets and archived task-exclusion manifest before running; current datasets/manifests may differ.",
+      "The local experiment worktree has no Git HEAD commit; no immutable historical code revision could be established. A source-file checksum identifies the inspected current file only.",
+      "Historical Codex binary version, provider snapshot and per-trial reasoning settings are not completely recorded."
+    ],
+    "evidence": [
+      "evovle_agents/src/scripts/run_oracle_agents.sh",
+      "evovle_agents/src/config.py",
+      "evovle_agents/src/runner.py",
+      "evolve_tools/src/ale_eval.py",
+      "analysis/arms.py",
+      "evovle_agents/src/runner.py:382",
+      "evovle_agents/src/agent_library.py:243",
+      "evovle_agents/src/ale_eval.py:134"
+    ],
+    "protocol": {
+      "model_eog": "gpt-5-codex",
+      "model_ale": "gpt-5",
+      "evaluation_runs": 3,
+      "training": "none",
+      "memory_training_concurrency": null,
+      "source_revision": null,
+      "capability_selection": "EOG: per-cohort reference specialist library (confirmed in three archived CSM v1 manifests); ALE: task-specific specialist families."
+    },
+    "result_reconstruction": "Included per-task scores and success flags reproduce all archived aggregates offline."
+  },
+  "sourceRoots": {
+    "csm": "evovle_agents/jobs/oracle_agents/csm_harness_codex_llm_gpt_5_codex",
+    "hr": "evovle_agents/jobs/oracle_agents/hr_harness_codex_llm_gpt_5_codex",
+    "itsm": "evovle_agents/jobs/oracle_agents/itsm_harness_codex_llm_gpt_5_codex",
+    "ale": "evovle_agents/jobs/oracle_agents/ale"
+  },
+  "coverage": {
+    "csm": {
+      "benchmark": "eog",
+      "recorded_stages": [
+        1,
+        2,
+        3
+      ],
+      "evaluation_cohorts": [
+        1,
+        2,
+        3
+      ],
+      "summary_scope": "cohort_only"
+    },
+    "hr": {
+      "benchmark": "eog",
+      "recorded_stages": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "evaluation_cohorts": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "summary_scope": "cohort_only"
+    },
+    "itsm": {
+      "benchmark": "eog",
+      "recorded_stages": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "evaluation_cohorts": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "summary_scope": "cohort_only"
+    },
+    "ale": {
+      "benchmark": "ale",
+      "recorded_stages": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "evaluation_cohorts": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "summary_scope": "cohort_only"
+    }
+  }
+}

@@ -1,0 +1,195 @@
+{
+  "name": "Codex Memory",
+  "track": "skills",
+  "arm": "memory",
+  "model": "GPT-5",
+  "harness": "Codex",
+  "author": "Zixuan",
+  "kind": "cumulative",
+  "description": "Codex with native persistent memory. Training rollouts populate a shared memory home that is carried between stages and copied for evaluation.",
+  "settings": [
+    [
+      "Solver model",
+      "GPT-5",
+      "Recorded"
+    ],
+    [
+      "Adaptation",
+      "Training tasks from versions 1…k; memory carried between stages",
+      "Current runner"
+    ],
+    [
+      "Memory training concurrency",
+      "EOG: 1 (forced); ALE: requested concurrency, with parallel sandbox rollouts",
+      "Current runner; historical override unknown"
+    ],
+    [
+      "Extraction / consolidation limits",
+      "600 / 900 seconds",
+      "Current defaults"
+    ],
+    [
+      "Extraction concurrency",
+      "8",
+      "Current default"
+    ],
+    [
+      "Stage search budget",
+      "No GEPA/Meta-Harness search; training and memory processing add work",
+      "Runner"
+    ],
+    [
+      "EOG solver limit",
+      "900 seconds per task shared across up to 4 episodes",
+      "Current default; historical overrides not fully established"
+    ],
+    [
+      "ALE solver limit",
+      "7,200 seconds per task",
+      "Saved experiment configuration / runner"
+    ],
+    [
+      "Held-out evaluation",
+      "Runs 1, 2 and 3 per recorded cell",
+      "Archived snapshot"
+    ],
+    [
+      "Complete total compute budget",
+      "Not established; evaluation metrics exclude adaptation/search work",
+      "Unavailable"
+    ]
+  ],
+  "notes": [
+    "Historical memory-processing overrides and total adaptation tokens/cost are not recoverable from the evaluation snapshot. Held-out evaluation uses a copy of trained memory."
+  ],
+  "sources": [
+    "analysis/arms.py",
+    "analysis/cache/cells_skills.tsv",
+    "evovle_skills/src/scripts/run_cumulative_skill.py",
+    "evovle_agents/src/config.py:328",
+    "evovle_skills/src/config.py",
+    "evovle_skills/src/config.py",
+    "evovle_skills/src/runner.py"
+  ],
+  "reproduction": {
+    "status": "partial",
+    "prerequisites": [
+      "Use a complete experiment-source checkout, not the static website. Set REPRO_SOURCE to its root.",
+      "Set REPRO_RUN_ID to a fresh directory-safe run identifier and REPRO_CONCURRENCY to an explicit positive integer. The template concurrency is a new-run choice; historical overrides are unknown.",
+      "For EOG: run the EnterpriseOps-Gym MCP/SQL services from reference/EnterpriseOps-Gym and preserve their dataset/database seeds; install/authenticate Codex CLI with access to the requested model.",
+      "Make eval_service/sdk importable (the launch scripts set PYTHONPATH); install its declared dependencies. The inspected runner documentation requires httpx, with datasets when reloading Hugging Face data.",
+      "For ALE: obtain reference/agents-last-exam, use its Python >=3.12 environment and dependency lock (uv sync), and provision the Docker/cloud environment with the same task image and guard assets. Configure credentials privately through ALE_SECRET_FILE; never copy archived credentials.",
+      "Native memory requires Codex >=0.145.0 in the current runner. This is a minimum, not the historical version. Use a fresh jobs arm directory so old memory cannot enter the rerun."
+    ],
+    "steps": [
+      {
+        "title": "EOG rerun template",
+        "command": "cd \"${REPRO_SOURCE:?}\"\nEVOVLE_SKILLS_JOBS_ARM_DIR=\"repro_memory_${REPRO_RUN_ID:?}\" EVOVLE_AGENT_RUNTIME=acp EVOVLE_CODEX_MAX_EPISODES=4 EVOVLE_MEMORY_EXTRACT_TIMEOUT=600 EVOVLE_MEMORY_CONSOLIDATE_TIMEOUT=900 EVOVLE_MEMORY_EXTRACT_CONCURRENCY=8 EVOVLE_MEMORY_MIN_IDLE_HOURS=1 \\\n  bash evovle_skills/src/scripts/run_cumulative_skill.sh --domains \"csm hr itsm\" --dataset eog \\\n  --backend local --model gpt-5 --num-runs 3 \\\n  --concurrency \"${REPRO_CONCURRENCY:?}\" --timeout-s 900 --transport stdio \\\n  --run-id \"${REPRO_RUN_ID:?}\" --memory",
+        "notes": "Current source template; not a recovered historical launch. EOG model matches inspected saved config.toml. Timeout/episodes/transport and explicit concurrency remain new-run settings where historical overrides are absent. Default launcher evaluates the cumulative lower-triangular matrix, not only the diagonal; no --diagonal flag is used."
+      },
+      {
+        "title": "ALE rerun template",
+        "command": "cd \"${REPRO_SOURCE:?}\"\nEVOVLE_SKILLS_JOBS_ARM_DIR=\"repro_memory_${REPRO_RUN_ID:?}\" EVOVLE_AGENT_RUNTIME=acp EVOVLE_CODEX_MAX_EPISODES=4 EVOVLE_MEMORY_EXTRACT_TIMEOUT=600 EVOVLE_MEMORY_CONSOLIDATE_TIMEOUT=900 EVOVLE_MEMORY_EXTRACT_CONCURRENCY=8 EVOVLE_MEMORY_MIN_IDLE_HOURS=1 ALE_WALL_TIME_S=7200 ALE_MODEL=gpt-5 \\\n  bash evovle_skills/src/scripts/run_cumulative_skill.sh --dataset ale --backend local --model gpt-5 \\\n  --num-runs 3 --concurrency \"${REPRO_CONCURRENCY:?}\" \\\n  --run-id \"${REPRO_RUN_ID:?}\" --memory",
+        "notes": "Current local-backend template with model explicitly pinned to gpt-5 and task wall clock to 7,200 seconds. Keep the original ALE image, task inventory, hard capability guard and exclusion manifest; the hosted backend can select a different preset."
+      }
+    ],
+    "missing": [
+      "The archived launcher command, full environment overrides, exact dependency lock and historical source revision were not preserved in the exported evaluation snapshot.",
+      "A fresh live-model run is stochastic. Matching its protocol does not guarantee the same scores; use the downloadable trial/cell data to reproduce the archived arithmetic.",
+      "Obtain the versioned task splits, capability libraries, original verifier/environment assets and archived task-exclusion manifest before running; current datasets/manifests may differ.",
+      "The local experiment worktree has no Git HEAD commit; no immutable historical code revision could be established. A source-file checksum identifies the inspected current file only.",
+      "Historical Codex binary version, provider snapshot and per-trial reasoning settings are not completely recorded.",
+      "Exact archived memory extraction/consolidation settings, stage memory snapshots and complete adaptation tokens/cost must be obtained to recreate the original treatment."
+    ],
+    "evidence": [
+      "evovle_skills/src/scripts/run_cumulative_skill.sh",
+      "evovle_skills/src/config.py",
+      "evovle_skills/src/runner.py",
+      "evolve_tools/src/ale_eval.py",
+      "analysis/arms.py",
+      "evovle_agents/src/config.py:278",
+      "evovle_skills/src/scripts/run_cumulative_skill.py"
+    ],
+    "protocol": {
+      "model_eog": "gpt-5",
+      "model_ale": "gpt-5",
+      "evaluation_runs": 3,
+      "training": "Sequential stage train rollouts with persistent native memory; held-out evaluation reads copied stage memory",
+      "memory_training_concurrency": "EOG: 1; ALE: requested concurrency (parallel sandboxes)",
+      "source_revision": null
+    },
+    "result_reconstruction": "Included per-task scores and success flags reproduce all archived aggregates offline."
+  },
+  "sourceRoots": {
+    "csm": "evovle_skills/jobs/cumulative_skill_memeory/csm",
+    "hr": "evovle_skills/jobs/cumulative_skill_memeory/hr",
+    "itsm": "evovle_skills/jobs/cumulative_skill_memeory/itsm",
+    "ale": "evovle_skills/jobs/cumulative_skill_memeory/ale"
+  },
+  "coverage": {
+    "csm": {
+      "benchmark": "eog",
+      "recorded_stages": [
+        1,
+        2,
+        3
+      ],
+      "evaluation_cohorts": [
+        1,
+        2,
+        3
+      ],
+      "summary_scope": "seen_cohorts"
+    },
+    "hr": {
+      "benchmark": "eog",
+      "recorded_stages": [
+        1,
+        2,
+        3
+      ],
+      "evaluation_cohorts": [
+        1,
+        2,
+        3
+      ],
+      "summary_scope": "seen_cohorts"
+    },
+    "itsm": {
+      "benchmark": "eog",
+      "recorded_stages": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "evaluation_cohorts": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "summary_scope": "seen_cohorts"
+    },
+    "ale": {
+      "benchmark": "ale",
+      "recorded_stages": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "evaluation_cohorts": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "summary_scope": "seen_cohorts"
+    }
+  }
+}

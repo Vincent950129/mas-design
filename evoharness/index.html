@@ -22,7 +22,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
   <link rel="stylesheet" href="./static/css/index.css">
   <link rel="stylesheet" href="obs.css">
-  <link rel="stylesheet" href="paper.css?v=20260913-blog-9">
+  <link rel="stylesheet" href="paper.css?v=20260927-config-results-1">
   <link rel="icon" href="./static/images/favicon.svg">
   <script defer src="./static/js/fontawesome.all.min.js"></script>
 </head>
@@ -267,7 +267,7 @@
       </p>
       <p style="line-height: 1.8; margin-top: 1rem; margin-bottom: 0;">
         The benchmark contains 17 multi-stage streams constructed deterministically from verifier-based
-        benchmarks (EnterpriseOps-Gym and Agentic Last Exam), comprising 802 tasks instantiated as
+        benchmarks (EnterpriseOps-Gym and Agents&rsquo; Last Exam), comprising 802 tasks instantiated as
         1,510 axis-specific evaluation examples. Two complementary settings isolate the central challenges:
         <strong>deployment evaluation</strong> (retention as the harness expands, with no experience carried forward)
         and <strong>self-evolving adaptation evaluation</strong> (whether accumulated persistent state remains useful
@@ -1257,7 +1257,7 @@
     <h2 class="title is-3 section-heading has-text-centered">Benchmark Statistics</h2>
     <p class="has-text-centered" style="max-width: 720px; margin: 0 auto 0.5rem; line-height: 1.7;">
       17 streams from two seed benchmarks, constructed deterministically from EnterpriseOps-Gym
-      and Agentic Last Exam. No LLM-generated tasks. Capabilities are released from core to long tail.
+      and Agents&rsquo; Last Exam. No LLM-generated tasks. Capabilities are released from core to long tail.
     </p>
     <div class="masbench-stats-grid">
       <div class="masbench-stat"><div class="stat-number">17</div><div class="stat-sub">harness streams</div></div>
@@ -2315,7 +2315,8 @@ row["gym_servers_config"]  # JSON: which gym to seed, and from which snapshot</c
       not across them, since each axis has its own task set. Each row states its backbone model
       and the harness it ran in, because the field is not uniform: the controlled systems hold
       GPT-5 fixed, SkillOpt runs GPT-5.5, and Claude Code is Sonnet-4.6 inside its own harness.
-      Filter to one model and one harness for a strictly controlled comparison.
+      Filter to one model and one harness to compare shared backbones and scaffolds. Click a system
+      name for its configuration, search budget, and available results by stream and stage.
     </p>
 
     <div class="lb-bar">
@@ -2350,6 +2351,14 @@ row["gym_servers_config"]  # JSON: which gym to seed, and from which snapshot</c
     <div class="lb-panel" data-lb-panel="gap" data-lb-gap></div>
     <div class="lb-panel" data-lb-panel="eff" data-lb-eff></div>
 
+    <dialog id="lb-system-dialog" class="lbd-dialog" aria-labelledby="lb-system-title">
+      <header class="lbd-header">
+        <h2 id="lb-system-title">System details</h2>
+        <button type="button" class="lbd-close" data-lbd-close aria-label="Close system details">×</button>
+      </header>
+      <div class="lbd-body" data-lb-detail-body></div>
+    </dialog>
+
     <p class="cs-prov">
       Transcribed from the paper's three <em>main results</em> tables, plus the Claude Code
       deployment table and the skill-learning ablations from the appendix. Pass (%) is strict: every
@@ -2377,7 +2386,7 @@ row["gym_servers_config"]  # JSON: which gym to seed, and from which snapshot</c
     <h2 class="title is-3 section-heading has-text-centered">Construct Your Own Evolving Benchmark</h2>
     <p class="sv-lead">
       EvoHarnessBench ships 17 streams constructed from two seed benchmarks, EnterpriseOps-Gym and
-      Agentic Last Exam. The construction recipe itself is general: point it at a seed of your own and
+      Agents&rsquo; Last Exam. The construction recipe itself is general: point it at a seed of your own and
       it gives you an evolving benchmark on the same terms.
     </p>
 
@@ -3335,6 +3344,8 @@ curl -fsSL -H "Authorization: Bearer $EVAL_SERVICE_API_KEY" \
   <script src="tb2-public-blocks.js?v=20260913-construction-4"></script>
   <script src="apex-public-blocks.js?v=20260913-construction-4"></script>
   <script src="hyper-tau-public-blocks.js?v=20260913-construction-1"></script>
-  <script src="app.js?v=20260913-stats-5"></script>
+  <script src="static/baselines/data.js?v=20260927-reader-details-1"></script>
+  <script src="leaderboard-details.js?v=20260927-reader-details-1"></script>
+  <script src="app.js?v=20260927-system-links-1"></script>
 </body>
 </html>

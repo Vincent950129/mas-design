@@ -1,0 +1,18 @@
+track,arm,method,benchmark,stream,adapt_stage,scope,evaluated_cohorts,score_pct,score_std_pct,pass_pct,pass_std_pct,num_runs,tasks_per_run
+agents,oracle-claude,Task-specific Claude Code,eog,csm,1,cohort_only,1,31.333333,13.199327,13.333333,18.856181,3,1:5;2:5;3:5
+agents,oracle-claude,Task-specific Claude Code,eog,csm,2,cohort_only,2,59.702394,0.392837,11.111111,7.856742,3,1:6;2:6;3:6
+agents,oracle-claude,Task-specific Claude Code,eog,csm,3,cohort_only,3,48.506395,3.300947,6.666667,1.885618,3,1:25;2:25;3:25
+agents,oracle-claude,Task-specific Claude Code,eog,hr,1,cohort_only,1,18.749996,3.402071,0.0,0.0,3,1:8;2:8;3:8
+agents,oracle-claude,Task-specific Claude Code,eog,hr,2,cohort_only,2,60.683759,2.473469,20.512821,3.626189,3,1:13;2:13;3:13
+agents,oracle-claude,Task-specific Claude Code,eog,hr,3,cohort_only,3,48.408822,4.086586,3.921569,2.772968,3,1:17;2:17;3:17
+agents,oracle-claude,Task-specific Claude Code,eog,hr,4,cohort_only,4,52.309122,2.686836,13.333333,0.0,3,1:15;2:15;3:15
+agents,oracle-claude,Task-specific Claude Code,eog,itsm,1,cohort_only,1,59.365076,16.814909,28.571429,0.0,3,1:7;2:7;3:7
+agents,oracle-claude,Task-specific Claude Code,eog,itsm,2,cohort_only,2,55.151521,5.669178,24.242424,11.338356,3,1:11;2:11;3:11
+agents,oracle-claude,Task-specific Claude Code,eog,itsm,3,cohort_only,3,41.388886,1.093612,8.333333,0.0,3,1:12;2:12;3:12
+agents,oracle-claude,Task-specific Claude Code,eog,itsm,4,cohort_only,4,40.927753,2.102105,8.045977,3.251066,3,1:29;2:29;3:29
+agents,oracle-claude,Task-specific Claude Code,ale,ale,1,cohort_only,1,45.027457,4.820387,25.0,8.164966,3,1:20;2:20;3:20
+agents,oracle-claude,Task-specific Claude Code,ale,ale,2,cohort_only,2,41.745497,3.760107,5.128205,3.626189,3,1:13;2:13;3:13
+agents,oracle-claude,Task-specific Claude Code,ale,ale,3,cohort_only,3,17.622733,1.761958,0.0,0.0,3,1:3;2:3;3:3
+agents,oracle-claude,Task-specific Claude Code,ale,ale,4,cohort_only,4,67.766667,0.422681,5.555556,7.856742,3,1:6;2:6;3:6
+agents,oracle-claude,Task-specific Claude Code,ale,ale,5,cohort_only,5,42.730169,3.086295,25.641026,3.626189,3,1:13;2:13;3:13
+agents,oracle-claude,Task-specific Claude Code,ale,ale,6,cohort_only,6,17.908546,7.648839,16.666667,5.892557,3,1:8;2:8;3:8

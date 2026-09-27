@@ -1,0 +1,11 @@
+track,arm,method,benchmark,stream,adapt_stage,scope,evaluated_cohorts,score_pct,score_std_pct,pass_pct,pass_std_pct,num_runs,tasks_per_run
+skills,oracle-gpt55,Task-specific Codex (gpt-5.5),eog,csm,1,cohort_only,1,55.555561,3.470266,0.0,0.0,3,1:12;2:12;3:12
+skills,oracle-gpt55,Task-specific Codex (gpt-5.5),eog,csm,2,cohort_only,2,81.421913,6.452559,53.846154,10.878566,3,1:13;2:13;3:13
+skills,oracle-gpt55,Task-specific Codex (gpt-5.5),eog,csm,3,cohort_only,3,79.292936,1.571346,39.393939,4.285496,3,1:11;2:11;3:11
+skills,oracle-gpt55,Task-specific Codex (gpt-5.5),eog,hr,1,cohort_only,1,76.641418,1.428497,51.515152,4.285496,3,1:11;2:11;3:11
+skills,oracle-gpt55,Task-specific Codex (gpt-5.5),eog,hr,2,cohort_only,2,70.634927,1.237119,36.363636,0.0,3,1:22;2:22;3:22
+skills,oracle-gpt55,Task-specific Codex (gpt-5.5),eog,hr,3,cohort_only,3,69.750618,1.47667,13.333333,2.357023,3,1:20;2:20;3:20
+skills,oracle-gpt55,Task-specific Codex (gpt-5.5),eog,itsm,1,cohort_only,1,85.897436,1.813094,71.794872,3.626189,3,1:13;2:13;3:13
+skills,oracle-gpt55,Task-specific Codex (gpt-5.5),eog,itsm,2,cohort_only,2,79.722223,1.194767,55.0,4.082483,3,1:20;2:20;3:20
+skills,oracle-gpt55,Task-specific Codex (gpt-5.5),eog,itsm,3,cohort_only,3,76.203709,1.134327,40.0,0.0,3,1:15;2:15;3:15
+skills,oracle-gpt55,Task-specific Codex (gpt-5.5),eog,itsm,4,cohort_only,4,79.383124,3.449647,54.545455,7.422696,3,1:11;2:11;3:11

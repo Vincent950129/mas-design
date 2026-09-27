@@ -1,0 +1,504 @@
+{
+  "snapshot": "August 2026",
+  "registry": "analysis/arms.py",
+  "sources": [
+    {
+      "file": "analysis/arms.py",
+      "modified_utc": "2026-09-13T06:24:59.085690+00:00",
+      "sha256": "a00a3367a397f436172d7d9b5d4e733375bf7ff9fda1b6e2a86de35492f37905"
+    },
+    {
+      "file": "analysis/cache/trials_tools_eog.jsonl",
+      "modified_utc": "2026-08-20T05:17:12.097726+00:00",
+      "sha256": "0d8cb606ef43f0b02be4fd05078fac1ebe9cb44984830cf651cda6731e216b49"
+    },
+    {
+      "file": "analysis/cache/cells_tools.tsv",
+      "modified_utc": "2026-08-20T05:17:11.427265+00:00",
+      "sha256": "3d389f56ac2c4c4ec1c4f8e3a6a607026a125e8a4a7c6475287614171f4705ec"
+    },
+    {
+      "file": "analysis/cache/trials_skills.jsonl",
+      "modified_utc": "2026-08-27T00:00:24.680326+00:00",
+      "sha256": "7ed02d607db328127c7cd6a2b89281a8938ec298875dcb2b5279c1b9c0549632"
+    },
+    {
+      "file": "analysis/cache/cells_skills.tsv",
+      "modified_utc": "2026-08-27T00:00:24.434534+00:00",
+      "sha256": "501c5b997aa402f052261a5d9acba383d8687eb6b97de01ad63033da113e6d7b"
+    },
+    {
+      "file": "analysis/cache/trials_agents.jsonl",
+      "modified_utc": "2026-08-20T07:27:47.755206+00:00",
+      "sha256": "18fa8e12664a059a167a78de38c6ead36a12569ad5782c8042950fa905770b40"
+    },
+    {
+      "file": "analysis/cache/cells_agents.tsv",
+      "modified_utc": "2026-08-20T07:27:47.572491+00:00",
+      "sha256": "b2c4bcb708c9f9e5368153d6bf5dabee230e3c4e8505c3ca336223211fd67667"
+    },
+    {
+      "file": "analysis/ale_excluded_tasks_iclr.json",
+      "modified_utc": "2026-09-16T20:48:18.996593+00:00",
+      "sha256": "428fb2db4743052e6989bb4831806caa61fbcbb1feb3771d4a791e9c731010d2"
+    }
+  ],
+  "exported_utc": "2026-09-27T00:43:57.244530+00:00",
+  "counts": {
+    "systems": 25,
+    "matrix_cells": 1346,
+    "stage_scores": 518,
+    "cell_runs": 4038,
+    "cached_trials": 53965
+  },
+  "validation": "Every exported per-run task count, success count and score sum checked against cached trials and cached cells. The included offline checker independently reconstructs cells, stages and benchmark aggregates from exported task records. This is not a rerun of original trajectories.",
+  "aggregation": "Task-weighted within run; equal-weight mean and population SD across runs 1\u20133. Controls pool cohort-only results; cumulative benchmark aggregates use each stream\u2019s final recorded stage. Forward cells are excluded from stage summaries.",
+  "limitations": "August snapshot, not a fresh evaluation. Missing records are not zero-filled. Usage can be incomplete or from a separate telemetry run; it excludes adaptation/search. Current exclusion filters are not reapplied.",
+  "profile_source": {
+    "file": "tools/baseline_profiles.py",
+    "modified_utc": "2026-09-27T00:38:57.712550+00:00",
+    "sha256": "c7f887ad320522ae99c07e0fde3c04ceed96a28277eaad002e0f57833a9df4fb"
+  },
+  "recipe_source": {
+    "file": "tools/reproduction_recipes.json",
+    "modified_utc": "2026-09-27T00:30:00.121906+00:00",
+    "sha256": "37e5a8e8da07e41ce7537bcef2c2ff3a8869bb37304d2bbd09f1733a9f210ac0"
+  },
+  "search_evidence_source": {
+    "file": "tools/search_stage_evidence.json",
+    "modified_utc": "2026-09-27T00:30:00.063478+00:00",
+    "sha256": "3cc7771f9ebd71917d8f51006d8b635745db5949553d00ee7c783384ae2a6d38"
+  },
+  "search_artifact_validation": {
+    "stages": 150,
+    "unique_files": 1560,
+    "scope": "State checkpoints, candidate modules and recorded search/validation evidence with supplied hashes. Files are identified but not bundled for executable replay."
+  },
+  "current_source_fingerprints": {
+    "basis": "Current checkout inspected at export time, not a historical source/environment lock. Hashes do not provide the source files themselves.",
+    "files": [
+      {
+        "file": "analysis/arms.py",
+        "modified_utc": "2026-09-13T06:24:59.085690+00:00",
+        "sha256": "a00a3367a397f436172d7d9b5d4e733375bf7ff9fda1b6e2a86de35492f37905"
+      },
+      {
+        "file": "analysis/cache/cells_agents.tsv",
+        "modified_utc": "2026-08-20T07:27:47.572491+00:00",
+        "sha256": "b2c4bcb708c9f9e5368153d6bf5dabee230e3c4e8505c3ca336223211fd67667"
+      },
+      {
+        "file": "analysis/cache/cells_skills.tsv",
+        "modified_utc": "2026-08-27T00:00:24.434534+00:00",
+        "sha256": "501c5b997aa402f052261a5d9acba383d8687eb6b97de01ad63033da113e6d7b"
+      },
+      {
+        "file": "analysis/cache/cells_tools.tsv",
+        "modified_utc": "2026-08-20T05:17:11.427265+00:00",
+        "sha256": "3d389f56ac2c4c4ec1c4f8e3a6a607026a125e8a4a7c6475287614171f4705ec"
+      },
+      {
+        "file": "analysis/evolution_probe.py",
+        "modified_utc": "2026-09-13T06:24:58.983711+00:00",
+        "sha256": "04d16e990d031ccbd73ed26e2dec3de57ae8118d9a55a4b9b96f529e27b4e432"
+      },
+      {
+        "file": "analysis/main_results_table.py",
+        "modified_utc": "2026-09-13T06:24:58.879681+00:00",
+        "sha256": "df3163a753bf381014885a1ba56fd15b4f5b3bf9b88ecaf5b90e7332b487cdd0"
+      },
+      {
+        "file": "evolve_tools/meta_harness/cl_eval.py",
+        "modified_utc": "2026-09-13T06:24:58.698012+00:00",
+        "sha256": "5bc01f9b6e619df950063075eeff1e875106813987a239b82bd78dc587f82236"
+      },
+      {
+        "file": "evolve_tools/meta_harness/config.yaml",
+        "modified_utc": "2026-08-12T19:50:31.131799+00:00",
+        "sha256": "4cf3acfd413adc60bba16a5e785ea545434349f474014f155b35ba56a6e6ad46"
+      },
+      {
+        "file": "evolve_tools/meta_harness/gepa_adapter.py",
+        "modified_utc": "2026-09-13T06:24:58.434431+00:00",
+        "sha256": "7acd25aa1092a0e2403face3cece266a4acfa8c7883b209301a4ed26e49dd3fe"
+      },
+      {
+        "file": "evolve_tools/meta_harness/gepa_reflection.py",
+        "modified_utc": "2026-09-13T06:24:58.979803+00:00",
+        "sha256": "dccaf58bf3d4f04b00cb1ca03c9e8a225b39a1b11842215a2437632d2011e90e"
+      },
+      {
+        "file": "evolve_tools/meta_harness/run_gepa.py",
+        "modified_utc": "2026-09-13T06:24:58.435831+00:00",
+        "sha256": "3b9a4162fc5ca930e561b37bafed75f97c18e25904f4213bd9c1535445dd8ea9"
+      },
+      {
+        "file": "evolve_tools/meta_harness/run_stages.py",
+        "modified_utc": "2026-08-24T22:05:39.086708+00:00",
+        "sha256": "2ece7f283069b0a27db72e7c01a9de5130733a86ee6686370557878c04cc5475"
+      },
+      {
+        "file": "evolve_tools/meta_harness/skills/meta-harness/SKILL.md",
+        "modified_utc": "2026-08-12T19:50:31.044289+00:00",
+        "sha256": "c8f365fbc1ddfd98e7fa50ed1a1fa1458b74ed3c005b1e679acaaa888d1430bb"
+      },
+      {
+        "file": "evolve_tools/meta_harness/splits.py",
+        "modified_utc": "2026-09-13T06:24:59.167109+00:00",
+        "sha256": "16636dda4e6ee231a16f6fccb61352e25b493e1e0cc193594e6421c9f3249db3"
+      },
+      {
+        "file": "evolve_tools/src/ale_eval.py",
+        "modified_utc": "2026-09-13T06:24:59.175289+00:00",
+        "sha256": "11005946c508b63ae9adf3fb3047651becaadfef43466a1d990d5eb7de328555"
+      },
+      {
+        "file": "evolve_tools/src/run_oracle_evolving.py",
+        "modified_utc": "2026-09-13T06:24:58.832418+00:00",
+        "sha256": "7098693df7450971fe5c8b0f3a48644e64addadab4c4a498a67c363ff9b943ce"
+      },
+      {
+        "file": "evolve_tools/src/runner.py",
+        "modified_utc": "2026-09-13T06:24:59.066383+00:00",
+        "sha256": "2803a7dcaa48bf5c5dd80ec4419280bb794ae45fbe3fc2047077b51c707e399b"
+      },
+      {
+        "file": "evolve_tools/src/runner_evolving_tools.py",
+        "modified_utc": "2026-09-13T06:24:59.171214+00:00",
+        "sha256": "1e608e93a5d3e92fd98ce4f67be6abf7dffc484b8cc54729cac47173a9a93fd5"
+      },
+      {
+        "file": "evolve_tools/src/scripts/gpt5_oracle_evoving_tools.sh",
+        "modified_utc": "2026-09-13T06:24:59.071896+00:00",
+        "sha256": "85442ff3d7014834847e91bbb12025f29288e9a7d67186e1721f61348a5ba87e"
+      },
+      {
+        "file": "evolve_tools/src/scripts/run_gepa.sh",
+        "modified_utc": "2026-09-13T06:24:59.294313+00:00",
+        "sha256": "621c698195881379e0ffc7994c2e1879aaadd925ac29a8199e0e443dd83e2b0c"
+      },
+      {
+        "file": "evolve_tools/src/scripts/run_meta_harness.sh",
+        "modified_utc": "2026-09-13T06:24:58.604250+00:00",
+        "sha256": "772bf46ad3400027285705e32bf9ed9ae7f58a33e2ebf13519a6fb9832ba0e8b"
+      },
+      {
+        "file": "evovle_agents/meta_harness/cl_eval.py",
+        "modified_utc": "2026-09-13T06:24:58.268990+00:00",
+        "sha256": "744137283f2b7a30fe8dfe0220a896caa85588d478086d02ecbcabce49e3cc84"
+      },
+      {
+        "file": "evovle_agents/meta_harness/config.yaml",
+        "modified_utc": "2026-08-24T22:05:39.084376+00:00",
+        "sha256": "ec1ad60809fe30afcaaed50a5cf59a7054993defa3ac13c36201419328ec00a2"
+      },
+      {
+        "file": "evovle_agents/meta_harness/gepa_adapter.py",
+        "modified_utc": "2026-09-13T06:24:59.020889+00:00",
+        "sha256": "ff45242615e9d76c9e2dc174145ec074359fc0c90d27bf155d4b282e37b8dd92"
+      },
+      {
+        "file": "evovle_agents/meta_harness/gepa_reflection.py",
+        "modified_utc": "2026-09-13T06:24:59.396237+00:00",
+        "sha256": "cf3947a5e8f05a426192158a5e713d527b75af9c5352d868d039b5ab5643fe07"
+      },
+      {
+        "file": "evovle_agents/meta_harness/run_gepa.py",
+        "modified_utc": "2026-09-13T06:24:58.744377+00:00",
+        "sha256": "f4ec59d7fad224bc8d17b75e7de09a0ebcb5d7d07dde79e72fef586073117706"
+      },
+      {
+        "file": "evovle_agents/meta_harness/run_stages.py",
+        "modified_utc": "2026-08-24T22:05:39.205783+00:00",
+        "sha256": "bfd103d8326091cedd1e3cfa67401105db4ad20ddaafc948cd39cbc579f62c9f"
+      },
+      {
+        "file": "evovle_agents/meta_harness/skills/meta-harness/SKILL.md",
+        "modified_utc": "2026-08-12T19:50:31.384925+00:00",
+        "sha256": "beda5180cea3a2f1ee27fe5cbb1bf481249387da6b06e4cdc424dc0a46c7fec5"
+      },
+      {
+        "file": "evovle_agents/meta_harness/splits.py",
+        "modified_utc": "2026-09-13T06:24:58.946453+00:00",
+        "sha256": "8bd00a86f614447098a1cbda9cfa910a375f93d3433eb1d936a2c486b8eafc72"
+      },
+      {
+        "file": "evovle_agents/src/agent_library.py",
+        "modified_utc": "2026-08-23T21:50:01.625499+00:00",
+        "sha256": "bcb178773734281008940008248af514a059b7a6d5803c2ec8738e89a14d5a83"
+      },
+      {
+        "file": "evovle_agents/src/ale_eval.py",
+        "modified_utc": "2026-09-13T06:24:59.303983+00:00",
+        "sha256": "836a9ba0f41b7789a856d5e97e163d3473f48b9a6d8f7b701ef869765087dd76"
+      },
+      {
+        "file": "evovle_agents/src/config.py",
+        "modified_utc": "2026-08-24T22:05:39.326190+00:00",
+        "sha256": "98ca59a57f151105a011f25c26e01248dde6ebe6e774f89cc1f49a908c89d5d1"
+      },
+      {
+        "file": "evovle_agents/src/runner.py",
+        "modified_utc": "2026-09-13T06:24:59.303154+00:00",
+        "sha256": "a7e07a409687d55c7bdf9b3e201b5370d0edc09204acbff5d2f203eb64cb7e18"
+      },
+      {
+        "file": "evovle_agents/src/scripts/run_cumulative_agents.py",
+        "modified_utc": "2026-09-08T02:48:50.358163+00:00",
+        "sha256": "e327968a4ca9d64f5b6b91baff12b79c15162ef971b84a40d31c7b9ab7e24be8"
+      },
+      {
+        "file": "evovle_agents/src/scripts/run_cumulative_agents.sh",
+        "modified_utc": "2026-09-04T03:24:17.004948+00:00",
+        "sha256": "23a7252ed66934d7ef76be1dc96ee469994a993f54ebecc7197a8c0283653209"
+      },
+      {
+        "file": "evovle_agents/src/scripts/run_gepa.sh",
+        "modified_utc": "2026-09-13T06:24:58.256914+00:00",
+        "sha256": "914df7d43a6392e10649272e8e69eb5ca161f7a3ac811a9a25babf762aa385c8"
+      },
+      {
+        "file": "evovle_agents/src/scripts/run_meta_harness.sh",
+        "modified_utc": "2026-09-13T06:24:59.342772+00:00",
+        "sha256": "93715fbd24120d5ed2daf589a93e2b47ea1604a643d7dd1ce6e3452b09283389"
+      },
+      {
+        "file": "evovle_agents/src/scripts/run_oracle_agents.sh",
+        "modified_utc": "2026-09-13T06:24:58.832096+00:00",
+        "sha256": "80e7bf31b02f1460948c5fc77c26360b9c2c107db0334cbd4db0b06324c57883"
+      },
+      {
+        "file": "evovle_skills/meta_harness/cl_eval.py",
+        "modified_utc": "2026-09-13T06:24:58.889939+00:00",
+        "sha256": "6e1c6b52f2e89820b116911be80db19b647624b616c04565c4fd29903373b4e5"
+      },
+      {
+        "file": "evovle_skills/meta_harness/config.yaml",
+        "modified_utc": "2026-08-12T19:50:31.384469+00:00",
+        "sha256": "c5a6ace556182f577cad2cc998a8edc15e2a1c99c83f40541eb1ba3ac09b96b4"
+      },
+      {
+        "file": "evovle_skills/meta_harness/gepa_adapter.py",
+        "modified_utc": "2026-09-13T06:24:58.736810+00:00",
+        "sha256": "d1e9deef9d3af36a3d00f0e44d05b89b73b4306563ba6d5e5d756c62facab09e"
+      },
+      {
+        "file": "evovle_skills/meta_harness/gepa_reflection.py",
+        "modified_utc": "2026-09-13T06:24:58.830181+00:00",
+        "sha256": "cc77967b102249bef9adb2bce3ec6d127ffafdb69e69f0d06319690e5a3759cc"
+      },
+      {
+        "file": "evovle_skills/meta_harness/run_gepa.py",
+        "modified_utc": "2026-09-13T06:24:59.085904+00:00",
+        "sha256": "3db76bc058d1895f2f78a8f2359fa3c1b1808f0d306d23d05512d8bab1d38733"
+      },
+      {
+        "file": "evovle_skills/meta_harness/run_stages.py",
+        "modified_utc": "2026-08-24T22:05:39.394404+00:00",
+        "sha256": "916c928fc491ad493e94d9776fa74267ba57e8b06347b02730877eb3bb761d84"
+      },
+      {
+        "file": "evovle_skills/meta_harness/skills/meta-harness/SKILL.md",
+        "modified_utc": "2026-08-12T19:50:31.140256+00:00",
+        "sha256": "23633e41c4d1f41a0bb560a3e2894bcc96caa60a90c9032b79c096aa09f52223"
+      },
+      {
+        "file": "evovle_skills/meta_harness/splits.py",
+        "modified_utc": "2026-09-13T06:24:58.740040+00:00",
+        "sha256": "6507ac49ca26e7cb4e7789288fdb35367a728e949cbebc3fd7c815fca353e82d"
+      },
+      {
+        "file": "evovle_skills/src/config.py",
+        "modified_utc": "2026-09-13T06:24:58.744499+00:00",
+        "sha256": "c36383a84004e14de07af1c6685540c407ac7a9c387846589c53c11d81a2136e"
+      },
+      {
+        "file": "evovle_skills/src/runner.py",
+        "modified_utc": "2026-09-13T06:24:59.339968+00:00",
+        "sha256": "d9816ea16f5dd6b3917d8aa255360f5d3faf1ab9cf3952840c84a568aac31d3d"
+      },
+      {
+        "file": "evovle_skills/src/scripts/run_cumulative_skill.py",
+        "modified_utc": "2026-09-13T06:24:58.842603+00:00",
+        "sha256": "6690e256d2ba7f536b94d54b1b558017de53a807e940b7bea5458a2a07ab5977"
+      },
+      {
+        "file": "evovle_skills/src/scripts/run_cumulative_skill.sh",
+        "modified_utc": "2026-09-13T06:24:58.883400+00:00",
+        "sha256": "898825af88aac37669d8793c471499da4e45a57436e122fb84fbbefd148817fd"
+      },
+      {
+        "file": "evovle_skills/src/scripts/run_gepa.sh",
+        "modified_utc": "2026-09-13T06:24:58.428773+00:00",
+        "sha256": "bba0382a9b44e539fa5480571ea831b5eabe37fab060648f8c44bdceee6126ee"
+      },
+      {
+        "file": "evovle_skills/src/scripts/run_meta_harness.sh",
+        "modified_utc": "2026-09-13T06:24:58.829608+00:00",
+        "sha256": "8a0b88fe67de826368c25d64b017b61850529f2760331aecc506f59f52c2eb09"
+      },
+      {
+        "file": "evovle_skills/src/scripts/run_oracle_skill.sh",
+        "modified_utc": "2026-09-13T06:24:59.298397+00:00",
+        "sha256": "23fd0ae1b4315860aef043cde3ac39bfb824ba14c9ac4eb3d6d35825f5291a27"
+      },
+      {
+        "file": "evovle_skills/src/scripts/run_oracle_skill_gepa.sh",
+        "modified_utc": "2026-08-23T23:19:56.499501+00:00",
+        "sha256": "644eaf4e4d491fd85df1edd347fe9c17b126859cae4657de368d11c62be9d0d0"
+      },
+      {
+        "file": "install.md",
+        "modified_utc": "2026-09-08T02:48:50.353903+00:00",
+        "sha256": "dc26dfc7a0513ffdcbe362a48d0f6d69cb785d13dfccb48a43d18618fd9fcd83"
+      },
+      {
+        "file": "reference/EnterpriseOps-Gym/conf/llm/gpt-5.json",
+        "modified_utc": "2026-04-14T01:56:37.172227+00:00",
+        "sha256": "6037d9823a65e2fa00f87bc9cc06dbe889456703fd18e46905be44b9236a5ee2"
+      },
+      {
+        "file": "reference/EnterpriseOps-Gym/pyproject.toml",
+        "modified_utc": "2026-04-09T15:48:00.857972+00:00",
+        "sha256": "f40d4473e8373696685628543d6e249cf8f137c3821ab487d906f7ed0f075248"
+      },
+      {
+        "file": "reference/EnterpriseOps-Gym/uv.lock",
+        "modified_utc": "2026-04-09T15:51:44.901321+00:00",
+        "sha256": "004d71fae2535652419e66847bebdac48a3d23ced3e85aff40b3b7d0a219735d"
+      },
+      {
+        "file": "reference/agents-last-exam/pyproject.toml",
+        "modified_utc": "2026-06-18T05:46:13.538516+00:00",
+        "sha256": "e004b432d47fe68daeaa8416d27b7acbbad15354bed92fb39e9baf079199d1b0"
+      },
+      {
+        "file": "reference/agents-last-exam/uv.lock",
+        "modified_utc": "2026-06-23T05:55:07.433192+00:00",
+        "sha256": "04aec99672731af90e572691a38e729f336f316e46bc160f09678687c4d4658f"
+      },
+      {
+        "file": "reference/gepa/pyproject.toml",
+        "modified_utc": "2026-08-11T03:53:35.089443+00:00",
+        "sha256": "735e3c3b843ef27a7bcdb0e5e1ab49914f9f61112730bb207484d76f31bab8a9"
+      },
+      {
+        "file": "reference/gepa/uv.lock",
+        "modified_utc": "2026-08-11T03:53:38.524419+00:00",
+        "sha256": "b419857444e1302f8f573f05b2c25bcb9efd40c5493540a97068eccf07b01bbb"
+      },
+      {
+        "file": "scripts/env.sh",
+        "modified_utc": "2026-09-13T06:24:59.077001+00:00",
+        "sha256": "b3f0c647a307b7d3864e1bfda5fa831e9138f1761007323da9bf7c252d4c30e8"
+      },
+      {
+        "file": "yang_li/results_final/README.md",
+        "modified_utc": "2026-08-17T17:45:07.181777+00:00",
+        "sha256": "88495940b256f91ab3bad6fdc70a2480248f889ff881068bed0363efa6818598"
+      }
+    ]
+  },
+  "exports": {
+    "tools-oracle-stages.csv": "775bc1615c85e15c326e40ddeaa5d7141f9cc28e7284d382cfa939218bd486d0",
+    "tools-oracle-matrix.csv": "acbd493d4f9738b9fd3cb15d7a071402aab7c65d6ac24f1e590fb33bc7461f10",
+    "tools-oracle-runs.csv": "832e94bbd1afe8b6d87bd332402a38a3b7824c4795c885f3a40fb7cbd718e2bf",
+    "tools-oracle-trials.csv": "f5c3e21cf0862f93376e9e4023f041c249d03938b106c9a7b32e912321946d72",
+    "tools-react-stages.csv": "6c2d33058d79b95a2fc9f5a83fd4713c3f187e1cc698982ce7b8d2de82822ee1",
+    "tools-react-matrix.csv": "da938af66c6203e3bb00cac8a8274366fc59a1c8fa745ae241af0e1516ea4f57",
+    "tools-react-runs.csv": "238ba042553ea77f818ec276ffa087574d6ad988146bb785e9df2b9a0edf5232",
+    "tools-react-trials.csv": "8a31a735709b1ac4bbdeba5d9a4236d6f922885576cfdfc1b999c0aed100e70c",
+    "tools-meta-harness-stages.csv": "8699acb7386598221247d35416606c81491de3b759576ea0f1f4c8cc3add7ac1",
+    "tools-meta-harness-matrix.csv": "a3cac7cd0d9bf6d17184f331e6f4b6eb5370961b6b04d224a9090e7c7159ba9c",
+    "tools-meta-harness-runs.csv": "bcf80b879d3e4e44df5b652510d227263e1fc3a20bf3980d741ea3b47c872698",
+    "tools-meta-harness-trials.csv": "c94768e4884fedc548164546ef8aff013d7f7b72b46c1b7667380bfe7d5a2ef9",
+    "tools-gepa-stages.csv": "6bac9c5083425335d944e925ee895cad984e16f75e1d8900015e18180f469e1d",
+    "tools-gepa-matrix.csv": "8b525530961bdf7d232f0c053a9390e420bcf22283fa3c6f6d03c36f600dd933",
+    "tools-gepa-runs.csv": "a6180081bbfd708d1440cc375ccd9edae712fb71c3f368f3eef1dbf9f5969686",
+    "tools-gepa-trials.csv": "d12db151a70c635fa85c7557640f97cad395e1eb6ad8e7f42ed467c11ef9b19f",
+    "tools-react-ale-v-stages.csv": "8d54da98eadd655b796534861639ee26c8be4f656d5fcbbc727c00c5af416310",
+    "tools-react-ale-v-matrix.csv": "3a6ede87afeb2b99ea3ce00b93ebd971c58f53442b649eef5bac8956ac80c187",
+    "tools-react-ale-v-runs.csv": "ddc46528f658b40a046e281d95997282a6848fac0514e64b2c52937511562dc8",
+    "tools-react-ale-v-trials.csv": "2c52c1761273fd6ab85de8dcc6dca4445066e56d16906d9d3283c841293922f8",
+    "tools-raw-memory-stages.csv": "c5a7f96249914893b19eced2e31810847e920eac22d7f10d0ee017ea52af6832",
+    "tools-raw-memory-matrix.csv": "0bfd2f190ac5f33fa1e86450388ceafe66a68f0b75005f7dc10d9dc385961b82",
+    "tools-raw-memory-runs.csv": "1db74a10a58cc83e3b58c519ef035d23210cf9fdf5d3528e711c19317309af6e",
+    "tools-raw-memory-trials.csv": "e57b896678ec4377f780b54aa87e6037374380305d39e8f813f35d156d2421f8",
+    "tools-reasoning-bank-stages.csv": "db3f7cfb00670520fc5e96e5034e8d42f41bc6392c92cb4a44f7167ec922ed5e",
+    "tools-reasoning-bank-matrix.csv": "4b709d1f4cae14dd0aba0e4193e55d1b7c93068d0e7cb070217a2ef6893d8231",
+    "tools-reasoning-bank-runs.csv": "7caf4ba0a70b78ed8cbbf17295c733d5f35433cca578e46d9a2d8b9123f96b7f",
+    "tools-reasoning-bank-trials.csv": "39460af5561bebb338ca65a4d567ba50190fc14f3b96c39bc19b9fc478faae56",
+    "tools-memtoolagent-stages.csv": "c221b3b02da23ad7a4b16c3aa0ebea5e0bbc7248e1a5dd819b90be93fb10a5dd",
+    "tools-memtoolagent-matrix.csv": "ec168d9937978397baec3fc58478c75db64582d3ac35b8cffe3a7ae59dd709b5",
+    "tools-memtoolagent-runs.csv": "76b9d6e4776b2a5c77a98a1a615a3b52ef534b56aaecd136508331f3efc4db29",
+    "tools-memtoolagent-trials.csv": "3bd9d5aff44330d2ae820148c98bb99b6738bea32025d157f983ddcb936a1c86",
+    "skills-oracle-stages.csv": "d195c82c40fd09db0d1872ad9bb6fc2fc5363a7aa7f9f5830d651675604a79d3",
+    "skills-oracle-matrix.csv": "ed099ae91dbfdb47cd7430e3f30d05ba4e76853a303601dc1c21106f5fbee801",
+    "skills-oracle-runs.csv": "f07f31155dc4afbf72c179586124315b28e38b3aa9888c78f71b621deda3a7da",
+    "skills-oracle-trials.csv": "1e5472a41d70f5b65a6aa5426ed2424ecfa151c16ae4b8daeb8d2797e3e6d77a",
+    "skills-oracle-gpt55-stages.csv": "e94d05bdeacd8249a7b518961b19c666d139e9c568b7ae4f0b38721c8baf1bba",
+    "skills-oracle-gpt55-matrix.csv": "27fb9ddcbacbadb52070566b5cd3e57d206e1d8481b8ed10211996960408ba07",
+    "skills-oracle-gpt55-runs.csv": "6d720f5da332baeff0002166f876a82ff20e40ce3d32c788337dc4ef20636cab",
+    "skills-oracle-gpt55-trials.csv": "033f923cc0dd71b5e9f93f454327436ff1f7abe7ff495acf06ac584cca4dabf8",
+    "skills-oracle-claude-stages.csv": "e44c17fba6787d04ea0594914efa3a5a90d92d713a02bbeb21bd699d0f5b8c2a",
+    "skills-oracle-claude-matrix.csv": "946ef47d82227395f8c57f3b9ec7eb056489db72f4ec642dcd641f52758278fe",
+    "skills-oracle-claude-runs.csv": "c32e605a9b966e9f2136c78df95c6606d3a983dc079a79a1a0417ef7290bcdb4",
+    "skills-oracle-claude-trials.csv": "23588da5a56dc2cecdd7f64f459db02413f5f34b358773b0683e2b3cbb76b050",
+    "skills-claude-stages.csv": "05f8693fd011dbd65f73e7de471ea4f98a8bc6283dc7fd0c04557b0cb996ef8f",
+    "skills-claude-matrix.csv": "1a22566caf8bbf942425b8cfd7cd80e4368ab84fcd6aab67bc6588006fb1488c",
+    "skills-claude-runs.csv": "6a75fa15a53eaef252750c1c388f2662ba101af8fa67908ed574740e85c71abd",
+    "skills-claude-trials.csv": "8d306b8844d445cccca342293cbeea3ea01e420ecdf60886badf4abef1216bd9",
+    "skills-codex-stages.csv": "1cf150c1a68a036e6d40b00519f0fadc569312c7c115fa2dde793eea747fbf7a",
+    "skills-codex-matrix.csv": "a58fdf423fb42285a1b697be71625983031a5905f8c6ffbd18957514e08e738d",
+    "skills-codex-runs.csv": "f7e94ca869d9425101f815fb53466791247eb2010d3cef6072c05189c1ce00b2",
+    "skills-codex-trials.csv": "3ad79ac1c2063f29acd8eadf32a378bc2f3efd41cada858cb237e29db55a45cf",
+    "skills-memory-stages.csv": "d6f3341837e5ed926a1f72ccbb668423724aa7bced3f186f02bad496058cd5c9",
+    "skills-memory-matrix.csv": "83a61d6e88f3bdf36d6a0e88d4d4b7e943bda668c2bef453bb71878e52429ef2",
+    "skills-memory-runs.csv": "395feafda67d5a529218a7b99134c8254fd5785462f15c9f493c430b250d4ed7",
+    "skills-memory-trials.csv": "7121154d214a05317fb18a4117057812498fcf78ca4edbd3a9bc61dfa648bd4f",
+    "skills-meta-harness-stages.csv": "f70f66e4c4977e9a21ece14d885e5474ccf1098cc257051a37967c23478d8794",
+    "skills-meta-harness-matrix.csv": "8e146b156ae65d4d24f40b0a669392b5315c24ce22f762fd47131bda6e044693",
+    "skills-meta-harness-runs.csv": "cd44a51ee205d95e895667b328775d686111c3fed3567a5ac32f345c24c48ff2",
+    "skills-meta-harness-trials.csv": "52fc3edd3a89a9543fff9d9a93b46cefd34d2e9581da1554c76f07488d0d4b7a",
+    "skills-gepa-stages.csv": "e561e317192d1b93b7dc861f4d9dfb6a607a5a982ce6e73bae3cf8d927f325ae",
+    "skills-gepa-matrix.csv": "cb480363b2569ea3b187bd91a1b35eda1e726479234a29b267d8e6c0b9f2edc4",
+    "skills-gepa-runs.csv": "2f64cd38221aed1c142f6e8cff213d4b1bc76343cb228adfc691343771ad5430",
+    "skills-gepa-trials.csv": "a98de274f0f7590ee227422911ae2292e17b84bbc52b205a3c215126c8ddd73b",
+    "skills-gepa-oracle-stages.csv": "27b61cff3baede7e20c341b10626107dbe6259214137cddf6b7d853036a7beba",
+    "skills-gepa-oracle-matrix.csv": "9eb95b77992c2b4fca52f9b0abec8c88316aa049a7a346979816cf4aa874ae18",
+    "skills-gepa-oracle-runs.csv": "aca470e4afa26dfee2419d42bbcfba6d240f3cdd62abc9911d4bd7ff0caea4ca",
+    "skills-gepa-oracle-trials.csv": "8d1af0daf0cd71a9118d8d46bbc60a124ba8edcbb2682a0269b8b49cfb267587",
+    "skills-skillopt-stages.csv": "f1a0d9fca267aa6021f5adfb950327d9af4d0f8bc4c676da2e5480ec6ada8169",
+    "skills-skillopt-matrix.csv": "f30e3121ca4055e9afd1755dac1f18533d65a8597a1a4fb75286580115c9cc8f",
+    "skills-skillopt-runs.csv": "609c7dedeb65263d5ce61739c92462075a016cd66acb13aa9d38e7a16ef1b1a0",
+    "skills-skillopt-trials.csv": "bde9e7cf55e2d80373414e33dfbc9ba7cd66c30906822e870c2551f0f9b080cc",
+    "agents-oracle-stages.csv": "b556e68cb822060fa861b53fb7a4949cc9eaeea1b74b9796fa5ed5b91ad6c51e",
+    "agents-oracle-matrix.csv": "c7b246527c79384d695c3c4530191d91ee2d9c29683ae40a83cd2a8f97af8bea",
+    "agents-oracle-runs.csv": "dbdd6e321a8e771b61892eaa99be92ba279a85ebd8b1a4d2bee8b8c7cb6bac2e",
+    "agents-oracle-trials.csv": "55a296fc3a163d5e44b7d9b0f34717d916db7161bd85bd519830d4cbe284b6ed",
+    "agents-oracle-claude-stages.csv": "00f046f2c39e1b8592868c544f1708a46b267f370078da4802e17f0d85447d2f",
+    "agents-oracle-claude-matrix.csv": "300ca108a0e80fead1c9d6cefc0164e7208810ecf5aab0a79c3afe94f98d16ea",
+    "agents-oracle-claude-runs.csv": "8395fb3ea513ebb81b5cad13b90b846ff645d356a838f7641231db12a589816f",
+    "agents-oracle-claude-trials.csv": "e53404f9da7d5a57ee1f4293ba4f4813152d3a69fb3bac565c5cc8b246234faf",
+    "agents-codex-stages.csv": "bd058a28e47ea35363ed2a202b9e137b2d673427eb29518380cc77f51cd5c80e",
+    "agents-codex-matrix.csv": "5e89d789993ce253ba3fa2bf5c640ecdeedc7697b553924e7950afe888e56609",
+    "agents-codex-runs.csv": "edfda8cb97b6c5f0c63d5926f986ab07cbe7fb686a262740ac4e2bcac0a55bfe",
+    "agents-codex-trials.csv": "443f62a836e31a03aada776f4f8732b56e30ebce24d69aa0566bf57cc2e0f5a2",
+    "agents-claude-stages.csv": "0e3ee4339277cd2205bc6901a5012afe9c9d50e7f2854134ed7c4bafebf4d80d",
+    "agents-claude-matrix.csv": "517ad7440bb78694067f2aae92283113e5d023c272b2e7029cbdf3b38eb6ebd4",
+    "agents-claude-runs.csv": "5cd0abe1dc3254d54d3a665b08ca990ef3850acfef5753140b60634445c0a527",
+    "agents-claude-trials.csv": "de8f4487b09c207c4e5416c6cdf9fcdb28a3b588fbce761a459697573e75ffd0",
+    "agents-memory-stages.csv": "dab6460ed082ab53bddb22118faf6f17889d882429520227ac7c7c5ffc3026f3",
+    "agents-memory-matrix.csv": "94a3dcb382de68443855ee37907de511067f976c16b0a4449eb64caafb8fcc85",
+    "agents-memory-runs.csv": "94127e10bcd5465bbca63f5878bf952ca86e7a7c51298ae18de2276965bf2ecb",
+    "agents-memory-trials.csv": "b207eb857d26d8aab35171003e81c99fc44521dbc78320714de65eae60b1ac5c",
+    "agents-meta-harness-stages.csv": "1a99e406f121ca7ef324670d3ae666eb819d65812f528e0c2bd0b3e2eb361598",
+    "agents-meta-harness-matrix.csv": "22457dba66db5b61d949f8e26b520f0f5bff67907a809005667662edb104c44e",
+    "agents-meta-harness-runs.csv": "7812fbe16698b14fee73f2b8140b65d56e272d704e4fcc767cb7ab083941a3a2",
+    "agents-meta-harness-trials.csv": "510c6e5a6a4cc49b12a32c84fd3ee8241342f57e8d5b37c2f19851766f3f27b6",
+    "agents-gepa-stages.csv": "3080bbd30532a5fddb29960282bfc6ef795ea0f4b8ee8e61fe2962e35f98dd69",
+    "agents-gepa-matrix.csv": "1481fe90df2e0fd00451bdb455a182c69eec845e4248e796e704bd69e44e64be",
+    "agents-gepa-runs.csv": "6be5610f7858dad5c83319e4cfcca04e7303f346657fdb1588e090ab49cc28f2",
+    "agents-gepa-trials.csv": "89d8688eedef7c70138f5815c6bef99219a08d572388878e63e179df9fdc3120"
+  }
+}

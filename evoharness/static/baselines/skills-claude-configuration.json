@@ -1,0 +1,153 @@
+{
+  "name": "Claude Code",
+  "track": "skills",
+  "arm": "claude",
+  "model": "Sonnet-4.6",
+  "harness": "Claude Code",
+  "author": "Yang Li",
+  "kind": "cumulative",
+  "description": "Deployment baseline with the benchmark’s accumulating capability pool. No stage-specific prompt or harness optimization.",
+  "settings": [
+    [
+      "Solver model",
+      "Sonnet-4.6",
+      "Reported"
+    ],
+    [
+      "Stage search budget",
+      "No stage-level optimization",
+      "Experiment design"
+    ],
+    [
+      "Capability pool",
+      "Cumulative through the selected stage",
+      "Registry / runner"
+    ],
+    [
+      "EOG solver limit",
+      "900 seconds per task",
+      "Export notes / timeout records"
+    ],
+    [
+      "ALE solver limit / launch overrides",
+      "Not specified in the exported run configuration",
+      "Unavailable"
+    ],
+    [
+      "Held-out evaluation",
+      "Runs 1, 2 and 3 per recorded cell",
+      "Archived snapshot"
+    ],
+    [
+      "Complete total compute budget",
+      "Not established; evaluation metrics exclude adaptation/search work",
+      "Unavailable"
+    ]
+  ],
+  "notes": [
+    "Some EOG usage comes from a dedicated one-run telemetry pass; accuracy still uses the original three runs. Missing usage means cost totals may be lower bounds."
+  ],
+  "sources": [
+    "analysis/arms.py",
+    "analysis/cache/cells_skills.tsv",
+    "yang_li/results_final/README.md"
+  ],
+  "reproduction": {
+    "status": "unavailable",
+    "prerequisites": [
+      "Obtain the original Claude Code runner and its locked dependencies/container image from the experiment authors. The registered folder contains exported results, not executable runner source.",
+      "Obtain the original Vertex provider/model endpoint configuration and use your own credentials. Sonnet-4.6 is the reported display label; an immutable historical model identifier was not recovered.",
+      "Obtain the versioned dataset, stage capability bundles, verifier assets and archived task exclusions."
+    ],
+    "steps": [],
+    "missing": [
+      "No source-supported launch command exists in the supplied result-only export. Do not substitute the Codex launcher or invent Claude CLI flags.",
+      "Historical Claude Code version, exact model/Vertex region, prompts and launch overrides, ALE solver budget and concurrency are absent from the export.",
+      "EOG timeout records establish a 900-second cap; ALE limits are not established. Three accuracy repeats exist, but some usage measurements come from a separate one-run token sweep."
+    ],
+    "evidence": [
+      "analysis/arms.py",
+      "yang_li/results_final/README.md",
+      "yang_li/results_final/per_run/skills/cumulative_skill/"
+    ],
+    "protocol": {
+      "evaluation_runs": 3,
+      "provider": "Vertex (export README)",
+      "solver_model": "Sonnet-4.6 (reported label; exact historical identifier unavailable)",
+      "source_revision": null
+    },
+    "result_reconstruction": "Included per-task scores and success flags reproduce all archived aggregates offline."
+  },
+  "sourceRoots": {
+    "csm": "yang_li/results_final/per_run/skills/cumulative_skill/eog/csm",
+    "hr": "yang_li/results_final/per_run/skills/cumulative_skill/eog/hr",
+    "itsm": "yang_li/results_final/per_run/skills/cumulative_skill/eog/itsm",
+    "ale": "yang_li/results_final/per_run/skills/cumulative_skill/ale/ale"
+  },
+  "coverage": {
+    "csm": {
+      "benchmark": "eog",
+      "recorded_stages": [
+        1,
+        2,
+        3
+      ],
+      "evaluation_cohorts": [
+        1,
+        2,
+        3
+      ],
+      "summary_scope": "seen_cohorts"
+    },
+    "hr": {
+      "benchmark": "eog",
+      "recorded_stages": [
+        1,
+        2,
+        3
+      ],
+      "evaluation_cohorts": [
+        1,
+        2,
+        3
+      ],
+      "summary_scope": "seen_cohorts"
+    },
+    "itsm": {
+      "benchmark": "eog",
+      "recorded_stages": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "evaluation_cohorts": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "summary_scope": "seen_cohorts"
+    },
+    "ale": {
+      "benchmark": "ale",
+      "recorded_stages": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "evaluation_cohorts": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "summary_scope": "seen_cohorts"
+    }
+  }
+}

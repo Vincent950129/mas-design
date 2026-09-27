@@ -1,0 +1,17 @@
+track,arm,method,benchmark,stream,adapt_stage,scope,evaluated_cohorts,score_pct,score_std_pct,pass_pct,pass_std_pct,num_runs,tasks_per_run
+skills,memory,Codex Memory,eog,csm,1,seen_cohorts,1,54.506178,2.879152,2.777778,3.928371,3,1:12;2:12;3:12
+skills,memory,Codex Memory,eog,csm,2,seen_cohorts,1;2,56.700004,2.44949,10.666667,1.885618,3,1:25;2:25;3:25
+skills,memory,Codex Memory,eog,csm,3,seen_cohorts,1;2;3,61.471195,0.8983,20.37037,1.309457,3,1:36;2:36;3:36
+skills,memory,Codex Memory,eog,hr,1,seen_cohorts,1,67.171721,5.535427,33.333333,15.451574,3,1:11;2:11;3:11
+skills,memory,Codex Memory,eog,hr,2,seen_cohorts,1;2,62.500002,1.365232,26.262626,3.779452,3,1:33;2:33;3:33
+skills,memory,Codex Memory,eog,hr,3,seen_cohorts,1;2;3,60.947257,2.267885,18.238994,2.353244,3,1:53;2:53;3:53
+skills,memory,Codex Memory,eog,itsm,1,seen_cohorts,1,41.367515,6.969873,7.692308,10.878566,3,1:13;2:13;3:13
+skills,memory,Codex Memory,eog,itsm,2,seen_cohorts,1;2,54.377105,0.967392,15.151515,2.474232,3,1:33;2:33;3:33
+skills,memory,Codex Memory,eog,itsm,3,seen_cohorts,1;2;3,56.681549,3.779143,22.916667,5.892557,3,1:48;2:48;3:48
+skills,memory,Codex Memory,eog,itsm,4,seen_cohorts,1;2;3;4,53.302397,0.869692,15.819209,4.227861,3,1:59;2:59;3:59
+skills,memory,Codex Memory,ale,ale,1,seen_cohorts,1,59.208627,0.168043,30.0,0.0,3,1:10;2:10;3:10
+skills,memory,Codex Memory,ale,ale,2,seen_cohorts,1;2,38.897361,3.353605,17.647059,4.802921,3,1:17;2:17;3:17
+skills,memory,Codex Memory,ale,ale,3,seen_cohorts,1;2;3,39.690336,1.396736,18.518519,3.024061,3,1:27;2:27;3:27
+skills,memory,Codex Memory,ale,ale,4,seen_cohorts,1;2;3;4,34.110601,0.227331,13.475177,2.653658,3,1:47;2:47;3:47
+skills,memory,Codex Memory,ale,ale,5,seen_cohorts,1;2;3;4;5,28.324384,2.318421,10.0,1.632993,3,1:50;2:50;3:50
+skills,memory,Codex Memory,ale,ale,6,seen_cohorts,1;2;3;4;5;6,25.63951,3.452514,9.313725,1.834146,3,1:68;2:68;3:68

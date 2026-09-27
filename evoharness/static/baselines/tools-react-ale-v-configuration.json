@@ -1,0 +1,112 @@
+{
+  "name": "Codex (ALE, V)",
+  "track": "tools",
+  "arm": "react-ale-v",
+  "model": "GPT-5",
+  "harness": "Codex (ALE)",
+  "author": "Vaidehi",
+  "kind": "cumulative",
+  "description": "Deployment baseline with the benchmark’s accumulating capability pool. No stage-specific prompt or harness optimization.",
+  "settings": [
+    [
+      "Solver model",
+      "GPT-5",
+      "Recorded"
+    ],
+    [
+      "Stage search budget",
+      "No stage-level optimization",
+      "Experiment design"
+    ],
+    [
+      "Capability pool",
+      "Cumulative through the selected stage",
+      "Registry / runner"
+    ],
+    [
+      "ALE solver limit",
+      "7,200 seconds per task",
+      "Saved experiment configuration / runner"
+    ],
+    [
+      "Held-out evaluation",
+      "Runs 1, 2 and 3 per recorded cell",
+      "Archived snapshot"
+    ],
+    [
+      "Complete total compute budget",
+      "Not established; evaluation metrics exclude adaptation/search work",
+      "Unavailable"
+    ]
+  ],
+  "notes": [
+    "ALE deployment control for the tool-memory baselines. Results are reported separately from the other ReAct / Codex deployment run."
+  ],
+  "sources": [
+    "analysis/arms.py",
+    "analysis/cache/cells_tools.tsv",
+    "evolve_tools/src/runner.py",
+    "evolve_tools/src/ale_eval.py",
+    "reference/EnterpriseOps-Gym/conf/llm/gpt-5.json (model settings only)"
+  ],
+  "reproduction": {
+    "status": "partial",
+    "prerequisites": [
+      "Use the exact source tree named in the evidence. The external/evolving-mas-benchmark prefix denotes Vaidehi’s separate checkout; it is not interchangeable with the main experiment source.",
+      "Set REPRO_SOURCE to that checkout, REPRO_DATA_ROOT to the frozen evovling_tools dataset, REPRO_OUTPUT_ROOT to a new empty output directory, REPRO_DOMAIN to the desired stream, and REPRO_CONCURRENCY explicitly.",
+      "Create REPRO_LLM_CONFIG as a private provider configuration with openai/gpt-5, max_tokens 16384 and temperature 0.1; use your own credentials. The original file must not be copied because it can contain secrets.",
+      "EOG requires the matching EnterpriseOps-Gym source/dependencies and running MCP/SQL services. ALE requires the matching agents-last-exam checkout, locked Python >=3.12 environment, Docker/task images, software guard and your own secret file.",
+      "Before ALE runs in the external checkout, point ALE_AGENT_CONFIG at a user-created Codex preset with model gpt-5. This runner has no ALE_MODEL override; its default preset can select gpt-5.4. Validate the generated experiment YAML without printing credentials."
+    ],
+    "steps": [
+      {
+        "title": "External tool-runner template",
+        "command": "cd \"${REPRO_SOURCE:?}\"\nALE_WALL_TIME_S=7200 python -m evolve_tools.src.runner_evolving_tools \\\n  --data_root \"${REPRO_DATA_ROOT:?}\" --domain \"${REPRO_DOMAIN:?}\" \\\n  --llm_config \"${REPRO_LLM_CONFIG:?}\" --output_dir \"${REPRO_OUTPUT_ROOT:?}\" \\\n  --memory_mode none --runs_per_stage 3 --concurrency \"${REPRO_CONCURRENCY:?}\"",
+        "notes": "Current external source template. Use REPRO_DOMAIN=ale for ALE; this arm is ALE-only. Current no-memory ALE code evaluates the final cumulative row only. It cannot recreate every earlier archived matrix cell without recovering the earlier runner/version."
+      }
+    ],
+    "missing": [
+      "The archived launcher command, full environment overrides, exact dependency lock and historical source revision were not preserved in the exported evaluation snapshot.",
+      "A fresh live-model run is stochastic. Matching its protocol does not guarantee the same scores; use the downloadable trial/cell data to reproduce the archived arithmetic.",
+      "Obtain the versioned task splits, capability libraries, original verifier/environment assets and archived task-exclusion manifest before running; current datasets/manifests may differ.",
+      "The external checkout currently has HEAD aef27e4802f7c64dcd591844e6858bcdcdb7da44 plus uncommitted modifications to runner_evolving_tools.py, runner.py, memory.py, reasoning_induction.py, ale_eval.py and metrics.py. This is not an archived run commit or a reproducible source pin.",
+      "Historical solver/induction overrides, retrieval policy, complete adaptation compute usage and matching stage memory artifacts are not fully recorded."
+    ],
+    "evidence": [
+      "analysis/arms.py",
+      "external/evolving-mas-benchmark/evolve_tools/src/runner_evolving_tools.py",
+      "external/evolving-mas-benchmark/evolve_tools/src/ale_eval.py",
+      "external/evolving-mas-benchmark/evolve_tools/src/scripts/frequent_config/gpt5_evolve_ale_cumulative_tool_no_memory.sh"
+    ],
+    "protocol": {
+      "evaluation_runs": 3,
+      "memory_representation": null,
+      "training": "none",
+      "source_revision": null
+    },
+    "result_reconstruction": "Included per-task scores and success flags reproduce all archived aggregates offline."
+  },
+  "sourceRoots": {
+    "ale": "external/evolving-mas-benchmark/evolve_tools/results/gpt5_evolve_evoving_tools_ale/ale/cumulative_tool_no_memory"
+  },
+  "coverage": {
+    "ale": {
+      "benchmark": "ale",
+      "recorded_stages": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "evaluation_cohorts": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "summary_scope": "seen_cohorts"
+    }
+  }
+}

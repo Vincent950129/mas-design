@@ -1,0 +1,17 @@
+track,arm,method,benchmark,stream,adapt_stage,scope,evaluated_cohorts,score_pct,score_std_pct,pass_pct,pass_std_pct,num_runs,tasks_per_run
+skills,oracle-claude,Task-specific Claude Code,eog,csm,1,cohort_only,1,59.166672,0.785674,8.333333,0.0,3,1:12;2:12;3:12
+skills,oracle-claude,Task-specific Claude Code,eog,csm,2,cohort_only,2,70.060223,0.794343,28.205128,3.626189,3,1:13;2:13;3:13
+skills,oracle-claude,Task-specific Claude Code,eog,csm,3,cohort_only,3,76.397312,0.629906,30.30303,4.285496,3,1:11;2:11;3:11
+skills,oracle-claude,Task-specific Claude Code,eog,hr,1,cohort_only,1,72.474745,2.630389,54.545455,7.422696,3,1:11;2:11;3:11
+skills,oracle-claude,Task-specific Claude Code,eog,hr,2,cohort_only,2,62.076723,1.731212,25.757576,2.142748,3,1:22;2:22;3:22
+skills,oracle-claude,Task-specific Claude Code,eog,hr,3,cohort_only,3,65.006105,1.035817,10.0,0.0,3,1:20;2:20;3:20
+skills,oracle-claude,Task-specific Claude Code,eog,itsm,1,cohort_only,1,51.623933,5.497727,17.948718,3.626189,3,1:13;2:13;3:13
+skills,oracle-claude,Task-specific Claude Code,eog,itsm,2,cohort_only,2,74.666668,0.78469,50.0,4.082483,3,1:20;2:20;3:20
+skills,oracle-claude,Task-specific Claude Code,eog,itsm,3,cohort_only,3,62.555553,2.749857,40.0,0.0,3,1:15;2:15;3:15
+skills,oracle-claude,Task-specific Claude Code,eog,itsm,4,cohort_only,4,60.721506,1.767777,30.30303,4.285496,3,1:11;2:11;3:11
+skills,oracle-claude,Task-specific Claude Code,ale,ale,1,cohort_only,1,54.47891,0.862051,26.666667,4.714045,3,1:10;2:10;3:10
+skills,oracle-claude,Task-specific Claude Code,ale,ale,2,cohort_only,2,9.136233,0.012875,0.0,0.0,3,1:7;2:7;3:7
+skills,oracle-claude,Task-specific Claude Code,ale,ale,3,cohort_only,3,46.42727,0.975534,23.333333,4.714045,3,1:10;2:10;3:10
+skills,oracle-claude,Task-specific Claude Code,ale,ale,4,cohort_only,4,45.691235,1.297129,16.666667,2.357023,3,1:20;2:20;3:20
+skills,oracle-claude,Task-specific Claude Code,ale,ale,5,cohort_only,5,31.402222,26.067151,11.111111,15.713484,3,1:3;2:3;3:3
+skills,oracle-claude,Task-specific Claude Code,ale,ale,6,cohort_only,6,16.733548,3.015446,1.851852,2.618914,3,1:18;2:18;3:18

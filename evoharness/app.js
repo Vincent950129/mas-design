@@ -98,7 +98,7 @@ const MQ = (() => {
    * same facts. The second copy of the band is scenery: no place in the tab order or the
    * a11y tree. */
   function panel(p, dup) {
-    const where = p.env === "ale" ? "Agentic Last Exam" : "EnterpriseOps-Gym";
+    const where = p.env === "ale" ? "Agents’ Last Exam" : "EnterpriseOps-Gym";
     const h = p.hx;
     const held = h.first
       ? `the ${h.ax} harness starts at ${h.pool}`
@@ -2747,7 +2747,9 @@ const LB = (() => {
         };
         return `<tr class="${cls}">
           <td><span class="lb-rk is-${rk}">${rk ?? "\u2014"}</span></td>
-          <td><span class="lb-nm">${esc(r.name)}</span>${
+          <td><button class="lb-nm lb-system-link" type="button" data-lb-system="${allRows(axis).indexOf(r)}"
+            aria-haspopup="dialog" aria-controls="lb-system-dialog"
+            aria-label="View ${esc(r.name)} details: ${esc((CAT[r.cat] || CAT.ref).label)}, evolving ${axis}">${esc(r.name)}<span aria-hidden="true"> ↗</span></button>${
             r.ref ? '<span class="lb-tag is-ref">control</span>' : ""}${
             mixedAgency && facet(r, "agency", axis) === "mas"
               ? '<span class="lb-tag is-mas">multi-agent</span>' : ""}
@@ -2759,7 +2761,7 @@ const LB = (() => {
         </tr>`;
       }).join("")}</tbody>
     </table></div>
-    <p class="lb-cap">Click a column to sort. Bold indigo marks the best value in a column
+    <p class="lb-cap">Click a system for its configuration, budgets, and available stage results. Click a column to sort. Bold indigo marks the best value in a column
       &mdash; highest for pass and score, lowest for hours and tokens, measured over whatever
       the filters leave in view. The control rows are task-specific harnesses, which are
       reference conditions rather than competing systems.
@@ -3134,6 +3136,7 @@ const LB = (() => {
   function init() {
     const root = document.getElementById("leaderboard");
     if (!root) return;
+    LB_DETAILS.init();
     root.addEventListener("change", (e) => {
       const sel = e.target.closest("[data-lbf]");
       if (!sel) return;
@@ -3141,6 +3144,15 @@ const LB = (() => {
       paint();
     });
     root.addEventListener("click", (e) => {
+      const system = e.target.closest("[data-lb-system]");
+      if (system) {
+        const row = allRows(S.axis)[Number(system.dataset.lbSystem)];
+        if (row) LB_DETAILS.open({ axis: S.axis, row,
+          model: facet(row, "llm", S.axis), harness: facet(row, "harness", S.axis),
+          family: (CAT[row.cat] || CAT.ref).label,
+          agency: AGENCY[facet(row, "agency", S.axis)] });
+        return;
+      }
       const ax = e.target.closest("[data-lb-axis] .lb-segb");
       if (ax) { S.axis = ax.dataset.axis; paint(); return; }
       const vw = e.target.closest("[data-lb-view] .lb-segb");

@@ -1,0 +1,17 @@
+track,arm,method,benchmark,stream,adapt_stage,scope,evaluated_cohorts,score_pct,score_std_pct,pass_pct,pass_std_pct,num_runs,tasks_per_run
+skills,meta,Meta-Harness,eog,csm,1,seen_cohorts,1,57.500006,1.571348,0.0,0.0,3,1:12;2:12;3:12
+skills,meta,Meta-Harness,eog,csm,2,seen_cohorts,1;2,59.897984,1.598456,14.666667,3.771236,3,1:25;2:25;3:25
+skills,meta,Meta-Harness,eog,csm,3,seen_cohorts,1;2;3,65.178644,1.465865,20.37037,2.618914,3,1:36;2:36;3:36
+skills,meta,Meta-Harness,eog,hr,1,seen_cohorts,1,65.404045,3.40675,30.30303,11.338356,3,1:11;2:11;3:11
+skills,meta,Meta-Harness,eog,hr,2,seen_cohorts,1;2,57.994231,1.839238,22.222222,3.779452,3,1:33;2:33;3:33
+skills,meta,Meta-Harness,eog,hr,3,seen_cohorts,1;2;3,61.887717,1.54351,19.496855,3.55777,3,1:53;2:53;3:53
+skills,meta,Meta-Harness,eog,itsm,1,seen_cohorts,1,35.384615,4.187164,5.128205,7.252377,3,1:13;2:13;3:13
+skills,meta,Meta-Harness,eog,itsm,2,seen_cohorts,1;2,56.346803,1.814593,20.20202,1.428499,3,1:33;2:33;3:33
+skills,meta,Meta-Harness,eog,itsm,3,seen_cohorts,1;2;3,55.294312,2.196597,20.138889,2.598373,3,1:48;2:48;3:48
+skills,meta,Meta-Harness,eog,itsm,4,seen_cohorts,1;2;3;4,53.851225,2.025394,18.644068,4.151678,3,1:59;2:59;3:59
+skills,meta,Meta-Harness,ale,ale,1,seen_cohorts,1,57.98224,2.527041,23.333333,4.714045,3,1:10;2:10;3:10
+skills,meta,Meta-Harness,ale,ale,2,seen_cohorts,1;2,39.736467,1.772746,15.686275,2.772968,3,1:17;2:17;3:17
+skills,meta,Meta-Harness,ale,ale,3,seen_cohorts,1;2;3,36.369068,2.706557,17.283951,3.491885,3,1:27;2:27;3:27
+skills,meta,Meta-Harness,ale,ale,4,seen_cohorts,1;2;3;4,31.829134,0.718043,12.765957,1.737227,3,1:47;2:47;3:47
+skills,meta,Meta-Harness,ale,ale,5,seen_cohorts,1;2;3;4;5,32.066507,0.09987,12.666667,1.885618,3,1:50;2:50;3:50
+skills,meta,Meta-Harness,ale,ale,6,seen_cohorts,1;2;3;4;5;6,26.071569,2.367101,7.843137,1.834146,3,1:68;2:68;3:68

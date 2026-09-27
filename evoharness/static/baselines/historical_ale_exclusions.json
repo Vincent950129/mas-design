@@ -1,0 +1,154 @@
+{
+  "schema": 1,
+  "what": "ALE tasks that no accuracy number in this repo counts, and the ones that LOOK like they should be excluded and are deliberately kept. Every ALE row of every table and figure divides by the same task set, so this file is the one place a task leaves or enters that set.",
+  "read_by": [
+    "analysis/main_results_table.py (ENV_BROKEN_ALE_TASKS)",
+    "analysis/plot_cl_transfer.py",
+    "analysis/plot_pool_curves.py"
+  ],
+  "required": "This file is not optional and has no fallback. main_results_table.py loads it at import and refuses to start if it is missing, unparseable, on another schema, or holding an exclusion that states no cause -- and so, through it, does every figure above. Deleting it does not make a row look broken: it re-bases every ALE denominator by five or six tasks and prints numbers that read as fine, which is why the failure is loud instead. Keep the file and pass --keep-env-broken to COUNT these tasks rather than drop them.",
+  "editing": "Add or remove a task by editing 'excluded' here; nothing in the code carries a copy. Every entry needs a 'cause', and any change moves published rows, so re-run analysis/main_results_table.sh and update the task counts in the table headers (analysis/tables/*.tex) in the same breath.",
+  "rule": "Exclude a task only when it cannot be MEASURED on this host for a reason that has nothing to do with the agent: the task's own loader or grader dies before or after the agent's work, on every run, in every arm. A task the agent simply fails -- wrong answer, no answer, empty output, a cap or timeout it ran into -- stays in and scores the 0.0 it earned.",
+  "recorded_utc": "2026-08-16T07:38:10Z",
+  "excluded": {
+    "health_medicine/ct_geometry_calibration_catphan": {
+      "cause": "missing_package",
+      "module": "skimage",
+      "raised_in": "ale_run.tasks.loader._load_module, from tasks/.../main.py",
+      "outcome": "measured=false, status=failed, score=null, no tokens, ~11s",
+      "evidence": "evovle_skills/jobs/cumulative_skill_gepa/ale/adapt_v6/eval_v4/run_1/health_medicine/ct_geometry_calibration_catphan/ale_run.log"
+    },
+    "health_medicine/limited_angle_ct_dps_reconstruction": {
+      "cause": "missing_package",
+      "module": "scipy",
+      "raised_in": "ale_run.tasks.loader._load_module, from tasks/.../main.py",
+      "outcome": "measured=false, status=failed, score=null, no tokens",
+      "evidence": "evovle_skills/jobs/cumulative_skill_gepa/ale/adapt_v6/eval_v4/run_1/health_medicine/limited_angle_ct_dps_reconstruction/ale_run.log"
+    },
+    "life_sciences/merfish_image_decoding_segmentation_1": {
+      "cause": "missing_package",
+      "module": "scipy",
+      "raised_in": "ale_run.tasks.loader._load_module, from tasks/.../main.py",
+      "outcome": "measured=false, status=failed, score=null, no tokens",
+      "evidence": "evovle_skills/jobs/cumulative_skill_gepa/ale/adapt_v6/eval_v6/run_1/life_sciences/merfish_image_decoding_segmentation_1/ale_run.log",
+      "note": "the one exclusion here that a sweep has ever scored: Vaidehi's reasoningbank tree ran on a host WITH scipy and gets 0.26/0.16/0.16. Keeping the task would hand that one row three scores its neighbours cannot earn, which is the clearest argument for the file."
+    },
+    "life_sciences/spatial_transcriptomics_spatial_domain_identification": {
+      "cause": "missing_package",
+      "module": "sklearn",
+      "raised_in": "ale_run.tasks.loader._load_module, from tasks/.../main.py",
+      "outcome": "measured=false, status=failed, score=null, no tokens",
+      "evidence": "evovle_skills/jobs/cumulative_skill_gepa/ale/adapt_v6/eval_v6/run_1/life_sciences/spatial_transcriptomics_spatial_domain_identification/ale_run.log"
+    },
+    "other/aerobics_wc2026_portugal_trio_difficulty_scoring": {
+      "cause": "missing_package",
+      "module": "openpyxl",
+      "raised_in": "ale_run.orchestration.lifecycle.run_one_unit -> TaskLoader.load",
+      "outcome": "termination.error.type=ModuleNotFoundError, measured=false, ~10s",
+      "in_task_sets": "tools and agents (68); not in the skills 74",
+      "evidence": "evolve_tools/jobs/cumulative_tools_meta_harness/ale/v5/test_v5/run_1/other__aerobics_wc2026_portugal_trio_difficulty_scoring/_ale_runs/evolving_tools_ale_g0/codex/gpt-5/other__aerobics_wc2026_portugal_trio_difficulty_scoring/v0/20260812_204926/run.json"
+    },
+    "computing_math/dit_pipeline_cfg_alignment_fid_256_001": {
+      "cause": "missing_package",
+      "module": "torch",
+      "raised_in": "ale_run.tasks.loader._load_module, from tasks/.../main.py",
+      "outcome": "measured=false, status=failed, score=null, no tokens",
+      "in_task_sets": "skills (74); not in the tools/agents 68",
+      "evidence": "evovle_skills/jobs/cumulative_skill_gepa/ale/adapt_v6/eval_v2/run_1/computing_math/dit_pipeline_cfg_alignment_fid_256_001/ale_run.log"
+    },
+    "computing_math/mp_checkpoint_consolidation_v2": {
+      "cause": "missing_package",
+      "module": "torch",
+      "raised_in": "ale_run.tasks.loader._load_module, from tasks/.../main.py",
+      "outcome": "measured=false, status=failed, score=null, no tokens",
+      "in_task_sets": "skills (74); not in the tools/agents 68",
+      "evidence": "evovle_skills/jobs/cumulative_skill_gepa/ale/adapt_v6/eval_v2/run_1/computing_math/mp_checkpoint_consolidation_v2/ale_run.log"
+    },
+    "computing_math/go_game_reconstruction_1": {
+      "cause": "missing_package",
+      "module": "sgfmill",
+      "raised_in": "ale_run.tasks.loader._load_module -- the task imports its own verifier at module scope, and ALE never declares sgfmill",
+      "outcome": "measured=false, status=failed, score=null, no tokens",
+      "note": "excluded since post-hoc.md 1.1, before this file existed. Same cause as the six above it, which is why they now sit together.",
+      "evidence": "evovle_skills/jobs/cumulative_skill_gepa/ale/adapt_v6/eval_v5/run_1/computing_math/go_game_reconstruction_1/ale_run.log"
+    },
+    "engineering/sumo_urban_am_peak_calibration": {
+      "cause": "broken_grader",
+      "module": null,
+      "raised_in": "the task's prebuilt hidden-evaluator venv, whose console scripts hardcode the ALE author's build path, so grading dies when it shells out to `sumo`",
+      "outcome": "the AGENT finishes and burns a full budget (~1.27M tokens over 3 runs); only the score is unreachable",
+      "note": "the one exclusion that is not free: it removes real spend from the Tok. column as well as an ungradeable 0.0 from accuracy."
+    }
+  },
+  "kept_on_purpose": {
+    "life_sciences/gene_expression_differential_analysis_functional_enrichment_analysis_1": {
+      "why": "looks identical to an exclusion in some arms -- unmeasured, no tokens -- but the cause is a sandbox whose Computer API server went unreachable mid-run, not the task. It SCORES elsewhere (0.9988 on a frontier run), so it is harness flakiness every arm faces equally."
+    },
+    "education_info/marc_remediation_folio_overlay": {
+      "why": "its log carries a ModuleNotFoundError too (catalog_remediation_lib, a task-local helper), but that is the AGENT tripping over it during its own work: the task loads, grades, and scores 0.10-0.20 across arms."
+    },
+    "any task the agent merely failed": {
+      "why": "wrong answer, no answer, no score parsed, or a cap/timeout it ran into. These are 0.0 and stay 0.0. A trial can also honestly carry no tokens here, when the sandbox died before the agent was billed."
+    }
+  },
+  "not_linux": {
+    "why": "ALE's suite spans two operating systems and its version partition was built from the full 152 tasks, so a large part of each version cannot be run in a Linux docker sandbox at all.",
+    "enforced": "UPSTREAM, not post-hoc: the runners filter against this manifest before a sweep starts, so none of these ids appears in any of our ALE trees and main_results_table's rule 4 drops nothing in practice (skips.not_runnable is empty for every arm). Recorded here so the task set a row divides by can be reconstructed from names alone.",
+    "derivation": "selected_tasks/full.txt (152) minus selected_tasks/linux_only.txt (105). linux_only.txt is exactly docker_support.txt (99) plus the 6 PRIVILEGED_ALE_TASKS, checked, so either manifest reconstructs the same set.",
+    "count": 47,
+    "tasks": [
+      "agriculture_env/crop_rotation_d02",
+      "agriculture_env/ndvi_zonal_statistics_d02",
+      "business_finance/ar_full_1500",
+      "business_finance/ar_full_300",
+      "business_finance/equity_research_summary",
+      "business_finance/metabase_bi_dashboard_01",
+      "business_finance/odoo",
+      "business_finance/saas_onepager_brand_refresh_instance_1",
+      "business_finance/taxform_4_1",
+      "computing_math/ghidra_malware_config_extraction_01",
+      "computing_math/newyear_keygen2",
+      "computing_math/pcap_enterprise_triage_01",
+      "computing_math/tris_crackme",
+      "education_info/yi_manuscript_translation_1",
+      "engineering/2d_drawings_to_3d_building_model",
+      "engineering/Analog_Active",
+      "engineering/cailian_road_highway_alignment_2",
+      "engineering/gcode",
+      "engineering/humanoid_velocity_tracking_policy",
+      "engineering/inner_support_elevation_optimization",
+      "engineering/kicad_navswitch_library_integration_release_002",
+      "engineering/mold-flow",
+      "engineering/pcb_layout_kicad_1",
+      "engineering/robotics_blender_tabletop_reconstruction",
+      "engineering/sanding_performance_scoring_instance_1",
+      "health_medicine/ecg_rhythm_conduction_ptbxl",
+      "health_medicine/ecg_superclass_ptbxl",
+      "health_medicine/microdicom_nih_cxr_reader_adjudication",
+      "health_medicine/sa_aki_phenotyping",
+      "other/mota_exploration",
+      "physical_sciences/egt710_table1_smiles_extraction",
+      "physical_sciences/ketcher_smiles_reproduction",
+      "physical_sciences/lenacapavir_sar_table2_extraction",
+      "physical_sciences/qm9_mmff94_forcefield_survey_1",
+      "psychology_neuro/reddit_ai_post_codebook_boolean_coding",
+      "visual_media/atlas_outpost_graybox_navigation",
+      "visual_media/blender_character_reconstruction_from_multiview_01",
+      "visual_media/butterfly_flap_animation",
+      "visual_media/chroma_key_from_reference",
+      "visual_media/compress_3dgs_scene_ply",
+      "visual_media/human_mesh_animation_reproduction",
+      "visual_media/inkscape_cultural_poster_design",
+      "visual_media/music_transcription",
+      "visual_media/project_migration",
+      "visual_media/skeletal_animation_reproduction",
+      "visual_media/uv_reproduction",
+      "visual_media/video_storyboard_001"
+    ]
+  },
+  "task_sets_after_exclusion": {
+    "tools": "68 attempted -> 63 counted (catphan, limited_angle, merfish, spatial_transcriptomics, aerobics; go_game and sumo were never in the 68, having been dropped before this file)",
+    "skills": "74 attempted -> 68 counted (catphan, limited_angle, merfish, spatial_transcriptomics, dit_pipeline, mp_checkpoint)",
+    "agents": "68 attempted -> 63 counted, the same five as tools"
+  }
+}

@@ -1,0 +1,18 @@
+track,arm,method,benchmark,stream,adapt_stage,scope,evaluated_cohorts,score_pct,score_std_pct,pass_pct,pass_std_pct,num_runs,tasks_per_run
+agents,memory,Codex Memory,eog,csm,1,seen_cohorts,1,39.333333,9.42809,13.333333,9.42809,3,1:5;2:5;3:5
+agents,memory,Codex Memory,eog,csm,2,seen_cohorts,1;2,58.214285,4.709794,18.181818,7.422696,3,1:11;2:11;3:11
+agents,memory,Codex Memory,eog,csm,3,seen_cohorts,1;2;3,43.703368,3.576658,8.333333,2.268046,3,1:36;2:36;3:36
+agents,memory,Codex Memory,eog,hr,1,seen_cohorts,1,44.583337,9.199751,8.333333,11.785113,3,1:8;2:8;3:8
+agents,memory,Codex Memory,eog,hr,2,seen_cohorts,1;2,57.248678,5.010732,28.571429,10.28689,3,1:21;2:21;3:21
+agents,memory,Codex Memory,eog,hr,3,seen_cohorts,1;2;3,38.902466,2.502803,11.403509,1.240538,3,1:38;2:38;3:38
+agents,memory,Codex Memory,eog,hr,4,seen_cohorts,1;2;3;4,41.090438,1.800189,9.433962,2.668327,3,1:53;2:53;3:53
+agents,memory,Codex Memory,eog,itsm,1,seen_cohorts,1,42.06349,5.836432,9.52381,6.73435,3,1:7;2:7;3:7
+agents,memory,Codex Memory,eog,itsm,2,seen_cohorts,1;2,43.08642,8.211498,5.555556,7.856742,3,1:18;2:18;3:18
+agents,memory,Codex Memory,eog,itsm,3,seen_cohorts,1;2;3,47.87037,5.466005,16.666667,2.721655,3,1:30;2:30;3:30
+agents,memory,Codex Memory,eog,itsm,4,seen_cohorts,1;2;3;4,42.447541,1.30124,11.864407,3.661435,3,1:59;2:59;3:59
+agents,memory,Codex Memory,ale,ale,1,seen_cohorts,1,30.542065,4.228227,10.0,8.164966,3,1:20;2:20;3:20
+agents,memory,Codex Memory,ale,ale,2,seen_cohorts,1;2,20.785129,2.539984,6.060606,2.474232,3,1:33;2:33;3:33
+agents,memory,Codex Memory,ale,ale,3,seen_cohorts,1;2;3,23.595034,4.455689,5.555556,2.268046,3,1:36;2:36;3:36
+agents,memory,Codex Memory,ale,ale,4,seen_cohorts,1;2;3;4,15.943479,2.900252,3.174603,2.969569,3,1:42;2:42;3:42
+agents,memory,Codex Memory,ale,ale,5,seen_cohorts,1;2;3;4;5,23.015714,1.675156,8.484848,1.714198,3,1:55;2:55;3:55
+agents,memory,Codex Memory,ale,ale,6,seen_cohorts,1;2;3;4;5;6,16.599396,2.4007,3.703704,0.748261,3,1:63;2:63;3:63

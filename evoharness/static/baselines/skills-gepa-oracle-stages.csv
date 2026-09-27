@@ -1,0 +1,4 @@
+track,arm,method,benchmark,stream,adapt_stage,scope,evaluated_cohorts,score_pct,score_std_pct,pass_pct,pass_std_pct,num_runs,tasks_per_run
+skills,gepa-oracle,Task-specific GEPA (eval on full library),eog,csm,3,seen_cohorts,1;2;3,63.22715,2.146686,20.37037,3.464498,3,1:36;2:36;3:36
+skills,gepa-oracle,Task-specific GEPA (eval on full library),eog,hr,3,seen_cohorts,1;2;3,63.003569,0.52411,22.012579,0.889442,3,1:53;2:53;3:53
+skills,gepa-oracle,Task-specific GEPA (eval on full library),eog,itsm,4,seen_cohorts,1;2;3;4,63.023946,2.234844,25.423729,2.396972,3,1:59;2:59;3:59

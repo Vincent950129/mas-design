@@ -1,0 +1,11 @@
+track,arm,method,benchmark,stream,adapt_stage,scope,evaluated_cohorts,score_pct,score_std_pct,pass_pct,pass_std_pct,num_runs,tasks_per_run
+skills,skillopt,SkillOpt,eog,csm,1,seen_cohorts,1,55.771611,1.072725,0.0,0.0,3,1:12;2:12;3:12
+skills,skillopt,SkillOpt,eog,csm,2,seen_cohorts,1;2,58.33704,0.970399,9.333333,1.885618,3,1:25;2:25;3:25
+skills,skillopt,SkillOpt,eog,csm,3,seen_cohorts,1;2;3,64.43416,0.992553,20.37037,2.618914,3,1:36;2:36;3:36
+skills,skillopt,SkillOpt,eog,hr,1,seen_cohorts,1,72.22223,1.758634,39.393939,4.285496,3,1:11;2:11;3:11
+skills,skillopt,SkillOpt,eog,hr,2,seen_cohorts,1;2,65.601254,1.117765,26.262626,2.856997,3,1:33;2:33;3:33
+skills,skillopt,SkillOpt,eog,hr,3,seen_cohorts,1;2;3,63.519078,1.154065,20.754717,3.081119,3,1:53;2:53;3:53
+skills,skillopt,SkillOpt,eog,itsm,1,seen_cohorts,1,58.461541,5.539096,23.076923,6.280743,3,1:13;2:13;3:13
+skills,skillopt,SkillOpt,eog,itsm,2,seen_cohorts,1;2,61.245792,1.137829,29.292929,2.856997,3,1:33;2:33;3:33
+skills,skillopt,SkillOpt,eog,itsm,3,seen_cohorts,1;2;3,53.824404,3.268538,19.444444,0.982093,3,1:48;2:48;3:48
+skills,skillopt,SkillOpt,eog,itsm,4,seen_cohorts,1;2;3;4,58.736887,2.459254,22.033898,3.661435,3,1:59;2:59;3:59

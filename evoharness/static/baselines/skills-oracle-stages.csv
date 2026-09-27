@@ -1,0 +1,17 @@
+track,arm,method,benchmark,stream,adapt_stage,scope,evaluated_cohorts,score_pct,score_std_pct,pass_pct,pass_std_pct,num_runs,tasks_per_run
+skills,oracle,Task-specific Codex,eog,csm,1,cohort_only,1,55.555561,1.964186,0.0,0.0,3,1:12;2:12;3:12
+skills,oracle,Task-specific Codex,eog,csm,2,cohort_only,2,64.376459,3.050097,25.641026,9.593993,3,1:13;2:13;3:13
+skills,oracle,Task-specific Codex,eog,csm,3,cohort_only,3,73.400679,0.813669,36.363636,7.422696,3,1:11;2:11;3:11
+skills,oracle,Task-specific Codex,eog,hr,1,cohort_only,1,64.267679,2.806327,33.333333,4.285496,3,1:11;2:11;3:11
+skills,oracle,Task-specific Codex,eog,hr,2,cohort_only,2,55.728717,1.090637,16.666667,2.142748,3,1:22;2:22;3:22
+skills,oracle,Task-specific Codex,eog,hr,3,cohort_only,3,60.433763,3.341315,8.333333,4.714045,3,1:20;2:20;3:20
+skills,oracle,Task-specific Codex,eog,itsm,1,cohort_only,1,42.008546,4.974552,12.820513,3.626189,3,1:13;2:13;3:13
+skills,oracle,Task-specific Codex,eog,itsm,2,cohort_only,2,64.000003,1.440166,23.333333,2.357023,3,1:20;2:20;3:20
+skills,oracle,Task-specific Codex,eog,itsm,3,cohort_only,3,52.497356,0.843245,31.111111,3.142697,3,1:15;2:15;3:15
+skills,oracle,Task-specific Codex,eog,itsm,4,cohort_only,4,44.426409,1.607061,6.060606,4.285496,3,1:11;2:11;3:11
+skills,oracle,Task-specific Codex,ale,ale,1,cohort_only,1,55.599677,4.039224,20.0,0.0,3,1:10;2:10;3:10
+skills,oracle,Task-specific Codex,ale,ale,2,cohort_only,2,18.166595,2.335023,14.285714,0.0,3,1:7;2:7;3:7
+skills,oracle,Task-specific Codex,ale,ale,3,cohort_only,3,34.063723,7.394952,13.333333,4.714045,3,1:10;2:10;3:10
+skills,oracle,Task-specific Codex,ale,ale,4,cohort_only,4,25.493855,3.077684,1.666667,2.357023,3,1:20;2:20;3:20
+skills,oracle,Task-specific Codex,ale,ale,5,cohort_only,5,10.053333,14.21756,0.0,0.0,3,1:3;2:3;3:3
+skills,oracle,Task-specific Codex,ale,ale,6,cohort_only,6,18.468709,2.784594,1.851852,2.618914,3,1:18;2:18;3:18

@@ -1,0 +1,1796 @@
+{
+  "name": "Meta-Harness",
+  "track": "agents",
+  "arm": "meta",
+  "model": "GPT-5",
+  "harness": "Codex",
+  "author": "Zixuan",
+  "kind": "cumulative",
+  "description": "Code-based adaptation. A GPT-5 proposer edits the Python harness and learned state, carrying the selected program and state between stages.",
+  "settings": [
+    [
+      "Solver model",
+      "GPT-5",
+      "Recorded"
+    ],
+    [
+      "Search budget",
+      "5 proposer iterations per stage",
+      "Launcher configuration"
+    ],
+    [
+      "Candidates",
+      "3 requested per iteration",
+      "Proposer instruction"
+    ],
+    [
+      "EOG search repetitions",
+      "3 trials per task",
+      "Recorded"
+    ],
+    [
+      "ALE candidate validation repetitions",
+      "v1: 3 trials/task; v2: 3 trials/task; v3: 3 trials/task; v4: 3 trials/task; v5: 1 trials/task; v6: 1 trials/task",
+      "Recorded; repetitions per candidate, separate from held-out evaluation"
+    ],
+    [
+      "Proposer",
+      "GPT-5; 2,400 seconds per iteration",
+      "Configuration"
+    ],
+    [
+      "Inner learning",
+      "Offline; 1 epoch; batch size 1",
+      "Configuration"
+    ],
+    [
+      "Concurrency",
+      "8 concurrent trials",
+      "Current default"
+    ],
+    [
+      "EOG solver limit",
+      "900 seconds per task shared across up to 4 episodes",
+      "Current default; historical overrides not fully established"
+    ],
+    [
+      "ALE solver limit",
+      "7,200 seconds per task",
+      "Saved experiment configuration / runner"
+    ],
+    [
+      "Base delegation limits",
+      "12 threads; maximum depth 1",
+      "Saved base configuration / current default"
+    ],
+    [
+      "Held-out evaluation",
+      "Runs 1, 2 and 3 per recorded cell",
+      "Archived snapshot"
+    ],
+    [
+      "Complete total compute budget",
+      "Not established; evaluation metrics exclude adaptation/search work",
+      "Unavailable"
+    ]
+  ],
+  "notes": [
+    "Each candidate is evaluated on the full validation set. Five iterations do not guarantee 15 evaluated candidates; archived logs include incomplete stages.",
+    "The current ALE launcher defaults to one search trial/task throughout. The recorded schedule above differs.",
+    "Validation pools cohorts 1…k, with winners carried forward. Learning uses the new cohort with cumulative-data fallback from the seed.",
+    "GEPA metric calls and Meta-Harness proposer iterations are different budget units. These searches were not demonstrated to be compute-matched.",
+    "No complete search token/dollar cap or historical concurrency override was established. Three evaluation runs are not three independent searches.",
+    "These are base Codex delegation limits; an evolved harness may change orchestration behavior."
+  ],
+  "sources": [
+    "analysis/arms.py",
+    "analysis/cache/cells_agents.tsv",
+    "evovle_agents/src/scripts/run_meta_harness.sh",
+    "evovle_agents/meta_harness/config.yaml",
+    "evovle_agents/meta_harness/skills/meta-harness/SKILL.md",
+    "evovle_agents/meta_harness/logs/run_*/v*/<stream>/<candidate>/gpt-5/val.json",
+    "evovle_agents/src/config.py",
+    "evovle_agents/src/runner.py"
+  ],
+  "reproduction": {
+    "status": "partial",
+    "summary": "Archived metrics can be recomputed from released result tables. These source-validated recipes describe a new experiment; exact historical execution remains incomplete until the listed environment, data and checkpoint assets are supplied.",
+    "prerequisites": [
+      "Obtain the experiment source, benchmark task data and frozen capability libraries. Website CSVs can recompute reported aggregates but cannot execute an agent.",
+      "Follow install.md for local EOG gyms, Docker connectivity, Codex CLI authentication and Python environments. Authenticate with your own credentials; never reuse or publish saved authentication files.",
+      "Run namespace packages from the repository root. scripts/env.sh adds the root, eval_service/sdk (simple_agentic_evals), and reference/gepa/src to PYTHONPATH. Install the reference project dependencies instead of substituting another GEPA version.",
+      "EOG requires the reference EnterpriseOps-Gym runtime and its domain gym containers. Tools also require its ReAct/LangChain stack. Verify gym endpoints before spending the search budget.",
+      "ALE requires the reference/agents-last-exam Python 3.12 environment, gated task-data including grading references, a Linux sandbox image and the historical task eligibility/exclusion snapshot. A current manifest can change the denominator.",
+      "Freeze source, dependency locks, Python/Codex/Node versions, container digests, model identifiers, task/split manifests and library hashes. Current source fingerprints do not identify the historical runtime."
+    ],
+    "steps": [
+      {
+        "title": "Prepare an isolated run",
+        "command": "# Run from a prepared writable experiment checkout, not the website.\nset -euo pipefail\ntest -f scripts/env.sh\nsource scripts/env.sh\n# Retain this tag for resume; use a new tag for each independent search.\nexport REPRO_TAG=\"$(date -u +%Y%m%d_%H%M%S)_$$\"\nexport REPRO_RESULTS=\"$PWD/reproduction/$REPRO_TAG\"\nmkdir -p \"$REPRO_RESULTS\"\nexport EVOVLE_CODEX_MODEL=gpt-5\nexport EVOVLE_CODEX_TRANSPORT=stdio\nexport EVOVLE_CODEX_TIMEOUT_SEC=900\nexport EVOVLE_CODEX_MAX_EPISODES=4\nexport ALE_WALL_TIME_S=7200\nexport META_HARNESS_BACKEND=local\nexport META_HARNESS_CONCURRENCY=8\nunset EVOVLE_SKILLS_JOBS_ARM_DIR EVOVLE_AGENTS_JOBS_ARM_DIR",
+        "notes": "New run using inspected current source. EOG timeout 900 seconds, four episodes, stdio transport and concurrency eight are explicit current settings, not established historical overrides. Append --dry-run to a search command to inspect its plan once prerequisites exist; preparation files may still be written. Recipes were source-checked and bash syntax-checked; no benchmark was launched."
+      },
+      {
+        "title": "Search and evaluate EOG streams",
+        "command": "export EVOVLE_AGENTS_JOBS_MODE_SUFFIX=\"_meta_harness_repro_${REPRO_TAG}\"\nfor spec in csm:1,2,3 hr:1,2,3,4 itsm:1,2,3,4; do\n  stream=${spec%%:*}\n  versions=${spec#*:}\n  bash evovle_agents/src/scripts/run_meta_harness.sh \"$stream\" \\\n    --versions \"$versions\" --model gpt-5 --backend local \\\n    --concurrency 8 --num-runs 3 --fwt-all \\\n    --run-name \"repro_agents_meta_harness_${REPRO_TAG}_${stream}\" \\\n    --iterations 5 --trials-per-task 3 --resume \ndone",
+        "notes": "One stage chain per stream, pooled validation, three held-out repetitions and full forward/retention matrix. --fwt-all adds the forward cells; stagewise headline summaries pool j<=k. Fresh output roots/suffixes protect archived results."
+      },
+      {
+        "title": "Run ALE with the recorded search repetition schedule",
+        "command": "export EVOVLE_AGENTS_JOBS_MODE_SUFFIX=\"_meta_harness_repro_${REPRO_TAG}\"\nversions=\"\"\nstage=0\nfor repetitions in 3 3 3 3 1 1; do\n  stage=$((stage + 1))\n  versions=\"${versions:+$versions,}$stage\"\n  bash evovle_agents/src/scripts/run_meta_harness.sh ale \\\n    --versions \"$versions\" --model gpt-5 --backend local \\\n    --concurrency 8 --iterations 5 --trials-per-task \"$repetitions\" \\\n    --run-name \"repro_agents_meta_harness_${REPRO_TAG}_ale\" \\\n    --resume --no-eval \ndone\n# Resume completed stages and evaluate each winner three times.\nbash evovle_agents/src/scripts/run_meta_harness.sh ale \\\n  --versions \"$versions\" --model gpt-5 --backend local \\\n  --concurrency 8 --iterations 5 --trials-per-task 1 \\\n  --run-name \"repro_agents_meta_harness_${REPRO_TAG}_ale\" \\\n  --resume --num-runs 3 --fwt-all ",
+        "notes": "Requires the historical ALE eligibility snapshot and corresponding task/library files; current manifests can change split counts and denominators. Use a full version prefix, same run name and --resume at each stage so the preceding winner is restored. Passing only the newest stage starts carry state empty. Check prior stages completed before continuing."
+      },
+      {
+        "title": "Evaluate an existing checkpoint without another search",
+        "command": "export REPRO_STREAM=hr\nexport EVOVLE_AGENTS_JOBS_MODE_SUFFIX=\"_meta_harness_eval_repro_${REPRO_TAG}\"\npython -m evovle_agents.meta_harness.cl_eval \\\n  --domain \"$REPRO_STREAM\" \\\n  --run-name \"repro_agents_meta_harness_${REPRO_TAG}_${REPRO_STREAM}\" \\\n  --model gpt-5 --backend local --concurrency 8 --num-runs 3 --fwt-all\n",
+        "notes": "HR example reads the newly generated lineage and evaluates into a separate output tree. To evaluate an archived chain, replace --run-name with protocol.search_stages run_name and restore all lineage-linked code/state/library files. Tools also needs your own sanitized model config. This launches fresh stochastic evaluation, not recomputation of archived metrics."
+      }
+    ],
+    "missing": [
+      "No complete historical runtime lock: per-run Python/Codex/Node versions, dependency install state, container digests and immutable model snapshot are not recovered.",
+      "Historical concurrency, timeout, environment overrides and GEPA RNG seeds are not preserved in the inspected search summaries. Recipe values select current documented settings, not proof of the historical launch command.",
+      "No complete optimization token or dollar budget. Retained adapter statistics and reflection usage omit some failed attempts and are not total billed cost.",
+      "The downloadable result bundle does not include executable task environments, gated ALE data, trained checkpoints, full adapted code/state or frozen capability libraries. These assets are required for fresh evaluation.",
+      "A fresh search is stochastic and can select a different winner. Three evaluation repetitions are not three independently optimized harnesses.",
+      "Five iterations and three requested candidates are configured plans, not completed work. Archived stages can be incomplete and retained results overwritten; a complete rerun can spend more than the archived run."
+    ],
+    "evidence": [
+      "analysis/arms.py",
+      "evovle_agents/src/scripts/run_meta_harness.sh",
+      "evovle_agents/meta_harness/splits.py",
+      "evovle_agents/meta_harness/cl_eval.py",
+      "evovle_agents/meta_harness/run_stages.py",
+      "install.md",
+      "scripts/env.sh",
+      "reference/gepa/pyproject.toml",
+      "reference/gepa/uv.lock",
+      "reference/EnterpriseOps-Gym/pyproject.toml",
+      "reference/EnterpriseOps-Gym/uv.lock",
+      "reference/agents-last-exam/pyproject.toml",
+      "reference/agents-last-exam/uv.lock",
+      "evovle_agents/meta_harness/config.yaml",
+      "evovle_agents/meta_harness/skills/meta-harness/SKILL.md"
+    ],
+    "protocol": {
+      "scope": "Current source algorithm; historical counts are recorded below. Freeze task membership before applying it.",
+      "cohort_partition": "For each original training cohort sort task IDs by SHA256(\"{domain}|v{cohort}|{task_id}\"). Validation is the first n_val rows, where n_val=min(n-1,max(1,round(n/3))); learn is the remainder. A cohort smaller than two tasks cannot be searched.",
+      "search": "Default pooled validation includes cohorts 1..k. Learning uses the newest cohort when a non-seed winner is inherited, otherwise cumulative learn rows. --stage-local is a different experiment.",
+      "held_out": "R[k,j] evaluates held-out cohort j with stage-k adaptation. Lower triangle uses C_k; forward cells use C_max(k,j). Held-out results do not enter selection.",
+      "repeats": "Search trials_per_task and held-out --num-runs are separate. Archived held-out results use runs 1,2,3 for each cell.",
+      "aggregation": "Within each run pool task score/success across the selected cells, then equally average the three run means. Standard deviation is population SD across runs. Preserve each denominator and absent records; do not fill missing data with zeros.",
+      "streams": {
+        "csm": 3,
+        "hr": 4,
+        "itsm": 4,
+        "ale": 6
+      },
+      "search_stages": [
+        {
+          "domain": "hr",
+          "version": 1,
+          "run_name": "run_20260808_215918",
+          "winner": "readback_guardrail",
+          "checkpoint_lineage": "evovle_agents/meta_harness/logs/run_20260808_215918/lineage.json",
+          "validation_task_counts": [
+            1
+          ],
+          "recorded_trials_per_task": [
+            3.0
+          ],
+          "retained_candidate_validation_files": 13,
+          "retained_candidate_trials": 39,
+          "validation_evidence": [
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260808_215918/v1/hr/checklist_readback_guardrail/gpt-5/val.json",
+              "n_tasks": 1,
+              "n_trials": 3,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260808_215918/v1/hr/clustered_fewshot/gpt-5/val.json",
+              "n_tasks": 1,
+              "n_trials": 3,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260808_215918/v1/hr/contrastive_lesson_memory/gpt-5/val.json",
+              "n_tasks": 1,
+              "n_trials": 3,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260808_215918/v1/hr/fewshot_all/gpt-5/val.json",
+              "n_tasks": 1,
+              "n_trials": 3,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260808_215918/v1/hr/hybrid_fewshot_lesson/gpt-5/val.json",
+              "n_tasks": 1,
+              "n_trials": 3,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260808_215918/v1/hr/keyword_diverse_fewshot/gpt-5/val.json",
+              "n_tasks": 1,
+              "n_trials": 3,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260808_215918/v1/hr/lesson_memory/gpt-5/val.json",
+              "n_tasks": 1,
+              "n_trials": 3,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260808_215918/v1/hr/op_diverse_fewshot/gpt-5/val.json",
+              "n_tasks": 1,
+              "n_trials": 3,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260808_215918/v1/hr/plan_template_memory/gpt-5/val.json",
+              "n_tasks": 1,
+              "n_trials": 3,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260808_215918/v1/hr/preflight_verify_guardrail/gpt-5/val.json",
+              "n_tasks": 1,
+              "n_trials": 3,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260808_215918/v1/hr/readback_guardrail/gpt-5/val.json",
+              "n_tasks": 1,
+              "n_trials": 3,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260808_215918/v1/hr/schema_indexed_lessons/gpt-5/val.json",
+              "n_tasks": 1,
+              "n_trials": 3,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260808_215918/v1/hr/seed_harness/gpt-5/val.json",
+              "n_tasks": 1,
+              "n_trials": 3,
+              "trials_per_task": 3.0
+            }
+          ],
+          "trained_state": {
+            "hr": "evovle_agents/jobs/cumulative_agents_meta_harness/hr/adapt_v1/harness/readback_guardrail.state.json"
+          },
+          "candidate_code_directory": {
+            "hr": "evovle_agents/jobs/cumulative_agents_meta_harness/hr/adapt_v1/harness"
+          }
+        },
+        {
+          "domain": "hr",
+          "version": 2,
+          "run_name": "run_20260808_215918",
+          "winner": "readback_guardrail",
+          "checkpoint_lineage": "evovle_agents/meta_harness/logs/run_20260808_215918/lineage.json",
+          "validation_task_counts": [
+            2
+          ],
+          "recorded_trials_per_task": [
+            3.0
+          ],
+          "retained_candidate_validation_files": 6,
+          "retained_candidate_trials": 36,
+          "validation_evidence": [
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260808_215918/v2/hr/checklist_readback_guardrail/gpt-5/val.json",
+              "n_tasks": 2,
+              "n_trials": 6,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260808_215918/v2/hr/fewshot_all/gpt-5/val.json",
+              "n_tasks": 2,
+              "n_trials": 6,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260808_215918/v2/hr/plan_readback_guardrail/gpt-5/val.json",
+              "n_tasks": 2,
+              "n_trials": 6,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260808_215918/v2/hr/preflight_nudge_readback_guardrail/gpt-5/val.json",
+              "n_tasks": 2,
+              "n_trials": 6,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260808_215918/v2/hr/readback_guardrail/gpt-5/val.json",
+              "n_tasks": 2,
+              "n_trials": 6,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260808_215918/v2/hr/seed_harness/gpt-5/val.json",
+              "n_tasks": 2,
+              "n_trials": 6,
+              "trials_per_task": 3.0
+            }
+          ],
+          "trained_state": {
+            "hr": "evovle_agents/jobs/cumulative_agents_meta_harness/hr/adapt_v2/harness/readback_guardrail.state.json"
+          },
+          "candidate_code_directory": {
+            "hr": "evovle_agents/jobs/cumulative_agents_meta_harness/hr/adapt_v2/harness"
+          }
+        },
+        {
+          "domain": "hr",
+          "version": 3,
+          "run_name": "run_20260808_215918",
+          "winner": "checklist_readback_guardrail",
+          "checkpoint_lineage": "evovle_agents/meta_harness/logs/run_20260808_215918/lineage.json",
+          "validation_task_counts": [
+            4
+          ],
+          "recorded_trials_per_task": [
+            3.0
+          ],
+          "retained_candidate_validation_files": 7,
+          "retained_candidate_trials": 84,
+          "validation_evidence": [
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260808_215918/v3/hr/checklist_readback_guardrail/gpt-5/val.json",
+              "n_tasks": 4,
+              "n_trials": 12,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260808_215918/v3/hr/checklist_structured_verify_guardrail/gpt-5/val.json",
+              "n_tasks": 4,
+              "n_trials": 12,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260808_215918/v3/hr/compact_roster_readback_guardrail/gpt-5/val.json",
+              "n_tasks": 4,
+              "n_trials": 12,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260808_215918/v3/hr/focus_first_checklist_guardrail/gpt-5/val.json",
+              "n_tasks": 4,
+              "n_trials": 12,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260808_215918/v3/hr/preflight_nudge_readback_guardrail/gpt-5/val.json",
+              "n_tasks": 4,
+              "n_trials": 12,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260808_215918/v3/hr/readback_guardrail/gpt-5/val.json",
+              "n_tasks": 4,
+              "n_trials": 12,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260808_215918/v3/hr/schema_indexed_guidelines_guardrail/gpt-5/val.json",
+              "n_tasks": 4,
+              "n_trials": 12,
+              "trials_per_task": 3.0
+            }
+          ],
+          "trained_state": {
+            "hr": "evovle_agents/jobs/cumulative_agents_meta_harness/hr/adapt_v3/harness/checklist_readback_guardrail.state.json"
+          },
+          "candidate_code_directory": {
+            "hr": "evovle_agents/jobs/cumulative_agents_meta_harness/hr/adapt_v3/harness"
+          }
+        },
+        {
+          "domain": "hr",
+          "version": 4,
+          "run_name": "run_20260808_215918",
+          "winner": "fewshot_tfidf_retrieval_checklist_guardrail",
+          "checkpoint_lineage": "evovle_agents/meta_harness/logs/run_20260808_215918/lineage.json",
+          "validation_task_counts": [
+            8
+          ],
+          "recorded_trials_per_task": [
+            3.0
+          ],
+          "retained_candidate_validation_files": 6,
+          "retained_candidate_trials": 144,
+          "validation_evidence": [
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260808_215918/v4/hr/checklist_readback_guardrail/gpt-5/val.json",
+              "n_tasks": 8,
+              "n_trials": 24,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260808_215918/v4/hr/fewshot_all_checklist_guardrail/gpt-5/val.json",
+              "n_tasks": 8,
+              "n_trials": 24,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260808_215918/v4/hr/fewshot_checklist_guardrail/gpt-5/val.json",
+              "n_tasks": 8,
+              "n_trials": 24,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260808_215918/v4/hr/fewshot_preflight_checklist_guardrail/gpt-5/val.json",
+              "n_tasks": 8,
+              "n_trials": 24,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260808_215918/v4/hr/fewshot_retrieval_checklist_guardrail/gpt-5/val.json",
+              "n_tasks": 8,
+              "n_trials": 24,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260808_215918/v4/hr/fewshot_tfidf_retrieval_checklist_guardrail/gpt-5/val.json",
+              "n_tasks": 8,
+              "n_trials": 24,
+              "trials_per_task": 3.0
+            }
+          ],
+          "trained_state": {
+            "hr": "evovle_agents/jobs/cumulative_agents_meta_harness/hr/adapt_v4/harness/fewshot_tfidf_retrieval_checklist_guardrail.state.json"
+          },
+          "candidate_code_directory": {
+            "hr": "evovle_agents/jobs/cumulative_agents_meta_harness/hr/adapt_v4/harness"
+          }
+        },
+        {
+          "domain": "csm",
+          "version": 1,
+          "run_name": "run_20260809_185225",
+          "winner": "seed_harness",
+          "checkpoint_lineage": "evovle_agents/meta_harness/logs/run_20260809_185225/lineage.json",
+          "validation_task_counts": [
+            1
+          ],
+          "recorded_trials_per_task": [
+            3.0
+          ],
+          "retained_candidate_validation_files": 7,
+          "retained_candidate_trials": 21,
+          "validation_evidence": [
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_185225/v1/csm/checklist_diff_readback_guardrail/gpt-5/val.json",
+              "n_tasks": 1,
+              "n_trials": 3,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_185225/v1/csm/fewshot_all/gpt-5/val.json",
+              "n_tasks": 1,
+              "n_trials": 3,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_185225/v1/csm/plan_act_verify_inline/gpt-5/val.json",
+              "n_tasks": 1,
+              "n_trials": 3,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_185225/v1/csm/seed_baseline_clone/gpt-5/val.json",
+              "n_tasks": 1,
+              "n_trials": 3,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_185225/v1/csm/seed_depth2/gpt-5/val.json",
+              "n_tasks": 1,
+              "n_trials": 3,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_185225/v1/csm/seed_harness/gpt-5/val.json",
+              "n_tasks": 1,
+              "n_trials": 3,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_185225/v1/csm/seed_precise_targeting_nudge/gpt-5/val.json",
+              "n_tasks": 1,
+              "n_trials": 3,
+              "trials_per_task": 3.0
+            }
+          ],
+          "trained_state": {
+            "csm": "evovle_agents/jobs/cumulative_agents_meta_harness/csm/adapt_v1/harness/seed_harness.state.json"
+          },
+          "candidate_code_directory": {
+            "csm": "evovle_agents/jobs/cumulative_agents_meta_harness/csm/adapt_v1/harness"
+          }
+        },
+        {
+          "domain": "csm",
+          "version": 2,
+          "run_name": "run_20260809_185225",
+          "winner": "fewshot_schema_qna",
+          "checkpoint_lineage": "evovle_agents/meta_harness/logs/run_20260809_185225/lineage.json",
+          "validation_task_counts": [
+            2
+          ],
+          "recorded_trials_per_task": [
+            3.0
+          ],
+          "retained_candidate_validation_files": 9,
+          "retained_candidate_trials": 54,
+          "validation_evidence": [
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_185225/v2/csm/diversified_ops_qna/gpt-5/val.json",
+              "n_tasks": 2,
+              "n_trials": 6,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_185225/v2/csm/fewshot_all_checklist_guardrail/gpt-5/val.json",
+              "n_tasks": 2,
+              "n_trials": 6,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_185225/v2/csm/fewshot_compact_qna/gpt-5/val.json",
+              "n_tasks": 2,
+              "n_trials": 6,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_185225/v2/csm/fewshot_compact_qna_dedupe/gpt-5/val.json",
+              "n_tasks": 2,
+              "n_trials": 6,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_185225/v2/csm/fewshot_compact_qna_minheader_dedupe/gpt-5/val.json",
+              "n_tasks": 2,
+              "n_trials": 6,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_185225/v2/csm/fewshot_compact_qna_retrieval/gpt-5/val.json",
+              "n_tasks": 2,
+              "n_trials": 6,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_185225/v2/csm/fewshot_schema_qna/gpt-5/val.json",
+              "n_tasks": 2,
+              "n_trials": 6,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_185225/v2/csm/lesson_summaries_memory/gpt-5/val.json",
+              "n_tasks": 2,
+              "n_trials": 6,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_185225/v2/csm/seed_harness/gpt-5/val.json",
+              "n_tasks": 2,
+              "n_trials": 6,
+              "trials_per_task": 3.0
+            }
+          ],
+          "trained_state": {
+            "csm": "evovle_agents/jobs/cumulative_agents_meta_harness/csm/adapt_v2/harness/fewshot_schema_qna.state.json"
+          },
+          "candidate_code_directory": {
+            "csm": "evovle_agents/jobs/cumulative_agents_meta_harness/csm/adapt_v2/harness"
+          }
+        },
+        {
+          "domain": "csm",
+          "version": 3,
+          "run_name": "run_20260809_185225",
+          "winner": "two_pool_compact_qna",
+          "checkpoint_lineage": "evovle_agents/meta_harness/logs/run_20260809_185225/lineage.json",
+          "validation_task_counts": [
+            5
+          ],
+          "recorded_trials_per_task": [
+            3.0
+          ],
+          "retained_candidate_validation_files": 11,
+          "retained_candidate_trials": 165,
+          "validation_evidence": [
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_185225/v3/csm/crosspool_mmr_compact_qna/gpt-5/val.json",
+              "n_tasks": 5,
+              "n_trials": 15,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_185225/v3/csm/fewshot_compact_qna_global_sample/gpt-5/val.json",
+              "n_tasks": 5,
+              "n_trials": 15,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_185225/v3/csm/fewshot_compact_qna_minheader/gpt-5/val.json",
+              "n_tasks": 5,
+              "n_trials": 15,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_185225/v3/csm/fewshot_compact_qna_mmr/gpt-5/val.json",
+              "n_tasks": 5,
+              "n_trials": 15,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_185225/v3/csm/fewshot_compact_qna_rules/gpt-5/val.json",
+              "n_tasks": 5,
+              "n_trials": 15,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_185225/v3/csm/fewshot_schema_qna/gpt-5/val.json",
+              "n_tasks": 5,
+              "n_trials": 15,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_185225/v3/csm/guidelines_diverse_mmr/gpt-5/val.json",
+              "n_tasks": 5,
+              "n_trials": 15,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_185225/v3/csm/two_pool_compact_qna/gpt-5/val.json",
+              "n_tasks": 5,
+              "n_trials": 15,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_185225/v3/csm/two_pool_compact_qna_adaptive/gpt-5/val.json",
+              "n_tasks": 5,
+              "n_trials": 15,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_185225/v3/csm/two_pool_compact_qna_query_boosted/gpt-5/val.json",
+              "n_tasks": 5,
+              "n_trials": 15,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_185225/v3/csm/two_pool_qna_keys_preface/gpt-5/val.json",
+              "n_tasks": 5,
+              "n_trials": 15,
+              "trials_per_task": 3.0
+            }
+          ],
+          "trained_state": {
+            "csm": "evovle_agents/jobs/cumulative_agents_meta_harness/csm/adapt_v3/harness/two_pool_compact_qna.state.json"
+          },
+          "candidate_code_directory": {
+            "csm": "evovle_agents/jobs/cumulative_agents_meta_harness/csm/adapt_v3/harness"
+          }
+        },
+        {
+          "domain": "itsm",
+          "version": 1,
+          "run_name": "run_20260809_052547",
+          "winner": "checklist_readback_guardrail",
+          "checkpoint_lineage": "evovle_agents/meta_harness/logs/run_20260809_052547/lineage.json",
+          "validation_task_counts": [
+            1
+          ],
+          "recorded_trials_per_task": [
+            3.0
+          ],
+          "retained_candidate_validation_files": 12,
+          "retained_candidate_trials": 36,
+          "validation_evidence": [
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_052547/v1/itsm/checklist_readback_guardrail/gpt-5/val.json",
+              "n_tasks": 1,
+              "n_trials": 3,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_052547/v1/itsm/compact_roster_readback_guardrail/gpt-5/val.json",
+              "n_tasks": 1,
+              "n_trials": 3,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_052547/v1/itsm/constraint_checklist_memory/gpt-5/val.json",
+              "n_tasks": 1,
+              "n_trials": 3,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_052547/v1/itsm/contrastive_diverse_selector/gpt-5/val.json",
+              "n_tasks": 1,
+              "n_trials": 3,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_052547/v1/itsm/fewshot_all/gpt-5/val.json",
+              "n_tasks": 1,
+              "n_trials": 3,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_052547/v1/itsm/lesson_summaries_memory/gpt-5/val.json",
+              "n_tasks": 1,
+              "n_trials": 3,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_052547/v1/itsm/plan_execute_readback_guardrail/gpt-5/val.json",
+              "n_tasks": 1,
+              "n_trials": 3,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_052547/v1/itsm/preflight_nudge_readback_guardrail/gpt-5/val.json",
+              "n_tasks": 1,
+              "n_trials": 3,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_052547/v1/itsm/query_plan_templates_memory/gpt-5/val.json",
+              "n_tasks": 1,
+              "n_trials": 3,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_052547/v1/itsm/schema_indexed_guidelines_guardrail/gpt-5/val.json",
+              "n_tasks": 1,
+              "n_trials": 3,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_052547/v1/itsm/seed_harness/gpt-5/val.json",
+              "n_tasks": 1,
+              "n_trials": 3,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_052547/v1/itsm/two_pool_rehearsal_memory/gpt-5/val.json",
+              "n_tasks": 1,
+              "n_trials": 3,
+              "trials_per_task": 3.0
+            }
+          ],
+          "trained_state": {
+            "itsm": "evovle_agents/jobs/cumulative_agents_meta_harness/itsm/adapt_v1/harness/checklist_readback_guardrail.state.json"
+          },
+          "candidate_code_directory": {
+            "itsm": "evovle_agents/jobs/cumulative_agents_meta_harness/itsm/adapt_v1/harness"
+          }
+        },
+        {
+          "domain": "itsm",
+          "version": 2,
+          "run_name": "run_20260809_052547",
+          "winner": "contra_guidelines_memory",
+          "checkpoint_lineage": "evovle_agents/meta_harness/logs/run_20260809_052547/lineage.json",
+          "validation_task_counts": [
+            3
+          ],
+          "recorded_trials_per_task": [
+            3.0
+          ],
+          "retained_candidate_validation_files": 7,
+          "retained_candidate_trials": 63,
+          "validation_evidence": [
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_052547/v2/itsm/checklist_readback_guardrail/gpt-5/val.json",
+              "n_tasks": 3,
+              "n_trials": 9,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_052547/v2/itsm/constraint_checklist_memory/gpt-5/val.json",
+              "n_tasks": 3,
+              "n_trials": 9,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_052547/v2/itsm/constraint_checklist_mmr/gpt-5/val.json",
+              "n_tasks": 3,
+              "n_trials": 9,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_052547/v2/itsm/contra_guidelines_guardrail/gpt-5/val.json",
+              "n_tasks": 3,
+              "n_trials": 9,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_052547/v2/itsm/contra_guidelines_memory/gpt-5/val.json",
+              "n_tasks": 3,
+              "n_trials": 9,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_052547/v2/itsm/fewshot_all/gpt-5/val.json",
+              "n_tasks": 3,
+              "n_trials": 9,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_052547/v2/itsm/schema_playbook_memory/gpt-5/val.json",
+              "n_tasks": 3,
+              "n_trials": 9,
+              "trials_per_task": 3.0
+            }
+          ],
+          "trained_state": {
+            "itsm": "evovle_agents/jobs/cumulative_agents_meta_harness/itsm/adapt_v2/harness/contra_guidelines_memory.state.json"
+          },
+          "candidate_code_directory": {
+            "itsm": "evovle_agents/jobs/cumulative_agents_meta_harness/itsm/adapt_v2/harness"
+          }
+        },
+        {
+          "domain": "itsm",
+          "version": 3,
+          "run_name": "run_20260809_052547",
+          "winner": "contra_guidelines_memory",
+          "checkpoint_lineage": "evovle_agents/meta_harness/logs/run_20260809_052547/lineage.json",
+          "validation_task_counts": [
+            4
+          ],
+          "recorded_trials_per_task": [
+            3.0
+          ],
+          "retained_candidate_validation_files": 7,
+          "retained_candidate_trials": 84,
+          "validation_evidence": [
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_052547/v3/itsm/contra_guidelines_hier/gpt-5/val.json",
+              "n_tasks": 4,
+              "n_trials": 12,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_052547/v3/itsm/contra_guidelines_memory/gpt-5/val.json",
+              "n_tasks": 4,
+              "n_trials": 12,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_052547/v3/itsm/contra_guidelines_memory_guardrail/gpt-5/val.json",
+              "n_tasks": 4,
+              "n_trials": 12,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_052547/v3/itsm/contra_guidelines_memory_valstrip/gpt-5/val.json",
+              "n_tasks": 4,
+              "n_trials": 12,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_052547/v3/itsm/contra_guidelines_mmr/gpt-5/val.json",
+              "n_tasks": 4,
+              "n_trials": 12,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_052547/v3/itsm/contra_guidelines_signature/gpt-5/val.json",
+              "n_tasks": 4,
+              "n_trials": 12,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_052547/v3/itsm/contra_guidelines_summarized/gpt-5/val.json",
+              "n_tasks": 4,
+              "n_trials": 12,
+              "trials_per_task": 3.0
+            }
+          ],
+          "trained_state": {
+            "itsm": "evovle_agents/jobs/cumulative_agents_meta_harness/itsm/adapt_v3/harness/contra_guidelines_memory.state.json"
+          },
+          "candidate_code_directory": {
+            "itsm": "evovle_agents/jobs/cumulative_agents_meta_harness/itsm/adapt_v3/harness"
+          }
+        },
+        {
+          "domain": "itsm",
+          "version": 4,
+          "run_name": "run_20260809_052547",
+          "winner": "contra_guidelines_memory",
+          "checkpoint_lineage": "evovle_agents/meta_harness/logs/run_20260809_052547/lineage.json",
+          "validation_task_counts": [
+            7
+          ],
+          "recorded_trials_per_task": [
+            3.0
+          ],
+          "retained_candidate_validation_files": 8,
+          "retained_candidate_trials": 168,
+          "validation_evidence": [
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_052547/v4/itsm/contra_guidelines_diverse/gpt-5/val.json",
+              "n_tasks": 7,
+              "n_trials": 21,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_052547/v4/itsm/contra_guidelines_hybrid/gpt-5/val.json",
+              "n_tasks": 7,
+              "n_trials": 21,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_052547/v4/itsm/contra_guidelines_memory/gpt-5/val.json",
+              "n_tasks": 7,
+              "n_trials": 21,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_052547/v4/itsm/contra_guidelines_memory_qboost/gpt-5/val.json",
+              "n_tasks": 7,
+              "n_trials": 21,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_052547/v4/itsm/contra_guidelines_memory_qdiverse/gpt-5/val.json",
+              "n_tasks": 7,
+              "n_trials": 21,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_052547/v4/itsm/contra_guidelines_tfidf/gpt-5/val.json",
+              "n_tasks": 7,
+              "n_trials": 21,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_052547/v4/itsm/lesson_summaries_memory/gpt-5/val.json",
+              "n_tasks": 7,
+              "n_trials": 21,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260809_052547/v4/itsm/triple_constraints_memory/gpt-5/val.json",
+              "n_tasks": 7,
+              "n_trials": 21,
+              "trials_per_task": 3.0
+            }
+          ],
+          "trained_state": {
+            "itsm": "evovle_agents/jobs/cumulative_agents_meta_harness/itsm/adapt_v4/harness/contra_guidelines_memory.state.json"
+          },
+          "candidate_code_directory": {
+            "itsm": "evovle_agents/jobs/cumulative_agents_meta_harness/itsm/adapt_v4/harness"
+          }
+        },
+        {
+          "domain": "ale",
+          "version": 1,
+          "run_name": "run_20260810_052343",
+          "winner": "contrastive_hints_ale",
+          "checkpoint_lineage": "evovle_agents/meta_harness/logs/run_20260810_052343/lineage.json",
+          "validation_task_counts": [
+            3
+          ],
+          "recorded_trials_per_task": [
+            3.0
+          ],
+          "retained_candidate_validation_files": 12,
+          "retained_candidate_trials": 108,
+          "validation_evidence": [
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v1/ale/contrastive_hints_ale/gpt-5/val.json",
+              "n_tasks": 3,
+              "n_trials": 9,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v1/ale/distilled_playbook_ale/gpt-5/val.json",
+              "n_tasks": 3,
+              "n_trials": 9,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v1/ale/fewshot_all_ale/gpt-5/val.json",
+              "n_tasks": 3,
+              "n_trials": 9,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v1/ale/hierarchical_rules_ale/gpt-5/val.json",
+              "n_tasks": 3,
+              "n_trials": 9,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v1/ale/hybrid_playbook_hints_ale/gpt-5/val.json",
+              "n_tasks": 3,
+              "n_trials": 9,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v1/ale/mmr_fewshot_mixture_ale/gpt-5/val.json",
+              "n_tasks": 3,
+              "n_trials": 9,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v1/ale/mmr_guidelines_ale/gpt-5/val.json",
+              "n_tasks": 3,
+              "n_trials": 9,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v1/ale/mmr_hybrid_checklist_ale/gpt-5/val.json",
+              "n_tasks": 3,
+              "n_trials": 9,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v1/ale/recency_playbook_ale/gpt-5/val.json",
+              "n_tasks": 3,
+              "n_trials": 9,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v1/ale/reranked_playbook_ale/gpt-5/val.json",
+              "n_tasks": 3,
+              "n_trials": 9,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v1/ale/seed_harness_ale/gpt-5/val.json",
+              "n_tasks": 3,
+              "n_trials": 9,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v1/ale/task_blueprint_ale/gpt-5/val.json",
+              "n_tasks": 3,
+              "n_trials": 9,
+              "trials_per_task": 3.0
+            }
+          ],
+          "trained_state": {
+            "ale": "evovle_agents/jobs/cumulative_agents_meta_harness/ale/adapt_v1/harness/contrastive_hints_ale.state.json"
+          },
+          "candidate_code_directory": {
+            "ale": "evovle_agents/jobs/cumulative_agents_meta_harness/ale/adapt_v1/harness"
+          }
+        },
+        {
+          "domain": "ale",
+          "version": 2,
+          "run_name": "run_20260810_052343",
+          "winner": "verb_artifact_playbooks_idf_ale",
+          "checkpoint_lineage": "evovle_agents/meta_harness/logs/run_20260810_052343/lineage.json",
+          "validation_task_counts": [
+            5
+          ],
+          "recorded_trials_per_task": [
+            3.0
+          ],
+          "retained_candidate_validation_files": 8,
+          "retained_candidate_trials": 120,
+          "validation_evidence": [
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v2/ale/category_rulebooks_ale/gpt-5/val.json",
+              "n_tasks": 5,
+              "n_trials": 15,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v2/ale/contrastive_hints_ale/gpt-5/val.json",
+              "n_tasks": 5,
+              "n_trials": 15,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v2/ale/hybrid_fewshot_hints_ale/gpt-5/val.json",
+              "n_tasks": 5,
+              "n_trials": 15,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v2/ale/output_contract_guides_ale/gpt-5/val.json",
+              "n_tasks": 5,
+              "n_trials": 15,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v2/ale/output_contract_guides_bm25_ale/gpt-5/val.json",
+              "n_tasks": 5,
+              "n_trials": 15,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v2/ale/playbooks_with_contract_guides_ale/gpt-5/val.json",
+              "n_tasks": 5,
+              "n_trials": 15,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v2/ale/verb_artifact_playbooks_ale/gpt-5/val.json",
+              "n_tasks": 5,
+              "n_trials": 15,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v2/ale/verb_artifact_playbooks_idf_ale/gpt-5/val.json",
+              "n_tasks": 5,
+              "n_trials": 15,
+              "trials_per_task": 3.0
+            }
+          ],
+          "trained_state": {
+            "ale": "evovle_agents/jobs/cumulative_agents_meta_harness/ale/adapt_v2/harness/verb_artifact_playbooks_idf_ale.state.json"
+          },
+          "candidate_code_directory": {
+            "ale": "evovle_agents/jobs/cumulative_agents_meta_harness/ale/adapt_v2/harness"
+          }
+        },
+        {
+          "domain": "ale",
+          "version": 3,
+          "run_name": "run_20260810_052343",
+          "winner": "verb_artifact_playbooks_idf_ale",
+          "checkpoint_lineage": "evovle_agents/meta_harness/logs/run_20260810_052343/lineage.json",
+          "validation_task_counts": [
+            6
+          ],
+          "recorded_trials_per_task": [
+            3.0
+          ],
+          "retained_candidate_validation_files": 5,
+          "retained_candidate_trials": 90,
+          "validation_evidence": [
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v3/ale/verb_artifact_playbooks_bm25_ale/gpt-5/val.json",
+              "n_tasks": 6,
+              "n_trials": 18,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v3/ale/verb_artifact_playbooks_idf_ale/gpt-5/val.json",
+              "n_tasks": 6,
+              "n_trials": 18,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v3/ale/verb_artifact_playbooks_idf_artifactboost_ale/gpt-5/val.json",
+              "n_tasks": 6,
+              "n_trials": 18,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v3/ale/verb_artifact_playbooks_idf_contract_ale/gpt-5/val.json",
+              "n_tasks": 6,
+              "n_trials": 18,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v3/ale/verb_artifact_playbooks_idf_top3_ale/gpt-5/val.json",
+              "n_tasks": 6,
+              "n_trials": 18,
+              "trials_per_task": 3.0
+            }
+          ],
+          "trained_state": {
+            "ale": "evovle_agents/jobs/cumulative_agents_meta_harness/ale/adapt_v3/harness/verb_artifact_playbooks_idf_ale.state.json"
+          },
+          "candidate_code_directory": {
+            "ale": "evovle_agents/jobs/cumulative_agents_meta_harness/ale/adapt_v3/harness"
+          }
+        },
+        {
+          "domain": "ale",
+          "version": 4,
+          "run_name": "run_20260810_052343",
+          "winner": "verb_artifact_playbooks_idf_ale",
+          "checkpoint_lineage": "evovle_agents/meta_harness/logs/run_20260810_052343/lineage.json",
+          "validation_task_counts": [
+            8
+          ],
+          "recorded_trials_per_task": [
+            3.0
+          ],
+          "retained_candidate_validation_files": 7,
+          "retained_candidate_trials": 168,
+          "validation_evidence": [
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v4/ale/dual_channel_checklists_playbooks_ale/gpt-5/val.json",
+              "n_tasks": 8,
+              "n_trials": 24,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v4/ale/fewshot_clustered_ale/gpt-5/val.json",
+              "n_tasks": 8,
+              "n_trials": 24,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v4/ale/verb_artifact_playbooks_graph_ale/gpt-5/val.json",
+              "n_tasks": 8,
+              "n_trials": 24,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v4/ale/verb_artifact_playbooks_idf_ale/gpt-5/val.json",
+              "n_tasks": 8,
+              "n_trials": 24,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v4/ale/verb_artifact_playbooks_normsyn_ale/gpt-5/val.json",
+              "n_tasks": 8,
+              "n_trials": 24,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v4/ale/verb_artifact_playbooks_normsyn_extboost_ale/gpt-5/val.json",
+              "n_tasks": 8,
+              "n_trials": 24,
+              "trials_per_task": 3.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v4/ale/verb_artifact_playbooks_normsyn_mmr_ale/gpt-5/val.json",
+              "n_tasks": 8,
+              "n_trials": 24,
+              "trials_per_task": 3.0
+            }
+          ],
+          "trained_state": {
+            "ale": "evovle_agents/jobs/cumulative_agents_meta_harness/ale/adapt_v4/harness/verb_artifact_playbooks_idf_ale.state.json"
+          },
+          "candidate_code_directory": {
+            "ale": "evovle_agents/jobs/cumulative_agents_meta_harness/ale/adapt_v4/harness"
+          }
+        },
+        {
+          "domain": "ale",
+          "version": 5,
+          "run_name": "run_20260810_052343",
+          "winner": "verb_artifact_playbooks_guides_ale",
+          "checkpoint_lineage": "evovle_agents/meta_harness/logs/run_20260810_052343/lineage.json",
+          "validation_task_counts": [
+            9
+          ],
+          "recorded_trials_per_task": [
+            1.0
+          ],
+          "retained_candidate_validation_files": 9,
+          "retained_candidate_trials": 81,
+          "validation_evidence": [
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v5/ale/distilled_house_rules_ale/gpt-5/val.json",
+              "n_tasks": 9,
+              "n_trials": 9,
+              "trials_per_task": 1.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v5/ale/task_phase_playbooks_guides_ale/gpt-5/val.json",
+              "n_tasks": 9,
+              "n_trials": 9,
+              "trials_per_task": 1.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v5/ale/verb_artifact_playbooks_coverage_ale/gpt-5/val.json",
+              "n_tasks": 9,
+              "n_trials": 9,
+              "trials_per_task": 1.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v5/ale/verb_artifact_playbooks_guides_ale/gpt-5/val.json",
+              "n_tasks": 9,
+              "n_trials": 9,
+              "trials_per_task": 1.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v5/ale/verb_artifact_playbooks_guides_compact_ale/gpt-5/val.json",
+              "n_tasks": 9,
+              "n_trials": 9,
+              "trials_per_task": 1.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v5/ale/verb_artifact_playbooks_guides_mmr_ale/gpt-5/val.json",
+              "n_tasks": 9,
+              "n_trials": 9,
+              "trials_per_task": 1.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v5/ale/verb_artifact_playbooks_idf_ale/gpt-5/val.json",
+              "n_tasks": 9,
+              "n_trials": 9,
+              "trials_per_task": 1.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v5/ale/verb_artifact_playbooks_weighted_ale/gpt-5/val.json",
+              "n_tasks": 9,
+              "n_trials": 9,
+              "trials_per_task": 1.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v5/ale/verb_checklists_ale/gpt-5/val.json",
+              "n_tasks": 9,
+              "n_trials": 9,
+              "trials_per_task": 1.0
+            }
+          ],
+          "trained_state": {
+            "ale": "evovle_agents/jobs/cumulative_agents_meta_harness/ale/adapt_v5/harness/verb_artifact_playbooks_guides_ale.state.json"
+          },
+          "candidate_code_directory": {
+            "ale": "evovle_agents/jobs/cumulative_agents_meta_harness/ale/adapt_v5/harness"
+          }
+        },
+        {
+          "domain": "ale",
+          "version": 6,
+          "run_name": "run_20260810_052343",
+          "winner": "contract_checklists_ale",
+          "checkpoint_lineage": "evovle_agents/meta_harness/logs/run_20260810_052343/lineage.json",
+          "validation_task_counts": [
+            10
+          ],
+          "recorded_trials_per_task": [
+            1.0
+          ],
+          "retained_candidate_validation_files": 5,
+          "retained_candidate_trials": 50,
+          "validation_evidence": [
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v6/ale/artifact_contract_playbooks_hybrid_ale/gpt-5/val.json",
+              "n_tasks": 10,
+              "n_trials": 10,
+              "trials_per_task": 1.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v6/ale/contract_checklists_ale/gpt-5/val.json",
+              "n_tasks": 10,
+              "n_trials": 10,
+              "trials_per_task": 1.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v6/ale/contract_checklists_mmr_ale/gpt-5/val.json",
+              "n_tasks": 10,
+              "n_trials": 10,
+              "trials_per_task": 1.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v6/ale/verb_artifact_playbooks_guides_ale/gpt-5/val.json",
+              "n_tasks": 10,
+              "n_trials": 10,
+              "trials_per_task": 1.0
+            },
+            {
+              "source": "evovle_agents/meta_harness/logs/run_20260810_052343/v6/ale/verb_artifact_playbooks_normsyn_mmr_ale/gpt-5/val.json",
+              "n_tasks": 10,
+              "n_trials": 10,
+              "trials_per_task": 1.0
+            }
+          ],
+          "trained_state": {
+            "ale": "evovle_agents/jobs/cumulative_agents_meta_harness/ale/adapt_v6/harness/contract_checklists_ale.state.json"
+          },
+          "candidate_code_directory": {
+            "ale": "evovle_agents/jobs/cumulative_agents_meta_harness/ale/adapt_v6/harness"
+          }
+        }
+      ],
+      "initialization": "Meta-Harness starts from seed_harness and fewshot_all (separate ALE variants). Later stages inherit both selected Python code and learned state. cl_eval restores the code directory and state checkpoint from lineage; copying only the Python file is insufficient.",
+      "requested_budget": {
+        "proposer_iterations_per_stage": 5,
+        "requested_candidates_per_iteration": 3,
+        "proposer_timeout_s": 2400,
+        "inner_learning_mode": "offline",
+        "inner_epochs": 1,
+        "inner_batch_size": 1,
+        "eog_trials_per_task": 3,
+        "ale_trials_per_task": [
+          3,
+          3,
+          3,
+          3,
+          1,
+          1
+        ]
+      }
+    },
+    "result_reconstruction": "Included per-task scores and success flags reproduce all archived aggregates offline."
+  },
+  "searchBudget": [
+    {
+      "domain": "hr",
+      "version": 1,
+      "n_train": [
+        2
+      ],
+      "n_val": [
+        1
+      ],
+      "trials_per_task": [
+        3.0
+      ],
+      "searched": true,
+      "max_metric_calls": null,
+      "configured_iterations": 5,
+      "retained_candidate_trials": 39,
+      "retained_adapter_statistics": {}
+    },
+    {
+      "domain": "hr",
+      "version": 2,
+      "n_train": [
+        1
+      ],
+      "n_val": [
+        2
+      ],
+      "trials_per_task": [
+        3.0
+      ],
+      "searched": true,
+      "max_metric_calls": null,
+      "configured_iterations": 5,
+      "retained_candidate_trials": 36,
+      "retained_adapter_statistics": {}
+    },
+    {
+      "domain": "hr",
+      "version": 3,
+      "n_train": [
+        4
+      ],
+      "n_val": [
+        4
+      ],
+      "trials_per_task": [
+        3.0
+      ],
+      "searched": true,
+      "max_metric_calls": null,
+      "configured_iterations": 5,
+      "retained_candidate_trials": 84,
+      "retained_adapter_statistics": {}
+    },
+    {
+      "domain": "hr",
+      "version": 4,
+      "n_train": [
+        7
+      ],
+      "n_val": [
+        8
+      ],
+      "trials_per_task": [
+        3.0
+      ],
+      "searched": true,
+      "max_metric_calls": null,
+      "configured_iterations": 5,
+      "retained_candidate_trials": 144,
+      "retained_adapter_statistics": {}
+    },
+    {
+      "domain": "csm",
+      "version": 1,
+      "n_train": [
+        1
+      ],
+      "n_val": [
+        1
+      ],
+      "trials_per_task": [
+        3.0
+      ],
+      "searched": true,
+      "max_metric_calls": null,
+      "configured_iterations": 5,
+      "retained_candidate_trials": 21,
+      "retained_adapter_statistics": {}
+    },
+    {
+      "domain": "csm",
+      "version": 2,
+      "n_train": [
+        1
+      ],
+      "n_val": [
+        2
+      ],
+      "trials_per_task": [
+        3.0
+      ],
+      "searched": true,
+      "max_metric_calls": null,
+      "configured_iterations": 5,
+      "retained_candidate_trials": 54,
+      "retained_adapter_statistics": {}
+    },
+    {
+      "domain": "csm",
+      "version": 3,
+      "n_train": [
+        7
+      ],
+      "n_val": [
+        5
+      ],
+      "trials_per_task": [
+        3.0
+      ],
+      "searched": true,
+      "max_metric_calls": null,
+      "configured_iterations": 5,
+      "retained_candidate_trials": 165,
+      "retained_adapter_statistics": {}
+    },
+    {
+      "domain": "itsm",
+      "version": 1,
+      "n_train": [
+        3
+      ],
+      "n_val": [
+        1
+      ],
+      "trials_per_task": [
+        3.0
+      ],
+      "searched": true,
+      "max_metric_calls": null,
+      "configured_iterations": 5,
+      "retained_candidate_trials": 36,
+      "retained_adapter_statistics": {}
+    },
+    {
+      "domain": "itsm",
+      "version": 2,
+      "n_train": [
+        5
+      ],
+      "n_val": [
+        3
+      ],
+      "trials_per_task": [
+        3.0
+      ],
+      "searched": true,
+      "max_metric_calls": null,
+      "configured_iterations": 5,
+      "retained_candidate_trials": 63,
+      "retained_adapter_statistics": {}
+    },
+    {
+      "domain": "itsm",
+      "version": 3,
+      "n_train": [
+        2
+      ],
+      "n_val": [
+        4
+      ],
+      "trials_per_task": [
+        3.0
+      ],
+      "searched": true,
+      "max_metric_calls": null,
+      "configured_iterations": 5,
+      "retained_candidate_trials": 84,
+      "retained_adapter_statistics": {}
+    },
+    {
+      "domain": "itsm",
+      "version": 4,
+      "n_train": [
+        7
+      ],
+      "n_val": [
+        7
+      ],
+      "trials_per_task": [
+        3.0
+      ],
+      "searched": true,
+      "max_metric_calls": null,
+      "configured_iterations": 5,
+      "retained_candidate_trials": 168,
+      "retained_adapter_statistics": {}
+    },
+    {
+      "domain": "ale",
+      "version": 1,
+      "n_train": [
+        7
+      ],
+      "n_val": [
+        3
+      ],
+      "trials_per_task": [
+        3.0
+      ],
+      "searched": true,
+      "max_metric_calls": null,
+      "configured_iterations": 5,
+      "retained_candidate_trials": 108,
+      "retained_adapter_statistics": {}
+    },
+    {
+      "domain": "ale",
+      "version": 2,
+      "n_train": [
+        5
+      ],
+      "n_val": [
+        5
+      ],
+      "trials_per_task": [
+        3.0
+      ],
+      "searched": true,
+      "max_metric_calls": null,
+      "configured_iterations": 5,
+      "retained_candidate_trials": 120,
+      "retained_adapter_statistics": {}
+    },
+    {
+      "domain": "ale",
+      "version": 3,
+      "n_train": [
+        2
+      ],
+      "n_val": [
+        6
+      ],
+      "trials_per_task": [
+        3.0
+      ],
+      "searched": true,
+      "max_metric_calls": null,
+      "configured_iterations": 5,
+      "retained_candidate_trials": 90,
+      "retained_adapter_statistics": {}
+    },
+    {
+      "domain": "ale",
+      "version": 4,
+      "n_train": [
+        4
+      ],
+      "n_val": [
+        8
+      ],
+      "trials_per_task": [
+        3.0
+      ],
+      "searched": true,
+      "max_metric_calls": null,
+      "configured_iterations": 5,
+      "retained_candidate_trials": 168,
+      "retained_adapter_statistics": {}
+    },
+    {
+      "domain": "ale",
+      "version": 5,
+      "n_train": [
+        2
+      ],
+      "n_val": [
+        9
+      ],
+      "trials_per_task": [
+        1.0
+      ],
+      "searched": true,
+      "max_metric_calls": null,
+      "configured_iterations": 5,
+      "retained_candidate_trials": 81,
+      "retained_adapter_statistics": {}
+    },
+    {
+      "domain": "ale",
+      "version": 6,
+      "n_train": [
+        2
+      ],
+      "n_val": [
+        10
+      ],
+      "trials_per_task": [
+        1.0
+      ],
+      "searched": true,
+      "max_metric_calls": null,
+      "configured_iterations": 5,
+      "retained_candidate_trials": 50,
+      "retained_adapter_statistics": {}
+    }
+  ],
+  "sourceRoots": {
+    "csm": "evovle_agents/jobs/cumulative_agents_meta_harness/csm",
+    "hr": "evovle_agents/jobs/cumulative_agents_meta_harness/hr",
+    "itsm": "evovle_agents/jobs/cumulative_agents_meta_harness/itsm",
+    "ale": "evovle_agents/jobs/cumulative_agents_meta_harness/ale"
+  },
+  "coverage": {
+    "csm": {
+      "benchmark": "eog",
+      "recorded_stages": [
+        1,
+        2,
+        3
+      ],
+      "evaluation_cohorts": [
+        1,
+        2,
+        3
+      ],
+      "summary_scope": "seen_cohorts"
+    },
+    "hr": {
+      "benchmark": "eog",
+      "recorded_stages": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "evaluation_cohorts": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "summary_scope": "seen_cohorts"
+    },
+    "itsm": {
+      "benchmark": "eog",
+      "recorded_stages": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "evaluation_cohorts": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "summary_scope": "seen_cohorts"
+    },
+    "ale": {
+      "benchmark": "ale",
+      "recorded_stages": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "evaluation_cohorts": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "summary_scope": "seen_cohorts"
+    }
+  }
+}

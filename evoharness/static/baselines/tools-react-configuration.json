@@ -1,0 +1,258 @@
+{
+  "name": "ReAct/Codex",
+  "track": "tools",
+  "arm": "react",
+  "model": "GPT-5",
+  "harness": "ReAct (EOG) / Codex (ALE)",
+  "author": "Vaidehi (EOG) / Zixuan (ALE)",
+  "kind": "cumulative",
+  "description": "Deployment baseline with the benchmark’s accumulating capability pool. No stage-specific prompt or harness optimization.",
+  "settings": [
+    [
+      "Solver model",
+      "GPT-5",
+      "Recorded"
+    ],
+    [
+      "Stage search budget",
+      "No stage-level optimization",
+      "Experiment design"
+    ],
+    [
+      "Capability pool",
+      "Cumulative through the selected stage",
+      "Registry / runner"
+    ],
+    [
+      "EOG solver limits",
+      "ReAct: 50 iterations; max_tokens 16,384; temperature 0.1",
+      "Reference defaults; historical overrides unverified"
+    ],
+    [
+      "ALE solver limit",
+      "7,200 seconds per task",
+      "Saved experiment configuration / runner"
+    ],
+    [
+      "Held-out evaluation",
+      "Runs 1, 2 and 3 per recorded cell",
+      "Archived snapshot"
+    ],
+    [
+      "Complete total compute budget",
+      "Not established; evaluation metrics exclude adaptation/search work",
+      "Unavailable"
+    ]
+  ],
+  "notes": [
+    "The separate Codex (ALE, V) experiment provides the ALE deployment control for the tool-memory baselines."
+  ],
+  "sources": [
+    "analysis/arms.py",
+    "analysis/cache/cells_tools.tsv",
+    "evolve_tools/src/runner.py",
+    "evolve_tools/src/ale_eval.py",
+    "reference/EnterpriseOps-Gym/conf/llm/gpt-5.json (model settings only)"
+  ],
+  "reproduction": {
+    "status": "partial",
+    "prerequisites": [
+      "Use the exact source tree named in the evidence. The external/evolving-mas-benchmark prefix denotes Vaidehi’s separate checkout; it is not interchangeable with the main experiment source.",
+      "Set REPRO_SOURCE to that checkout, REPRO_DATA_ROOT to the frozen evovling_tools dataset, REPRO_OUTPUT_ROOT to a new empty output directory, REPRO_DOMAIN to the desired stream, and REPRO_CONCURRENCY explicitly.",
+      "Create REPRO_LLM_CONFIG as a private provider configuration with openai/gpt-5, max_tokens 16384 and temperature 0.1; use your own credentials. The original file must not be copied because it can contain secrets.",
+      "EOG requires the matching EnterpriseOps-Gym source/dependencies and running MCP/SQL services. ALE requires the matching agents-last-exam checkout, locked Python >=3.12 environment, Docker/task images, software guard and your own secret file.",
+      "This registry arm combines external EOG runs and the main-source local ALE run. Its ALE results differ from the separate tools-react-ale-v control; do not combine their raw trials."
+    ],
+    "steps": [
+      {
+        "title": "Local ALE cumulative deployment template",
+        "command": "cd \"${REPRO_SOURCE:?}\"\nALE_MODEL=gpt-5 ALE_WALL_TIME_S=7200 python -m evolve_tools.src.runner_evolving_tools \\\n  --data_root \"${REPRO_DATA_ROOT:?}\" --domain ale --dataset ale \\\n  --llm_config \"${REPRO_LLM_CONFIG:?}\" --output_dir \"${REPRO_OUTPUT_ROOT:?}\" \\\n  --memory_mode none --runs_per_stage 3 --concurrency \"${REPRO_CONCURRENCY:?}\"",
+        "notes": "Use the main experiment source for this ALE template. The model override is supported here. It fills the lower-triangular cumulative matrix."
+      },
+      {
+        "title": "External EOG deployment template",
+        "command": "cd \"${REPRO_EXTERNAL_SOURCE:?}\"\npython -m evolve_tools.src.runner_evolving_tools \\\n  --data_root \"${REPRO_DATA_ROOT:?}\" --domain \"${REPRO_DOMAIN:?}\" --dataset eog \\\n  --llm_config \"${REPRO_LLM_CONFIG:?}\" --output_dir \"${REPRO_OUTPUT_ROOT:?}\" \\\n  --memory_mode none --runs_per_stage 3 --concurrency \"${REPRO_CONCURRENCY:?}\"",
+        "notes": "Current external source template for one EOG stream. Historical overrides and the exact revision that generated all archived cells were not preserved."
+      }
+    ],
+    "missing": [
+      "The archived launcher command, full environment overrides, exact dependency lock and historical source revision were not preserved in the exported evaluation snapshot.",
+      "A fresh live-model run is stochastic. Matching its protocol does not guarantee the same scores; use the downloadable trial/cell data to reproduce the archived arithmetic.",
+      "Obtain the versioned task splits, capability libraries, original verifier/environment assets and archived task-exclusion manifest before running; current datasets/manifests may differ.",
+      "The local experiment worktree has no Git HEAD commit; no immutable historical code revision could be established. A source-file checksum identifies the inspected current file only.",
+      "The external checkout currently has HEAD aef27e4802f7c64dcd591844e6858bcdcdb7da44 plus uncommitted modifications to runner_evolving_tools.py, runner.py, memory.py, reasoning_induction.py, ale_eval.py and metrics.py. This is not an archived run commit or a reproducible source pin.",
+      "Two source trees are required for this registry entry. Archived EOG and ALE run configurations must both be recovered before claiming an exact rerun."
+    ],
+    "evidence": [
+      "analysis/arms.py",
+      "evolve_tools/src/runner_evolving_tools.py",
+      "evolve_tools/src/ale_eval.py",
+      "external/evolving-mas-benchmark/evolve_tools/src/runner_evolving_tools.py"
+    ],
+    "protocol": {
+      "evaluation_runs": 3,
+      "training": "none",
+      "source_revision": null
+    },
+    "result_reconstruction": "Included per-task scores and success flags reproduce all archived aggregates offline."
+  },
+  "sourceRoots": {
+    "calendar": "external/evolving-mas-benchmark/tasks/seed_task/EnterpriseOps-Gym/evolve_results/gpt5_evolve_evoving_tools/calendar/no_memory",
+    "csm": "external/evolving-mas-benchmark/tasks/seed_task/EnterpriseOps-Gym/evolve_results/gpt5_evolve_evoving_tools/csm/no_memory",
+    "drive": "external/evolving-mas-benchmark/tasks/seed_task/EnterpriseOps-Gym/evolve_results/gpt5_evolve_evoving_tools/drive/no_memory",
+    "email": "external/evolving-mas-benchmark/tasks/seed_task/EnterpriseOps-Gym/evolve_results/gpt5_evolve_evoving_tools/email/no_memory",
+    "hr": "external/evolving-mas-benchmark/tasks/seed_task/EnterpriseOps-Gym/evolve_results/gpt5_evolve_evoving_tools/hr/no_memory",
+    "hybrid": "external/evolving-mas-benchmark/tasks/seed_task/EnterpriseOps-Gym/evolve_results/gpt5_evolve_evoving_tools/hybrid/no_memory",
+    "itsm": "external/evolving-mas-benchmark/tasks/seed_task/EnterpriseOps-Gym/evolve_results/gpt5_evolve_evoving_tools/itsm/no_memory",
+    "teams": "external/evolving-mas-benchmark/tasks/seed_task/EnterpriseOps-Gym/evolve_results/gpt5_evolve_evoving_tools/teams/no_memory",
+    "ale": "evolve_tools/jobs/cumulative_tools/ale_harness_codex_llm_gpt_5"
+  },
+  "coverage": {
+    "calendar": {
+      "benchmark": "eog",
+      "recorded_stages": [
+        1,
+        2,
+        3
+      ],
+      "evaluation_cohorts": [
+        1,
+        2,
+        3
+      ],
+      "summary_scope": "seen_cohorts"
+    },
+    "csm": {
+      "benchmark": "eog",
+      "recorded_stages": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "evaluation_cohorts": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "summary_scope": "seen_cohorts"
+    },
+    "drive": {
+      "benchmark": "eog",
+      "recorded_stages": [
+        1,
+        2,
+        3
+      ],
+      "evaluation_cohorts": [
+        1,
+        2,
+        3
+      ],
+      "summary_scope": "seen_cohorts"
+    },
+    "email": {
+      "benchmark": "eog",
+      "recorded_stages": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "evaluation_cohorts": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "summary_scope": "seen_cohorts"
+    },
+    "hr": {
+      "benchmark": "eog",
+      "recorded_stages": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "evaluation_cohorts": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "summary_scope": "seen_cohorts"
+    },
+    "hybrid": {
+      "benchmark": "eog",
+      "recorded_stages": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "evaluation_cohorts": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "summary_scope": "seen_cohorts"
+    },
+    "itsm": {
+      "benchmark": "eog",
+      "recorded_stages": [
+        1,
+        2,
+        3
+      ],
+      "evaluation_cohorts": [
+        1,
+        2,
+        3
+      ],
+      "summary_scope": "seen_cohorts"
+    },
+    "teams": {
+      "benchmark": "eog",
+      "recorded_stages": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "evaluation_cohorts": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "summary_scope": "seen_cohorts"
+    },
+    "ale": {
+      "benchmark": "ale",
+      "recorded_stages": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "evaluation_cohorts": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "summary_scope": "seen_cohorts"
+    }
+  }
+}

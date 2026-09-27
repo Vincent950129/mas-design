@@ -1,0 +1,17 @@
+track,arm,method,benchmark,stream,adapt_stage,scope,evaluated_cohorts,score_pct,score_std_pct,pass_pct,pass_std_pct,num_runs,tasks_per_run
+skills,codex,Codex,eog,csm,1,seen_cohorts,1,55.555561,2.389535,0.0,0.0,3,1:12;2:12;3:12
+skills,codex,Codex,eog,csm,2,seen_cohorts,1;2,59.927613,2.513654,12.0,3.265986,3,1:25;2:25;3:25
+skills,codex,Codex,eog,csm,3,seen_cohorts,1;2;3,64.021234,1.222393,22.222222,2.268046,3,1:36;2:36;3:36
+skills,codex,Codex,eog,hr,1,seen_cohorts,1,62.121218,2.02808,24.242424,4.285496,3,1:11;2:11;3:11
+skills,codex,Codex,eog,hr,2,seen_cohorts,1;2,57.843917,0.147696,20.20202,2.856997,3,1:33;2:33;3:33
+skills,codex,Codex,eog,hr,3,seen_cohorts,1;2;3,61.975375,1.096348,18.867925,0.0,3,1:53;2:53;3:53
+skills,codex,Codex,eog,itsm,1,seen_cohorts,1,39.871795,4.992874,2.564103,3.626189,3,1:13;2:13;3:13
+skills,codex,Codex,eog,itsm,2,seen_cohorts,1;2,55.892256,3.242129,17.171717,5.150525,3,1:33;2:33;3:33
+skills,codex,Codex,eog,itsm,3,seen_cohorts,1;2;3,55.439815,2.845011,22.916667,1.701035,3,1:48;2:48;3:48
+skills,codex,Codex,eog,itsm,4,seen_cohorts,1;2;3;4,53.520986,2.091146,16.949153,2.767785,3,1:59;2:59;3:59
+skills,codex,Codex,ale,ale,1,seen_cohorts,1,56.801547,3.562761,23.333333,4.714045,3,1:10;2:10;3:10
+skills,codex,Codex,ale,ale,2,seen_cohorts,1;2,38.639606,4.303228,17.647059,4.802921,3,1:17;2:17;3:17
+skills,codex,Codex,ale,ale,3,seen_cohorts,1;2;3,40.469578,2.573127,19.753086,1.745943,3,1:27;2:27;3:27
+skills,codex,Codex,ale,ale,4,seen_cohorts,1;2;3;4,32.199286,0.967638,10.638298,0.0,3,1:47;2:47;3:47
+skills,codex,Codex,ale,ale,5,seen_cohorts,1;2;3;4;5,32.420991,0.674098,12.0,1.632993,3,1:50;2:50;3:50
+skills,codex,Codex,ale,ale,6,seen_cohorts,1;2;3;4;5;6,25.480664,0.503336,8.333333,0.693242,3,1:68;2:68;3:68
