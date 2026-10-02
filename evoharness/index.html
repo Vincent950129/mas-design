@@ -1599,16 +1599,15 @@
   <div class="container is-max-desktop">
     <h2 class="title is-3 section-heading has-text-centered">Evaluate Your Own Agent</h2>
     <p class="sv-lead">
-      Evaluate any verifier-backed evolving benchmark through one workflow. The SDK first checks
-      the live catalog: a healthy hosted adapter is used when it supports your track, mode, action
-      surface and harness; otherwise a checksum-approved adapter runs in a loopback-only local
-      service. EOG and ALE remain hosted, while Terminal-Bench 2, APEX-Agents, Hyper-&tau;-bench and
-      new datasets can use the same session, resource, grading and leaderboard APIs locally.
+      Evaluate your agent on EOG and ALE through the hosted API service, which provides the
+      environments and graders. For local use, download the published Hugging Face datasets to
+      inspect tasks and harness resources. We do not currently provide a local evaluation
+      environment or local baseline and agent runners.
     </p>
 
     <div class="ev-choose">
-      <span class="ev-choose-lb">Choose an environment</span>
-      <div class="ev-seg" role="tablist" aria-label="Execution environment">
+      <span class="ev-choose-lb">Choose how to use EvoHarnessBench</span>
+      <div class="ev-seg" role="tablist" aria-label="Evaluation and dataset access">
       <button class="ev-tab is-active" type="button" role="tab" data-ev="api">
         <span class="ev-th"><span class="ev-tt">Hosted API service</span>
           <span class="ev-ts is-live">Available now</span></span>
@@ -1616,10 +1615,10 @@
           get a score over plain HTTP.</span>
       </button>
       <button class="ev-tab" type="button" role="tab" data-ev="local">
-        <span class="ev-th"><span class="ev-tt">Local environment</span>
-          <span class="ev-ts is-live">Available now</span></span>
-        <span class="ev-td">Run reviewed benchmark adapters on loopback. Adapter code and its
-          manifest must both match hashes you explicitly approve.</span>
+        <span class="ev-th"><span class="ev-tt">Local datasets</span>
+          <span class="ev-ts is-live">Data available</span></span>
+        <span class="ev-td">Download and inspect the Hugging Face datasets. Local baseline and
+          agent runners are not currently provided.</span>
       </button>
       </div>
     </div>
@@ -1633,9 +1632,8 @@
       <li><b>session freed</b><i>automatically, on scope exit</i></li>
     </ol>
     <p class="sv-cap sv-cap--mid">
-      <code>run_benchmark</code> does all four once per task. The action descriptor tells your agent
-      whether the task uses MCP, artifact files, an isolated terminal, or an official managed
-      runtime; <code>run_leaderboard</code> accepts any advertised benchmark sequence.
+      <code>run_benchmark</code> does all four once per task. EOG tasks use MCP tools and ALE tasks
+      use artifact files; <code>run_leaderboard</code> combines results from the hosted benchmarks.
     </p>
 
     <div class="sv-cards">
@@ -1665,15 +1663,13 @@
 
     <p class="sv-cap sv-cap--mid">
       <b>If you just want a fast, interactive evaluation.</b> Inspect the
-      <a href="./eval-benchmark-skill/?skill=evolve-eval"><code>evolve-eval</code> skill</a>, then set
-      your service key and install the authenticated package with the command below. Ask your current coding agent to
-      <em>&ldquo;use the evolve-eval skill to evaluate yourself on my dataset.&rdquo;</em> It guides you through
-      four approvals: suitability and hosted/local resolution; runtime and deviations; exact smoke
-      and cost plan; then results and optional reporting. It can use a healthy hosted target or help
-      validate and start a local adapter. For a local track, it proposes how to enable only the
-      selected resources, asks you to approve the design and negative controls, and tests that an
-      unreleased tool, skill, or agent is inaccessible before calling the result comparable. You can
-      also ask it focused API questions such as
+      <a href="./eval-benchmark-skill/?skill=evolve-eval"><code>evolve-eval</code> skill</a>.
+      This optional skill uses the service&rsquo;s <code>simple_agentic_evals</code> SDK to guide
+      your coding agent through hosted evaluation. Set your service key and install the
+      authenticated package with the command below, then ask your coding agent to
+      <em>&ldquo;use the evolve-eval skill to evaluate yourself on the hosted EvoHarnessBench tasks.&rdquo;</em>
+      It checks the hosted target, reviews the agent configuration and evaluation budget with you,
+      and reports the results. You can also ask it focused API questions such as
       <em>&ldquo;How do I get per-verifier results?&rdquo;</em>; it will give the matching SDK or HTTP access
       path without starting a run. Credentials stay in environment variables.
     </p>
@@ -1684,7 +1680,7 @@
 curl -fsSL -H "Authorization: Bearer $EVAL_SERVICE_API_KEY" \
   https://educator-marrow-cultural.ngrok-free.dev/resources/evolve-eval/install.sh | bash
 
-# Then tell your coding agent: Use evolve-eval to evaluate yourself on my dataset.</code></pre>
+# Then tell your coding agent: Use evolve-eval to evaluate yourself on the hosted EvoHarnessBench tasks.</code></pre>
     </div>
 
     <p class="sv-cap sv-cap--mid">
@@ -1785,7 +1781,7 @@ python -m pip install "/tmp/${WHEEL##*/}"</code></pre>
         <span class="sv-lang">python</span>
         <button class="sv-copy" type="button">Copy</button>
         <pre class="sv-code" data-lang="python"><code>from simple_agentic_evals import (CommandAgent, EvalClient, ServiceError,
-                                  catalog_targets, inspect_adapter, resolve_target,
+                                  catalog_targets, resolve_target,
                                   run_benchmark, run_leaderboard,
                                   react_agent, acp_codex_agent, to_openai_tools)
 
@@ -1802,7 +1798,7 @@ print("connected ->", client.health())</code></pre>
       <p class="sv-cap">
         Never infer support from a benchmark name. Resolution checks the live catalog&rsquo;s adapter
         health, track, mode, harness and action surface. If any requested capability is missing, the
-        target is local or unavailable &mdash; never a hosted do-nothing score. Infrastructure and
+        target is unavailable through the hosted service. Infrastructure and
         grader failures remain errors rather than being converted to zero.
       </p>
       <div class="sv-codewrap">
@@ -1823,9 +1819,9 @@ assert choice["location"] == "hosted", choice
 print(choice["reason"])</code></pre>
       </div>
       <p class="sv-cap">
-        Catalog health is checked again by the local sidecar. Missing Docker, a source revision,
-        world archive, verifier runtime, or required credential blocks execution before a result is
-        reported. The diagnostic records the adapter and source hashes that were actually used.
+        Continue only when the catalog confirms the requested hosted configuration is runnable.
+        If it is unavailable, select a supported configuration or inspect the published datasets.
+        The public release does not provide a local runner as a fallback.
       </p>
     </div>
 
@@ -1910,19 +1906,18 @@ def my_agent(task):
         return solve_eog(task)
     if task.action_type == "sandbox":
         return solve_ale(task)
-    raise RuntimeError("select the adapter's official managed harness for this action")</code></pre>
+    raise RuntimeError(f"Unsupported hosted action type: {task.action_type}")</code></pre>
       </div>
       <p class="sv-cap">
         Branch on <code>task.action_type</code>, not a benchmark name. Swap the bodies for LangGraph,
-        your planner or another provider. Terminal and managed-runtime adapters can instead run the
-        reviewed official harness with <code>run_benchmark("codex", ...)</code>.
+        your planner or another provider while using the hosted EOG tools or ALE file interface.
       </p>
     </div>
 
     <div class="sv-panel" data-sv-panel="ports">
       <p class="sv-cap">
         Whatever you already have &mdash; a prompt optimizer, a memory, a multi-agent scaffold, a
-        container, a CLI &mdash; connects through one wrapper and one of four ports. Your policy runs
+        container, a CLI &mdash; connects through one wrapper and one of two interfaces. Your policy runs
         in <em>your</em> process and calls the service, so its language, framework and runtime stay
         yours; anything reachable from inside a Python function can be scored.
       </p>
@@ -1946,24 +1941,6 @@ mcp   = task.mcp_session(server)
 tools = mcp.list_tools()                # 1. WHAT YOUR POLICY CAN DO   (plain JSON Schema)
 mcp.call_tool(tools[0]["name"], {})     # 2. HOW YOUR POLICY ACTS      (a plain function)
 mcp.close()</code></pre>
-      </div>
-      <p class="sv-cap">
-        <b>Terminal and managed-runtime interfaces.</b> A terminal adapter places the agent in a
-        benchmark-owned isolated task container. A managed adapter invokes the seed benchmark&rsquo;s
-        official end-to-end harness (for example Harbor, Archipelago, or Hyper-&tau;&rsquo;s sealed
-        evaluator). Both are described in <code>task.action</code>; the adapter must enforce the
-        selected resources or the run is diagnostic only.
-      </p>
-      <div class="sv-codewrap">
-        <span class="sv-lang">python</span>
-        <button class="sv-copy" type="button">Copy</button>
-        <pre class="sv-code" data-lang="python"><code>print(task.action_type, task.action)
-
-# The local adapter owns provisioning, the official agent port, and the grader.
-# Infrastructure failure raises; it is never recorded as a zero score.
-report = run_benchmark("codex", "deployment_eval", client=local_client,
-                       dataset="evovling_tools", benchmark="terminal-bench-2",
-                       limit=1, on_error="raise")</code></pre>
       </div>
       <p class="sv-cap">
         <b>ALE artifact-delivery interface &mdash; input/output files.</b>
@@ -2062,7 +2039,7 @@ print(f"floor {floor.accuracy:.3f}   mine {report.accuracy:.3f}")
 row = run_leaderboard(my_agent, "My Method", client=client,
                       benchmarks=["eog", "ale"], cat="memory", seeds=1, limit=2)
 print(json.dumps(row, indent=2))
-print(row["benchmark_results"])       # dynamic map: hosted or local benchmark ids
+print(row["benchmark_results"])       # results keyed by hosted benchmark id
 
 #   Pass %    mean(r.success_rate)          strict -- every verifier on the task passed
 #   Score     mean(r.accuracy)              partial credit -- mean verifier pass rate
@@ -2073,7 +2050,7 @@ print(row["benchmark_results"])       # dynamic map: hosted or local benchmark i
 
 # A publishable no-limit run is expensive and requires explicit acknowledgement:
 # row = run_leaderboard(my_agent, "My Method", client=client, seeds=3,
-#                       benchmarks=["eog", "ale", "another-hosted-benchmark"],
+#                       benchmarks=["eog", "ale"],
 #                       confirm_full_cost=True)
 
 # Two switches worth knowing before you commit:
@@ -2152,8 +2129,8 @@ print(evolve.bwt, evolve.fwt)           # FWT is None in deployment mode; here i
 
     <h3 class="sv-h3">Run it yourself, at three levels</h3>
     <p class="sv-cap sv-cap--mid">
-      All three notebooks use the same client and session API. Point their client at the healthy
-      hosted deployment or a loopback sidecar; the evaluation cells do not change. They share setup
+      All three notebooks use the hosted service&rsquo;s client and session API. The environments
+      and graders run on the service. The notebooks share setup
       and health checks, then each answers one question &mdash; pick by how far you intend to go.
     </p>
     <div class="sv-tuts">
@@ -2200,44 +2177,23 @@ print(evolve.bwt, evolve.fwt)           # FWT is None in deployment mode; here i
 
     <div class="ev-panel" data-ev-panel="local">
       <p class="sv-cap">
-        Local evaluation is available through the same SDK. A versioned adapter binds three dataset
-        roots to the seed benchmark&rsquo;s official runtime and verifier. The skill inspects it without
-        importing code, shows the manifest and entrypoint hashes for approval, and then starts a
-        loopback-only sidecar. Adapters and results are never uploaded automatically.
-        Check <code>comparable_tracks</code> in the inspection result: a bounded diagnostic smoke
-        may run on other tracks, but the CLI rejects a full leaderboard run unless the official
-        runtime physically enforces that track&rsquo;s selected resources and a checksum-bound
-        negative-control report proves forbidden resources are inaccessible. The skill presents
-        the enforcement design and tests at its runtime checkpoint and waits for your approval.
+        The Hugging Face release provides datasets for local inspection and analysis.
+        <b>We do not currently provide local baseline or agent execution, or a standalone
+        evaluation environment.</b> Use the hosted API service to run and score your agent.
       </p>
-
-      <div class="sv-codewrap">
-        <span class="sv-lang">bash &middot; automatic hosted/local selection</span>
-        <button class="sv-copy" type="button">Copy</button>
-        <pre class="sv-code" data-lang="bash"><code># Check source pins, runtime policy, tracks, negative-control proof and hashes first.
-evolve-eval inspect-adapter ./adapter.json
-
-# If no healthy hosted target supports the request, this starts a loopback sidecar,
-# runs one bounded task, and tears it down with the CLI process.
-evolve-eval leaderboard --benchmarks my-benchmark --dataset evovling_tools \
-  --adapter codex --runtime-adapter ./adapter.json \
-  --approve-sha256 '&lt;manifest_sha256 from inspection&gt;' \
-  --approve-sha256 '&lt;entrypoint_sha256 from inspection&gt;' \
-  --name 'My Agent' --output ./eval-run</code></pre>
-      </div>
 
       <div class="ev-ds">
         <a class="ev-dcard" href="https://huggingface.co/datasets/ZixuanKe/evovling_tools"
            target="_blank" rel="noopener">
           <span class="ev-dax">Evolving tools</span>
           <code>ZixuanKe/evovling_tools</code>
-          <span class="ev-dn">4,615 rows &middot; 49 configs</span>
+          <span class="ev-dn">4,632 rows &middot; 49 configs</span>
         </a>
         <a class="ev-dcard" href="https://huggingface.co/datasets/ZixuanKe/evovling_skills"
            target="_blank" rel="noopener">
           <span class="ev-dax">Evolving skills</span>
           <code>ZixuanKe/evovling_skills</code>
-          <span class="ev-dn">3,243 rows &middot; 31 configs</span>
+          <span class="ev-dn">3,357 rows &middot; 31 configs</span>
         </a>
         <a class="ev-dcard" href="https://huggingface.co/datasets/ZixuanKe/evovling_agents"
            target="_blank" rel="noopener">
@@ -2252,12 +2208,12 @@ evolve-eval leaderboard --benchmarks my-benchmark --dataset evovling_tools \
            target="_blank" rel="noopener">EvoHarnessBench collection</a> on Hugging Face.
       </p>
 
-      <h3 class="sv-h3">The same four coordinates</h3>
+      <h3 class="sv-h3">Inspect the datasets</h3>
       <p class="sv-cap">
-        The selector the hosted client takes is not a different vocabulary from the dataset layout.
-        A <em>dataset</em> is the axis, a <em>config</em> is <code>{domain}_v{stage}</code>, and the
-        <em>split</em> is <code>train</code> or <code>test</code> &mdash; so anything you slice
-        locally names the same thing you would pass to <code>client.tasks(...)</code>.
+        A <em>dataset</em> is the evolving axis, a <em>config</em> is
+        <code>{domain}_v{stage}</code>, and the <em>split</em> is <code>train</code> or
+        <code>test</code>. The example below reads a published task and its metadata;
+        it does not run an agent or grade a result.
       </p>
       <div class="sv-codewrap">
         <span class="sv-lang">python</span>
@@ -2269,10 +2225,10 @@ ds = load_dataset("ZixuanKe/evovling_tools", "hr_v1", split="test")
 
 row = ds[0]
 row["user_prompt"]         # the request, exactly as the agent receives it
-row["oracle_tools"]        # the annotated required set   -> resource_mode="oracle"
-row["cummulative_tools"]   # everything up to this stage  -> resource_mode="accumulative"
-row["verifiers"]           # JSON: the checks this task is scored against
-row["gym_servers_config"]  # JSON: which gym to seed, and from which snapshot</code></pre>
+row["oracle_tools"]        # the annotated required tools
+row["cummulative_tools"]   # tools available up to this stage
+row["verifiers"]           # verifier metadata; this does not execute the grader
+row["gym_servers_config"]  # gym and snapshot metadata; this does not start an environment</code></pre>
       </div>
       <p class="sv-cap">
         Those columns are the EOG shape. The <code>ale_*</code> configs carry
@@ -2281,19 +2237,14 @@ row["gym_servers_config"]  # JSON: which gym to seed, and from which snapshot</c
         database state.
       </p>
 
-      <div class="ev-soon ev-ready">
-        <span class="ev-badge">Available now</span>
+      <div class="ev-soon">
+        <span class="ev-badge">Hosted evaluation</span>
         <div class="ev-soon-tx">
-          <h3>Bring a new verifier-backed benchmark</h3>
+          <h3>Run your agent with the hosted service</h3>
           <p>
-            The adapter contract covers task discovery, <code>create</code>, <code>run_agent</code>,
-            <code>grade</code> and <code>teardown</code>, plus isolation, network, credentials,
-            timeout, smoke selection and tested resource enforcement. The guided skill asks you to
-            approve the fence and its negative controls, then verifies allowed resources work while
-            forbidden resources cannot be discovered, read, called, or spawned. Terminal-Bench 2, APEX-Agents and
-            Hyper-&tau;-bench are reviewed examples; they are not hard-coded prerequisites. If a
-            verifier or resource fence cannot run, the skill reports a blocked or diagnostic run
-            instead of manufacturing a zero score.
+            The dataset downloads provide task records and harness resources. The hosted service
+            supplies the running EOG and ALE environments and graders needed to evaluate an agent.
+            Follow the hosted workflow for authentication, agent integration, and scoring.
           </p>
           <button class="ev-jump" type="button" data-ev="api">Show the hosted workflow</button>
         </div>

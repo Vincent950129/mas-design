@@ -1707,8 +1707,8 @@ const SV = (() => {
       p.classList.toggle("is-active", p.dataset.svPanel === key));
   }
 
-  /* Which execution environment the reader is being shown: the hosted service or running it
-   * locally. Separate from the quickstart tabs below it, which only apply to the service. */
+  /* Switch between hosted evaluation and local dataset access. The quickstart tabs below
+   * apply only to the hosted service. */
   function showEnv(key) {
     $$(".ev-tab").forEach((t) => {
       const on = t.dataset.ev === key;

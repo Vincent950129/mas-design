@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Checks for the Evaluate tab's two execution environments.
+"""Checks for the Evaluate tab's hosted service and local dataset access.
 
-The tab offers healthy hosted adapters and checksum-approved loopback adapters.
-These checks pin the claims that would mislead someone if they drifted: dynamic
-resolution, explicit hash approval, corpus counts, and integration ports.
+The hosted service supports EOG MCP tools and ALE artifact delivery. Local access
+provides Hugging Face data for inspection, without a supplied baseline or agent
+runner. These checks pin that distinction, corpus counts, and integration ports.
 
 Needs network for the Hub checks; pass --offline to skip them.
 """
@@ -24,8 +24,8 @@ BASE = "http://127.0.0.1:8777/evoharness/index.html"
 
 # What the page claims, and therefore what the Hub has to agree with.
 CLAIMS = {
-    "ZixuanKe/evovling_tools": {"rows": 4615, "configs": 49},
-    "ZixuanKe/evovling_skills": {"rows": 3243, "configs": 31},
+    "ZixuanKe/evovling_tools": {"rows": 4632, "configs": 49},
+    "ZixuanKe/evovling_skills": {"rows": 3357, "configs": 31},
     "ZixuanKe/evovling_agents": {"rows": 3327, "configs": 32},
 }
 COLLECTION = "https://huggingface.co/collections/ZixuanKe/evoharnessbench"
@@ -171,9 +171,18 @@ def check_page() -> None:
             return pg.eval_on_selector_all(
                 ".ev-panel", "ns => ns.filter(p => p.offsetHeight > 0).map(p => p.dataset.evPanel)")
 
-        check(len(pg.query_selector_all(".ev-tab")) == 2, "two environments are offered",
+        check(len(pg.query_selector_all(".ev-tab")) == 2,
+              "hosted evaluation and local dataset access are offered",
               str(len(pg.query_selector_all(".ev-tab"))))
         check(shown() == ["api"], "the hosted service is the default", str(shown()))
+        # textContent includes inactive panels: unsupported instructions should never
+        # reappear merely by selecting a different quickstart or dataset tab.
+        evaluation_text = pg.eval_on_selector(
+            '.pv-view[data-pv-view="evaluate"]', "n => n.textContent")
+        for unsupported in ("evolve-eval inspect-adapter", "evolve-eval serve-local",
+                            "--runtime-adapter", "local_client", "loopback"):
+            check(unsupported not in evaluation_text.lower(),
+                  f"Evaluation does not advertise unsupported {unsupported}")
         # The quickstart tabs belong to the hosted panel only.
         check(pg.eval_on_selector(".sv-tabs", "n => n.offsetHeight > 0"),
               "quickstart tabs show under the hosted panel")
@@ -237,9 +246,11 @@ def check_page() -> None:
         check(all(x in ports_text for x in ("EOG tool-use interface", "MCP",
                                              "ALE artifact-delivery interface",
                                              "input/output files", "task.mcp_session",
-                                             "fetch_inputs_to", "submit_dir",
-                                             "Terminal and managed-runtime")),
-              "all four action surfaces are explained")
+                                             "fetch_inputs_to", "submit_dir")),
+              "the hosted EOG MCP and ALE artifact interfaces are explained")
+        check(not re.search(r"four (?:ports|action surfaces)|terminal and managed-runtime",
+                            evaluation_text, flags=re.IGNORECASE),
+              "Evaluation does not advertise additional local execution interfaces")
         score_text = pg.eval_on_selector(
             '.sv-panel[data-sv-panel="score"]', "n => n.innerText")
         check("run_leaderboard" in score_text and "confirm_full_cost=True" in score_text,
@@ -302,15 +313,27 @@ def check_page() -> None:
             "outbound links open safely")
 
         txt = pg.eval_on_selector(local, "n => n.innerText")
-        check("available now" == pg.eval_on_selector(
+        check("Local datasets" == pg.eval_on_selector(
+            '.ev-tab[data-ev="local"] .ev-tt', "n => n.innerText.trim()"),
+              "the local tab is labelled for datasets")
+        check("data available" == pg.eval_on_selector(
             '.ev-tab[data-ev="local"] .ev-ts', "n => n.innerText.trim().toLowerCase()"),
-              "the loopback runner is marked available")
-        check("manifest_sha256" in txt and "entrypoint_sha256" in txt,
-              "local execution requires both reviewed hashes")
-        check("loopback" in txt.lower() and "never uploaded" in txt.lower(),
-              "local isolation and no-upload behavior are explicit")
-        for col in EOG_COLS:
-            check(col in txt, f"the snippet shows {col}")
+              "the local badge advertises data availability")
+        check(bool(re.search(r"do not (?:currently )?provide[^.]*local[^.]*baseline[^.]*agent[^.]*execution",
+                             txt, flags=re.IGNORECASE)),
+              "the local panel explicitly says local baseline and agent execution are not provided")
+        check("evolve-eval" not in txt.lower(),
+              "the local panel contains no evaluation CLI instructions")
+        check('from datasets import load_dataset' in txt
+              and 'load_dataset("ZixuanKe/evovling_tools", "hr_v1", split="test")' in txt,
+              "the local snippet loads published data for inspection")
+        for ds, want in CLAIMS.items():
+            card = pg.locator(local + f'a[href="https://huggingface.co/datasets/{ds}"]')
+            check(f"{want['rows']:,} rows" in card.inner_text()
+                  and f"{want['configs']} configs" in card.inner_text(),
+                  f"{ds} retains the published dataset counts")
+        for col in EOG_COLS + ALE_COLS:
+            check(col in txt, f"the local panel documents {col}")
 
         # Highlighting and copy come from the same module; both must reach this panel.
         check(pg.eval_on_selector_all(local + ".sv-code code .t-k", "ns => ns.length") > 0,

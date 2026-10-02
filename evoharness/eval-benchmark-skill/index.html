@@ -63,39 +63,36 @@
 
         <div class="purpose">
           <span>What it does</span>
-          <p>Evaluates a shell-capable agent on hosted or local EvoHarnessBench datasets. Use it for guided smoke tests, deployment, self-evolving or task-specific evaluation, continual-learning matrices, and explicitly confirmed leaderboard runs on EOG, ALE, TB2, APEX-Agents, Hyper-tau, and new verifier-backed benchmarks.</p>
+          <p>Guides a shell-capable agent through evaluation on the hosted EvoHarnessBench service. Use it for guided smoke tests, self-evolving or task-specific evaluation, continual-learning matrices, and explicitly confirmed leaderboard runs on supported EOG and ALE environments.</p>
         </div>
+
+        <p><code>evolve-eval</code> is the evaluation skill and command-line entry point supplied by the authenticated evaluation package. Install it through the <a href="../#evaluate">Evaluation tab</a> using your service key.</p>
 
         <p>Use <code>__BASE_URL__</code> as the hosted catalog. Keep credentials in environment variables; never print, persist, place them in prompts, or pass them on command lines.</p>
 
         <p>For an evaluation run, read <code>references/guided-workflow.md</code> and do not skip its four user checkpoints. For a documentation, API, or result question, answer directly without starting an evaluation; read <code>references/http-and-sdk.md</code>, inspect the installed SDK or service schema when needed, and tailor the smallest working query to the field the user wants.</p>
 
-        <h3>Read only what the selected runtime needs</h3>
+        <h3>Read only what the hosted evaluation needs</h3>
         <ul>
-          <li><code>references/adapter-contract.md</code> for a new or local benchmark.</li>
-          <li><code>references/resource-enforcement.md</code> for every local tools, skills, or agents track.</li>
           <li><code>references/modes-and-metrics.md</code> for track, mode, and matrix choices.</li>
-          <li><code>references/runtime-examples.md</code> for EOG, ALE, TB2, APEX-Agents, or Hyper-tau.</li>
+          <li><code>references/runtime-examples.md</code> for EOG or ALE.</li>
           <li><code>references/http-and-sdk.md</code> for execution and recovery.</li>
         </ul>
 
         <p>The default OpenAI model is <code>gpt-5</code> unless the user explicitly selects another model or an official benchmark fixes a separate simulator, judge, or model-menu seat.</p>
 
-        <h3>Resolve the target before evaluating</h3>
-        <pre><code>evolve-eval targets
-evolve-eval resolve-target BENCHMARK --runtime-adapter ./adapter.json</code></pre>
+        <h3>Check the hosted target before evaluating</h3>
+        <pre><code>evolve-eval targets</code></pre>
 
-        <p>Use the hosted endpoint only when its catalog entry says <code>runnable: true</code> and advertises the requested track, mode, action surface, and harness. Otherwise, validate the user-approved adapter and start a loopback sidecar:</p>
-
-        <pre><code>evolve-eval inspect-adapter ./adapter.json
-evolve-eval serve-local --runtime-adapter ./adapter.json --port 8078</code></pre>
+        <p>Use a hosted endpoint only when its catalog entry says <code>runnable: true</code> and advertises the requested track, mode, action surface, and harness. If the hosted service does not support the requested configuration, explain that limitation before starting a run.</p>
 
         <div class="guardrail">
           <h3>Before a full run</h3>
-          <p>Run a bounded smoke first. A no-limit or publishable run requires explicit user confirmation after the exact task count, repetitions, expected model cost, credentials, runtime, and smoke plan are shown. Never upload results or adapters automatically. Environment or runtime failures are errors, never zero scores.</p>
+          <p>Run a bounded smoke first. A no-limit or publishable run requires explicit user confirmation after the exact task count, repetitions, expected model cost, credentials, hosted environment, and smoke plan are shown. Never publish results automatically. Environment or runtime failures are errors, never zero scores.</p>
         </div>
 
-        <p>For a local adapter, do not accept <code>enforced_tracks</code> as proof. At checkpoint 2, show how selected resources are physically enabled, propose negative controls for forbidden resources, and ask the user to approve the implementation and tests. Run the approved controls and attach their checksum-bound report. Only tracks verified by <code>inspect-adapter</code> are comparable; otherwise label the smoke diagnostic and do not offer a full leaderboard run.</p>
+        <h3>Local availability: datasets only</h3>
+        <p>The local release currently consists of the datasets in the <a href="https://huggingface.co/collections/ZixuanKe/evoharnessbench" target="_blank" rel="noopener">EvoHarnessBench collection on Hugging Face</a>. You can download and inspect the data, but we do not currently provide a local baseline or agent runner, or a local evaluation runtime. Use the hosted service to evaluate your agent.</p>
       </article>
     </section>
 
