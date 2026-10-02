@@ -319,9 +319,8 @@ def check_page() -> None:
         check("data available" == pg.eval_on_selector(
             '.ev-tab[data-ev="local"] .ev-ts', "n => n.innerText.trim().toLowerCase()"),
               "the local badge advertises data availability")
-        check(bool(re.search(r"do not (?:currently )?provide[^.]*local[^.]*baseline[^.]*agent[^.]*execution",
-                             txt, flags=re.IGNORECASE)),
-              "the local panel explicitly says local baseline and agent execution are not provided")
+        check("To run and score your agent, please use the hosted API service." in txt,
+              "the local panel directs agent evaluation to the hosted service")
         check("evolve-eval" not in txt.lower(),
               "the local panel contains no evaluation CLI instructions")
         check('from datasets import load_dataset' in txt

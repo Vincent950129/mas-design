@@ -1601,8 +1601,7 @@
     <p class="sv-lead">
       Evaluate your agent on EOG and ALE through the hosted API service, which provides the
       environments and graders. For local use, download the published Hugging Face datasets to
-      inspect tasks and harness resources. We do not currently provide a local evaluation
-      environment or local baseline and agent runners.
+      inspect tasks and harness resources.
     </p>
 
     <div class="ev-choose">
@@ -1617,8 +1616,7 @@
       <button class="ev-tab" type="button" role="tab" data-ev="local">
         <span class="ev-th"><span class="ev-tt">Local datasets</span>
           <span class="ev-ts is-live">Data available</span></span>
-        <span class="ev-td">Download and inspect the Hugging Face datasets. Local baseline and
-          agent runners are not currently provided.</span>
+        <span class="ev-td">Download the Hugging Face datasets for local inspection and analysis.</span>
       </button>
       </div>
     </div>
@@ -1821,7 +1819,6 @@ print(choice["reason"])</code></pre>
       <p class="sv-cap">
         Continue only when the catalog confirms the requested hosted configuration is runnable.
         If it is unavailable, select a supported configuration or inspect the published datasets.
-        The public release does not provide a local runner as a fallback.
       </p>
     </div>
 
@@ -2178,8 +2175,7 @@ print(evolve.bwt, evolve.fwt)           # FWT is None in deployment mode; here i
     <div class="ev-panel" data-ev-panel="local">
       <p class="sv-cap">
         The Hugging Face release provides datasets for local inspection and analysis.
-        <b>We do not currently provide local baseline or agent execution, or a standalone
-        evaluation environment.</b> Use the hosted API service to run and score your agent.
+        To run and score your agent, please use the hosted API service.
       </p>
 
       <div class="ev-ds">
@@ -2212,8 +2208,7 @@ print(evolve.bwt, evolve.fwt)           # FWT is None in deployment mode; here i
       <p class="sv-cap">
         A <em>dataset</em> is the evolving axis, a <em>config</em> is
         <code>{domain}_v{stage}</code>, and the <em>split</em> is <code>train</code> or
-        <code>test</code>. The example below reads a published task and its metadata;
-        it does not run an agent or grade a result.
+        <code>test</code>. The example below reads a published task and its metadata.
       </p>
       <div class="sv-codewrap">
         <span class="sv-lang">python</span>
@@ -2227,8 +2222,8 @@ row = ds[0]
 row["user_prompt"]         # the request, exactly as the agent receives it
 row["oracle_tools"]        # the annotated required tools
 row["cummulative_tools"]   # tools available up to this stage
-row["verifiers"]           # verifier metadata; this does not execute the grader
-row["gym_servers_config"]  # gym and snapshot metadata; this does not start an environment</code></pre>
+row["verifiers"]           # verifier metadata
+row["gym_servers_config"]  # gym and snapshot metadata</code></pre>
       </div>
       <p class="sv-cap">
         Those columns are the EOG shape. The <code>ale_*</code> configs carry
